@@ -131,15 +131,23 @@ app.get("/admin.js", (_req, res) => {
 });
 
 app.get("/api/anime", (_req, res) => {
-  const anime = db
-    .prepare(
-      `SELECT id,title,description,category,poster,video,created_at
-       FROM anime
-       ORDER BY id DESC`
-    )
-    .all();
+  try {
+    const anime = db.prepare(`
+      SELECT id, title, description, category, poster, video, created_at
+      FROM anime
+      ORDER BY id DESC
+    `).all();
 
-  res.json(anime);
+    console.log("API /api/anime:", anime);
+
+    res.json(anime);
+  } catch (error) {
+    console.error("ANIME API ERROR:", error);
+
+    res.status(500).json({
+      error: error.message
+    });
+  }
 });
 
 app.post("/api/admin/login", (req, res) => {
