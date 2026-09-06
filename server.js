@@ -147,7 +147,23 @@ app.delete("/api/admin/anime/:id", adminOnly, (req, res) => {
   res.json({ ok: true });
 });
 
-app.use("/uploads", express.static(path.join(__dirname, "uploads")));
+app.use("/uploads", express.static(path.join(__dirname, "uploads")));app.use((err, req, res, next) => {
+  console.error("SERVER ERROR:", err);
+
+  if (err instanceof multer.MulterError) {
+    return res.status(400).json({
+      error: "Upload error: " + err.message
+    });
+  }
+
+  if (err) {
+    return res.status(400).json({
+      error: err.message || "Upload failed"
+    });
+  }
+
+  next();
+});
 
 app.listen(PORT, () => {
   console.log(`Anime site running at http://localhost:${PORT}`);
