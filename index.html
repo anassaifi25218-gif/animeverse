@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="hi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>AnimeVerse</title>
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+<header class="nav">
+  <a class="logo" href="/">ANIME<span>VERSE</span></a>
+  <input id="search" class="search" placeholder="Anime search करें..." aria-label="Search anime">
+  <a class="admin-link" href="/admin.html">Admin</a>
+</header>
+
+<main>
+  <section class="hero">
+    <div>
+      <p class="eyebrow">WELCOME TO ANIMEVERSE</p>
+      <h1>अपने पसंदीदा Anime<br><span>देखें और enjoy करें</span></h1>
+      <p class="muted">सभी visitors के लिए watch-only experience. Upload सिर्फ admin कर सकता है.</p>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="section-head">
+      <h2>Latest Anime</h2>
+      <select id="category"><option value="">All categories</option></select>
+    </div>
+    <div id="grid" class="grid"></div>
+    <p id="empty" class="empty" hidden>अभी कोई anime upload नहीं किया गया है।</p>
+  </section>
+</main>
+<script src="/app.js"></script>
+</body>
+</html>
