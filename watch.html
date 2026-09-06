@@ -6,35 +6,151 @@
   <title>Watch Anime</title>
   <link rel="stylesheet" href="/style.css">
 </head>
+
 <body>
+
 <header class="nav">
   <a class="logo" href="/">ANIME<span>VERSE</span></a>
   <a class="admin-link" href="/admin.html">Admin</a>
 </header>
+
 <main class="watch-page">
+
   <a href="/" class="back">← Back</a>
+
   <div id="watch"></div>
+
+  <section class="episodes-section">
+    <h2>Episodes</h2>
+    <div id="episodes"></div>
+  </section>
+
 </main>
+
 <script>
 (async () => {
+
   const id = new URLSearchParams(location.search).get("id");
-  const list = await fetch("/api/anime").then(r => r.json());
-  const a = list.find(x => String(x.id) === String(id));
-  const el = document.getElementById("watch");
-  if (!a) { el.innerHTML = "<h1>Anime नहीं मिला</h1>"; return; }
-  document.title = a.title + " — AnimeVerse";
-  el.innerHTML = `
-    <h1>${escapeHtml(a.title)}</h1>
-    <p class="muted">${escapeHtml(a.category)}</p>
-    <video class="player" controls playsinline preload="metadata" src="${a.video}"></video>
-    <div class="details">
-      <h2>${escapeHtml(a.title)}</h2>
-      <p>${escapeHtml(a.description || "No description available.")}</p>
-    </div>`;
-  function escapeHtml(s) {
-    return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[c]));
+
+  const watch = document.getElementById("watch");
+  const episodes = document.getElementById("episodes");
+
+  try {
+
+    const response = await fetch("/api/anime");
+
+    if (!response.ok) {
+      throw new Error("Anime load failed");
+    }
+
+    const list = await response.json();
+
+    const anime = list.find(
+      x => String(x.id) === String(id)
+    );
+
+    if (!anime) {
+      watch.innerHTML = "<h1>Anime नहीं मिला</h1>";
+      return;
+    }
+
+    document.title = anime.title + " — AnimeVerse";
+
+    /*
+      Same title वाले सभी uploads को episodes माना जाएगा.
+    */
+
+    const sameAnime = list
+      .filter(x =>
+        String(x.title).trim().toLowerCase() ===
+        String(anime.title).trim().toLowerCase()
+      )
+      .sort((a, b) => {
+        const epA = Number(a.episode || a.id);
+        const epB = Number(b.episode || b.id);
+        return epA - epB;
+      });
+
+    watch.innerHTML = `
+      <h1>${escapeHtml(anime.title)}</h1>
+
+      <p class="muted">
+        ${escapeHtml(anime.category || "Anime")}
+      </p>
+
+      <video
+        id="animeVideo"
+        class="player"
+        controls
+        playsinline
+        preload="metadata"
+        src="${escapeHtml(anime.video)}">
+      </video>
+
+      <div class="details">
+        <h2>${escapeHtml(anime.title)}</h2>
+        <p>
+          ${escapeHtml(
+            anime.description || "No description available."
+          )}
+        </p>
+      </div>
+    `;
+
+    if (sameAnime.length > 0) {
+
+      episodes.innerHTML = sameAnime.map((ep, index) => {
+
+        const episodeNumber =
+          ep.episode || (index + 1);
+
+        const active =
+          String(ep.id) === String(anime.id);
+
+        return `
+          <a
+            class="episode-btn ${active ? "active" : ""}"
+            href="/watch.html?id=${ep.id}"
+          >
+            ▶ Episode ${episodeNumber}
+          </a>
+        `;
+
+      }).join("");
+
+    } else {
+
+      episodes.innerHTML =
+        "<p class='muted'>No episodes available.</p>";
+
+    }
+
+  } catch (error) {
+
+    console.error(error);
+
+    watch.innerHTML =
+      "<h1>Anime load नहीं हो पाया।</h1>";
+
   }
+
+  function escapeHtml(s) {
+
+    return String(s || "").replace(
+      /[&<>"']/g,
+      c => ({
+        "&": "&amp;",
+        "<": "&lt;",
+        ">": "&gt;",
+        '"': "&quot;",
+        "'": "&#039;"
+      }[c])
+    );
+
+  }
+
 })();
 </script>
+
 </body>
 </html>
