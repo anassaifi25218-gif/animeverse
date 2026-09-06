@@ -80,23 +80,51 @@ uploadForm.addEventListener("submit", async (e) => {
   const formData = new FormData(uploadForm);
 
   try {
+    const controller = new AbortController();
+
+    // 10 minute timeout
+    const timeout = setTimeout(() => {
+      controller.abort();
+    }, 10 * 60 * 1000);
+
     const res = await fetch("/api/admin/anime", {
       method: "POST",
-      body: formData
+      body: formData,
+      credentials: "same-origin",
+      signal: controller.signal
     });
 
-    const data = await res.json();
+    clearTimeout(timeout);
 
-    if (!res.ok) {
-      uploadMsg.textContent = data.error || "Upload failed";
-      return;
+    const text = await res.text();
+
+    let data;
+
+    try {
+      data = JSON.parse(text);
+    } catch {
+      throw new Error(
+        "Server ne JSON response nahi diya. Status: " + res.status
+      );
+    }
+
+    if (!res.ok || !data.ok) {
+      throw new Error(data.error || "Upload failed");
     }
 
     uploadMsg.textContent = "Anime uploaded successfully!";
     uploadForm.reset();
-    loadAnime();
+
+    await loadAnime();
+
   } catch (e) {
-    uploadMsg.textContent = "Upload error";
+    if (e.name === "AbortError") {
+      uploadMsg.textContent =
+        "Upload timeout. Video bahut bada ho sakta hai ya server response nahi de raha.";
+    } else {
+      console.error("UPLOAD ERROR:", e);
+      uploadMsg.textContent = "Upload error: " + e.message;
+    }
   }
 });
 
