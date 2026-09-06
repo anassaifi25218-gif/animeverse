@@ -6,31 +6,139 @@
   <title>AnimeVerse</title>
   <link rel="stylesheet" href="/style.css">
 </head>
+
 <body>
+
 <header class="nav">
-  <a class="logo" href="/">ANIME<span>VERSE</span></a>
-  <input id="search" class="search" placeholder="Anime search करें..." aria-label="Search anime">
-  <a class="admin-link" href="/admin.html">Admin</a>
+
+  <button class="menu-btn" id="menuBtn" aria-label="Menu">
+    ☰
+  </button>
+
+  <a class="logo" href="/">
+    ANIME<span>VERSE</span>
+  </a>
+
+  <div class="search-box">
+    <input
+      id="search"
+      class="search"
+      type="search"
+      placeholder="Anime search करें..."
+      aria-label="Search anime"
+    >
+    <span class="search-icon">⌕</span>
+  </div>
+
+  <a class="admin-link" href="/admin.html">
+    Admin
+  </a>
+
 </header>
 
+<div class="side-menu" id="sideMenu">
+  <div class="menu-title">ANIMEVERSE</div>
+
+  <a href="/">🏠 Home</a>
+  <a href="#latest">🔥 Latest Anime</a>
+  <a href="#categories">📂 Categories</a>
+  <a href="/admin.html">⚙️ Admin</a>
+</div>
+
+<div class="menu-overlay" id="menuOverlay"></div>
+
 <main>
+
+  <!-- HERO -->
   <section class="hero">
-    <div>
+
+    <div class="hero-content">
       <p class="eyebrow">WELCOME TO ANIMEVERSE</p>
-      <h1>अपने पसंदीदा Anime<br><span>देखें और enjoy करें</span></h1>
-      <p class="muted">सभी visitors के लिए watch-only experience. Upload सिर्फ admin कर सकता है.</p>
+
+      <h1>
+        अपने पसंदीदा Anime
+        <br>
+        <span>देखें और Enjoy करें</span>
+      </h1>
+
+      <p class="muted">
+        Latest Anime episodes देखें और अपनी पसंदीदा series का आनंद लें।
+      </p>
+
+      <a href="#latest" class="watch-btn">
+        ▶ Latest Anime
+      </a>
     </div>
+
   </section>
 
-  <section class="section">
+  <!-- LATEST -->
+  <section class="section" id="latest">
+
     <div class="section-head">
-      <h2>Latest Anime</h2>
-      <select id="category"><option value="">All categories</option></select>
+
+      <div>
+        <p class="small-title">ANIME COLLECTION</p>
+        <h2>Latest Anime</h2>
+      </div>
+
+      <select id="category">
+        <option value="">All categories</option>
+      </select>
+
     </div>
+
     <div id="grid" class="grid"></div>
-    <p id="empty" class="empty" hidden>अभी कोई anime upload नहीं किया गया है।</p>
+
+    <p id="empty" class="empty" hidden>
+      अभी कोई anime upload नहीं किया गया है।
+    </p>
+
   </section>
+
 </main>
+
+<!-- DARK MODE -->
+<button class="theme-btn" id="themeBtn" aria-label="Dark mode">
+  ☾
+</button>
+
 <script src="/app.js"></script>
+
+<script>
+  const menuBtn = document.getElementById("menuBtn");
+  const sideMenu = document.getElementById("sideMenu");
+  const menuOverlay = document.getElementById("menuOverlay");
+
+  function openMenu() {
+    sideMenu.classList.add("open");
+    menuOverlay.classList.add("show");
+  }
+
+  function closeMenu() {
+    sideMenu.classList.remove("open");
+    menuOverlay.classList.remove("show");
+  }
+
+  menuBtn.addEventListener("click", openMenu);
+  menuOverlay.addEventListener("click", closeMenu);
+
+  document.querySelectorAll(".side-menu a").forEach(link => {
+    link.addEventListener("click", closeMenu);
+  });
+
+  const themeBtn = document.getElementById("themeBtn");
+
+  themeBtn.addEventListener("click", () => {
+    document.body.classList.toggle("light-mode");
+
+    if (document.body.classList.contains("light-mode")) {
+      themeBtn.textContent = "☀";
+    } else {
+      themeBtn.textContent = "☾";
+    }
+  });
+</script>
+
 </body>
 </html>
