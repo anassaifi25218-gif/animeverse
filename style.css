@@ -532,7 +532,24 @@ body.light-mode #category {
 
   .anime-card p {
     font-size: 10px;
+  }.player {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  height: auto !important;
+  object-fit: contain;
+  display: block;
+  background: #000;
+}
+
+@media (max-width: 600px) {
+  .player {
+    width: 100vw;
+    aspect-ratio: 16 / 9;
+    height: auto !important;
+    margin-left: calc(50% - 50vw);
+    border-radius: 0;
   }
+}
 
   .theme-btn {
     width: 52px;
