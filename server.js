@@ -126,6 +126,8 @@ app.get("/style.css", (_req, res) => {
 
 app.get("/admin.js", (_req, res) => {
   res.sendFile(path.join(__dirname, "admin.js"));
+});app.get("/app.js", (_req, res) => {
+  res.sendFile(path.join(__dirname, "app.js"));
 });
 
 app.get("/api/anime", (_req, res) => {
