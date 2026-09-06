@@ -79,6 +79,8 @@ app.get("/admin.html", (_req, res) => {
 
 app.get("/style.css", (_req, res) => {
   res.sendFile(path.join(__dirname, "style.css"));
+});app.get("/admin.js", (_req, res) => {
+  res.sendFile(path.join(__dirname, "admin.js"));
 });
 
 app.get("/api/anime", (_req, res) => {
