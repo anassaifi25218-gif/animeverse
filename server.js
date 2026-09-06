@@ -61,7 +61,25 @@ function adminOnly(req, res, next) {
   res.status(401).json({ error: "Admin login required" });
 }
 
-app.use(express.static(path.join(__dirname, "public")));
+app.get("/", (_req, res) => {
+  res.sendFile(path.join(__dirname, "index.html"));
+});
+
+app.get("/index.html", (_req, res) => {
+  res.sendFile(path.join(__dirname, "index.html"));
+});
+
+app.get("/watch.html", (_req, res) => {
+  res.sendFile(path.join(__dirname, "watch.html"));
+});
+
+app.get("/admin.html", (_req, res) => {
+  res.sendFile(path.join(__dirname, "admin.html"));
+});
+
+app.get("/style.css", (_req, res) => {
+  res.sendFile(path.join(__dirname, "style.css"));
+});
 
 app.get("/api/anime", (_req, res) => {
   res.json(db.prepare("SELECT id,title,description,category,poster,video,created_at FROM anime ORDER BY id DESC").all());
