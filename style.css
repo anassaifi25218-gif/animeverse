@@ -1,108 +1,245 @@
-* {
+  * {
   box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
 }
 
 body {
   margin: 0;
-  background: #0b0b10;
+  background: #171923;
   color: #f5f5f7;
   font-family: system-ui, -apple-system, "Segoe UI", Arial, sans-serif;
 }
 
-/* NAVBAR */
+/* =========================
+   NAVBAR
+========================= */
+
 .nav {
-  height: 54px;
-  padding: 0 24px;
+  height: 70px;
+  padding: 0 28px;
   display: flex;
   align-items: center;
   gap: 18px;
-  background: #101017;
-  border-bottom: 1px solid #292933;
+  background: #242630;
+  border-bottom: 1px solid #343641;
   position: sticky;
   top: 0;
-  z-index: 10;
+  z-index: 100;
+}
+
+.menu-btn {
+  width: 46px;
+  height: 46px;
+  border: 0;
+  border-radius: 5px;
+  background: #168ff0;
+  color: white;
+  font-size: 25px;
+  cursor: pointer;
 }
 
 .logo {
-  color: #ffffff;
+  color: white;
   text-decoration: none;
-  font-size: 21px;
-  font-weight: 800;
-  letter-spacing: .5px;
+  font-size: 23px;
+  font-weight: 900;
+  letter-spacing: 1px;
 }
 
 .logo span {
-  color: #9b5cff;
+  color: #b35cff;
+}
+
+/* SEARCH */
+
+.search-box {
+  margin-left: auto;
+  position: relative;
 }
 
 .search {
   width: 280px;
-  height: 36px;
-  padding: 0 14px;
-  border: 1px solid #30303b;
-  border-radius: 8px;
-  background: #191920;
+  height: 40px;
+  padding: 0 42px 0 15px;
+  border: 1px solid #3a3c48;
+  border-radius: 22px;
+  background: #181a22;
   color: white;
   outline: none;
-}
-
-.search::placeholder {
-  color: #8d8d98;
-}
-
-.admin-link {
-  margin-left: auto;
-  color: #c8b5ff;
-  text-decoration: none;
   font-size: 14px;
 }
 
-/* MAIN */
+.search:focus {
+  border-color: #168ff0;
+}
+
+.search::placeholder {
+  color: #888b98;
+}
+
+.search-icon {
+  position: absolute;
+  right: 15px;
+  top: 7px;
+  color: #00cfff;
+  font-size: 25px;
+  pointer-events: none;
+}
+
+.admin-link {
+  color: #cdb5ff;
+  text-decoration: none;
+  font-size: 14px;
+  margin-left: 4px;
+}
+
+/* =========================
+   SIDE MENU
+========================= */
+
+.side-menu {
+  position: fixed;
+  top: 0;
+  left: -280px;
+  width: 270px;
+  height: 100vh;
+  background: #20222c;
+  z-index: 200;
+  padding: 30px 18px;
+  transition: left .25s ease;
+  box-shadow: 5px 0 25px rgba(0,0,0,.35);
+}
+
+.side-menu.open {
+  left: 0;
+}
+
+.menu-title {
+  font-size: 20px;
+  font-weight: 900;
+  padding: 10px 12px 25px;
+  color: white;
+}
+
+.side-menu a {
+  display: block;
+  padding: 14px 12px;
+  color: #e8e8ed;
+  text-decoration: none;
+  border-radius: 8px;
+  margin-bottom: 5px;
+}
+
+.side-menu a:hover {
+  background: #30323d;
+}
+
+.menu-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,.55);
+  z-index: 150;
+  display: none;
+}
+
+.menu-overlay.show {
+  display: block;
+}
+
+/* =========================
+   MAIN
+========================= */
+
 main {
   max-width: 1200px;
   margin: auto;
-  padding: 34px 24px 60px;
+  padding: 30px 24px 70px;
 }
 
-/* HERO */
+/* =========================
+   HERO
+========================= */
+
 .hero {
-  min-height: 210px;
+  min-height: 300px;
   display: flex;
   align-items: center;
-  padding: 34px;
-  border-radius: 14px;
+  padding: 42px;
+  border-radius: 15px;
+  overflow: hidden;
+
   background:
-    radial-gradient(circle at 85% 20%, rgba(125, 64, 190, .35), transparent 35%),
-    linear-gradient(120deg, #17101f, #100d18);
-  border: 1px solid #292333;
+    radial-gradient(
+      circle at 85% 20%,
+      rgba(35, 176, 207, .35),
+      transparent 35%
+    ),
+    radial-gradient(
+      circle at 10% 90%,
+      rgba(127, 63, 190, .3),
+      transparent 40%
+    ),
+    linear-gradient(
+      120deg,
+      #102c34,
+      #171a29
+    );
+
+  border: 1px solid #343743;
+}
+
+.hero-content {
+  max-width: 720px;
 }
 
 .eyebrow {
   margin: 0 0 10px;
-  color: #9d8aa8;
+  color: #63dfff;
   font-size: 11px;
   letter-spacing: 2px;
+  font-weight: 700;
 }
 
 .hero h1 {
   margin: 0;
-  font-size: clamp(28px, 4vw, 48px);
+  font-size: clamp(30px, 5vw, 52px);
   line-height: 1.15;
 }
 
 .hero h1 span {
-  color: #b986ff;
+  color: #d16cff;
 }
 
 .muted {
   max-width: 650px;
-  margin: 16px 0 0;
-  color: #aaa7b2;
+  margin: 16px 0 20px;
+  color: #b1b3bd;
   font-size: 14px;
   line-height: 1.6;
 }
 
-/* LATEST */
+.watch-btn {
+  display: inline-block;
+  padding: 11px 20px;
+  background: #168ff0;
+  color: white;
+  border-radius: 7px;
+  text-decoration: none;
+  font-weight: 700;
+  font-size: 14px;
+}
+
+.watch-btn:hover {
+  background: #087bd8;
+}
+
+/* =========================
+   SECTION
+========================= */
+
 .section {
   margin-top: 38px;
 }
@@ -115,42 +252,65 @@ main {
   margin-bottom: 20px;
 }
 
+.small-title {
+  margin: 0 0 3px;
+  color: #858894;
+  font-size: 10px;
+  letter-spacing: 1.5px;
+}
+
 .section-head h2 {
   margin: 0;
-  font-size: 22px;
+  font-size: 25px;
 }
+
+/* CATEGORY */
 
 #category {
-  background: #15151c;
+  background: #242630;
   color: #eee;
-  border: 1px solid #30303b;
+  border: 1px solid #3a3c48;
   border-radius: 7px;
-  padding: 8px 12px;
+  padding: 9px 13px;
+  outline: none;
 }
 
-/* ANIME GRID */
+/* =========================
+   ANIME GRID
+========================= */
+
 .grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
   gap: 18px;
 }
 
-/* ANIME CARD */
+/* =========================
+   ANIME CARD
+========================= */
+
 .anime-card {
   min-width: 0;
   overflow: hidden;
-  background: #121219;
-  border: 1px solid #25252f;
+  background: #22242e;
+  border: 1px solid #343641;
   border-radius: 10px;
+  transition: transform .2s ease, border-color .2s ease;
+  position: relative;
+}
+
+.anime-card:hover {
+  transform: translateY(-4px);
+  border-color: #168ff0;
 }
 
 .anime-card img {
   width: 100%;
-  height: 250px;
+  height: 270px;
   display: block;
-  object-fit: contain;
+  object-fit: cover;
   object-position: center;
-  background: #08080c;
+  background: #090a0f;
 }
 
 .anime-card h3,
@@ -160,61 +320,176 @@ main {
 }
 
 .anime-card h3 {
-  margin-top: 11px;
+  margin-top: 12px;
   margin-bottom: 5px;
   font-size: 15px;
+  line-height: 1.4;
 }
 
 .anime-card p {
   margin-top: 0;
-  margin-bottom: 12px;
-  color: #92929d;
+  margin-bottom: 13px;
+  color: #999ca8;
   font-size: 12px;
+  line-height: 1.4;
 }
 
 .empty {
   color: #999;
-  padding: 20px 0;
+  padding: 25px 0;
+  text-align: center;
 }
 
-/* MOBILE */
+/* =========================
+   PINNED BADGE
+========================= */
+
+.pinned {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  padding: 7px 12px;
+  background: #159eea;
+  color: white;
+  border-radius: 20px;
+  font-size: 13px;
+  font-weight: 700;
+  box-shadow: 0 3px 10px rgba(0,0,0,.25);
+}
+
+/* =========================
+   THEME BUTTON
+========================= */
+
+.theme-btn {
+  position: fixed;
+  right: 18px;
+  bottom: 18px;
+  width: 58px;
+  height: 58px;
+  border: 0;
+  border-radius: 17px;
+  background: #f1f1f4;
+  color: #8855ee;
+  font-size: 29px;
+  cursor: pointer;
+  z-index: 90;
+  box-shadow: 0 4px 18px rgba(0,0,0,.3);
+}
+
+/* =========================
+   LIGHT MODE
+========================= */
+
+body.light-mode {
+  background: #f1f2f6;
+  color: #171820;
+}
+
+body.light-mode .nav {
+  background: white;
+  border-color: #ddd;
+}
+
+body.light-mode .logo {
+  color: #171820;
+}
+
+body.light-mode .search {
+  background: #f3f4f7;
+  color: #111;
+  border-color: #d4d5dc;
+}
+
+body.light-mode .hero {
+  background: linear-gradient(120deg, #e8f7fb, #f4eafa);
+  border-color: #ddd;
+}
+
+body.light-mode .muted {
+  color: #60636e;
+}
+
+body.light-mode .anime-card {
+  background: white;
+  border-color: #ddd;
+}
+
+body.light-mode #category {
+  background: white;
+  color: #222;
+}
+
+/* =========================
+   MOBILE
+========================= */
+
 @media (max-width: 600px) {
+
   .nav {
-    height: auto;
-    min-height: 54px;
-    padding: 10px 12px;
+    height: 64px;
+    padding: 8px 10px;
     gap: 8px;
+  }
+
+  .menu-btn {
+    width: 42px;
+    height: 42px;
+    font-size: 23px;
   }
 
   .logo {
     font-size: 16px;
+    letter-spacing: .5px;
+  }
+
+  .search-box {
+    margin-left: auto;
   }
 
   .search {
-    width: 150px;
-    height: 32px;
-    font-size: 12px;
+    width: 105px;
+    height: 34px;
+    padding-left: 10px;
+    padding-right: 30px;
+    font-size: 11px;
+  }
+
+  .search-icon {
+    right: 9px;
+    top: 4px;
+    font-size: 23px;
   }
 
   .admin-link {
-    font-size: 12px;
+    display: none;
   }
 
   main {
-    padding: 22px 10px 40px;
+    padding: 18px 10px 50px;
   }
 
   .hero {
-    min-height: 165px;
-    padding: 20px 14px;
+    min-height: 220px;
+    padding: 24px 17px;
+    border-radius: 12px;
   }
 
   .hero h1 {
-    font-size: 29px;
+    font-size: 28px;
+  }
+
+  .eyebrow {
+    font-size: 9px;
   }
 
   .muted {
     font-size: 12px;
+  }
+
+  .watch-btn {
+    font-size: 12px;
+    padding: 10px 15px;
   }
 
   .section {
@@ -223,7 +498,17 @@ main {
 
   .section-head {
     align-items: flex-start;
-    flex-direction: column;
+    flex-direction: row;
+  }
+
+  .section-head h2 {
+    font-size: 21px;
+  }
+
+  #category {
+    padding: 7px 9px;
+    font-size: 11px;
+    max-width: 125px;
   }
 
   .grid {
@@ -231,7 +516,29 @@ main {
     gap: 10px;
   }
 
+  .anime-card {
+    border-radius: 8px;
+  }
+
   .anime-card img {
     height: 190px;
+    object-fit: cover;
+  }
+
+  .anime-card h3 {
+    font-size: 13px;
+    margin-top: 9px;
+  }
+
+  .anime-card p {
+    font-size: 10px;
+  }
+
+  .theme-btn {
+    width: 52px;
+    height: 52px;
+    right: 13px;
+    bottom: 13px;
+    border-radius: 16px;
   }
 }
