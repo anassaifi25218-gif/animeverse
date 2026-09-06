@@ -146,8 +146,10 @@ async function loadAnime() {
 
       item.innerHTML = `
         <strong>${escapeHtml(anime.title)}</strong>
-        <span class="muted">${escapeHtml(anime.category || "Anime")}</span>
-        <button class="secondary" data-id="${anime.id}">Delete</button>
+<span class="muted">
+  Episode ${anime.episode || 1} • ${escapeHtml(anime.category || "Anime")}
+</span>
+<button class="secondary" data-id="${anime.id}">Delete</button>
       `;
 
       item.querySelector("button").addEventListener("click", () => {
