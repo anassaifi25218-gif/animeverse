@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="hi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Admin — AnimeVerse</title>
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+<header class="nav">
+  <a class="logo" href="/">ANIME<span>VERSE</span></a>
+  <a class="admin-link" href="/">View site</a>
+</header>
+<main class="admin-page">
+  <section id="loginBox" class="panel">
+    <h1>Admin Login</h1>
+    <p class="muted">यहाँ से सिर्फ authorized admin anime upload कर सकता है.</p>
+    <form id="loginForm">
+      <input id="password" type="password" placeholder="Admin password" required>
+      <button>Login</button>
+      <p id="loginMsg" class="msg"></p>
+    </form>
+  </section>
+
+  <section id="dashboard" class="panel" hidden>
+    <div class="section-head"><h1>Upload Anime</h1><button id="logout" class="secondary">Logout</button></div>
+    <form id="uploadForm" enctype="multipart/form-data">
+      <label>Anime title<input name="title" required placeholder="जैसे: My Anime"></label>
+      <label>Category<input name="category" placeholder="Action"></label>
+      <label>Description<textarea name="description" rows="4" placeholder="Anime के बारे में..."></textarea></label>
+      <label>Video <input name="video" type="file" accept="video/mp4,video/webm,video/ogg" required></label>
+      <label>Poster <input name="poster" type="file" accept="image/jpeg,image/png,image/webp"></label>
+      <button>Upload Anime</button>
+      <p id="uploadMsg" class="msg"></p>
+    </form>
+    <h2>Your Anime</h2>
+    <div id="adminList"></div>
+  </section>
+</main>
+<script src="/admin.js"></script>
+</body>
+</html>

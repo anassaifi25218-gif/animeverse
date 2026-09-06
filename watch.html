@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="hi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Watch Anime</title>
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+<header class="nav">
+  <a class="logo" href="/">ANIME<span>VERSE</span></a>
+  <a class="admin-link" href="/admin.html">Admin</a>
+</header>
+<main class="watch-page">
+  <a href="/" class="back">← Back</a>
+  <div id="watch"></div>
+</main>
+<script>
+(async () => {
+  const id = new URLSearchParams(location.search).get("id");
+  const list = await fetch("/api/anime").then(r => r.json());
+  const a = list.find(x => String(x.id) === String(id));
+  const el = document.getElementById("watch");
+  if (!a) { el.innerHTML = "<h1>Anime नहीं मिला</h1>"; return; }
+  document.title = a.title + " — AnimeVerse";
+  el.innerHTML = `
+    <h1>${escapeHtml(a.title)}</h1>
+    <p class="muted">${escapeHtml(a.category)}</p>
+    <video class="player" controls playsinline preload="metadata" src="${a.video}"></video>
+    <div class="details">
+      <h2>${escapeHtml(a.title)}</h2>
+      <p>${escapeHtml(a.description || "No description available.")}</p>
+    </div>`;
+  function escapeHtml(s) {
+    return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[c]));
+  }
+})();
+</script>
+</body>
+</html>
