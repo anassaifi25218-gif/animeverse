@@ -6,7 +6,7 @@
   <title>Admin — AnimeVerse</title>
   <link rel="stylesheet" href="/style.css">
 </head>
-<script src="https://upload-widget.cloudinary.com/global/all.js"></script>
+
 <body>
 
 <header class="nav">
@@ -24,6 +24,7 @@
     </p>
 
     <form id="loginForm">
+
       <input
         id="password"
         type="password"
@@ -31,9 +32,10 @@
         required
       >
 
-      <button>Login</button>
+      <button type="submit">Login</button>
 
       <p id="loginMsg" class="msg"></p>
+
     </form>
   </section>
 
@@ -41,15 +43,25 @@
   <section id="dashboard" class="panel" hidden>
 
     <div class="section-head">
+
       <h1>Upload Anime</h1>
-      <button id="logout" class="secondary">Logout</button>
+
+      <button
+        id="logout"
+        type="button"
+        class="secondary"
+      >
+        Logout
+      </button>
+
     </div>
 
 
-    <form id="uploadForm" enctype="multipart/form-data">
+    <form id="uploadForm">
 
       <label>
         Anime title
+
         <input
           name="title"
           required
@@ -60,19 +72,20 @@
 
       <label>
         Episode Number
+
         <input
           name="episode"
           type="number"
           min="1"
           value="1"
           required
-          placeholder="जैसे: 1"
         >
       </label>
 
 
       <label>
         Category
+
         <input
           name="category"
           placeholder="Action"
@@ -82,6 +95,7 @@
 
       <label>
         Description
+
         <textarea
           name="description"
           rows="4"
@@ -90,26 +104,63 @@
       </label>
 
 
-      <label>
-        Video
-        <input name="video" type="file" accept="video/*" required>
-    
-      </label>
+      <!-- VIDEO -->
 
+      <div class="upload-field">
 
-      <label>
-        Poster
-        <input
-          name="poster"
-          type="file"
-          accept="image/jpeg,image/png,image/webp"
+        <label>Video</label>
+
+        <button
+          type="button"
+          id="videoUploadBtn"
         >
-      </label>
+          Select Video
+        </button>
+
+        <p
+          id="videoStatus"
+          class="muted"
+        >
+          No video selected
+        </p>
+
+      </div>
 
 
-      <button>Upload Anime</button>
+      <!-- POSTER -->
 
-      <p id="uploadMsg" class="msg"></p>
+      <div class="upload-field">
+
+        <label>Poster</label>
+
+        <button
+          type="button"
+          id="posterUploadBtn"
+        >
+          Select Poster
+        </button>
+
+        <p
+          id="posterStatus"
+          class="muted"
+        >
+          No poster selected
+        </p>
+
+      </div>
+
+
+      <button
+        id="saveAnimeBtn"
+        type="submit"
+      >
+        Upload Anime
+      </button>
+
+      <p
+        id="uploadMsg"
+        class="msg"
+      ></p>
 
     </form>
 
@@ -121,6 +172,9 @@
   </section>
 
 </main>
+
+
+<script src="https://upload-widget.cloudinary.com/global/all.js"></script>
 
 <script src="/admin.js"></script>
 
