@@ -1,13 +1,14 @@
 import express from "express";
 import session from "express-session";
 import multer from "multer";
-import Database from "better-sqlite3";
 import path from "path";
 import fs from "fs";
 import { fileURLToPath } from "url";
+import { v2 as cloudinary } from "cloudinary";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const app = express();
+
 const PORT = process.env.PORT || 3000;
 
 const ADMIN_PASSWORD =
@@ -16,112 +17,118 @@ const ADMIN_PASSWORD =
 const SESSION_SECRET =
   process.env.SESSION_SECRET || "replace-this-secret";
 
+
 // ===============================
-// STORAGE
+// CLOUDINARY
 // ===============================
 
-// Render Persistent Disk का Mount Path /var/data होना चाहिए.
-// Local computer पर यह ./data इस्तेमाल करेगा.
-const dataDir =
-  process.env.RENDER_DISK_PATH ||
-  (process.env.RENDER
-    ? "/var/data"
-    : path.join(__dirname, "data"));
-
-fs.mkdirSync(dataDir, { recursive: true });
-
-const uploadDir = path.join(dataDir, "uploads");
-fs.mkdirSync(uploadDir, { recursive: true });
-
-// Database भी Persistent Disk पर रहेगा
-const db = new Database(
-  path.join(dataDir, "anime.db")
-);
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET
+});
 
 
 // ===============================
-// DATABASE
+// TEMPORARY UPLOAD FOLDER
 // ===============================
 
-db.exec(`
-  CREATE TABLE IF NOT EXISTS anime (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    title TEXT NOT NULL,
-    description TEXT DEFAULT '',
-    category TEXT DEFAULT 'Anime',
-    poster TEXT,
-    video TEXT NOT NULL,
-    episode INTEGER DEFAULT 1,
-    created_at TEXT DEFAULT CURRENT_TIMESTAMP
-  )
-`);
+const tempDir =
+  path.join(__dirname, "temp-uploads");
 
-
-// अगर anime.db पहले से बना हुआ है,
-// तो उसमें episode column automatically add होगा.
-try {
-  db.exec(`
-    ALTER TABLE anime
-    ADD COLUMN episode INTEGER DEFAULT 1
-  `);
-} catch (error) {
-  if (!error.message.includes("duplicate column name")) {
-    throw error;
-  }
-}
+fs.mkdirSync(tempDir, {
+  recursive: true
+});
 
 
 // ===============================
-// MULTER UPLOAD
+// MULTER
 // ===============================
 
 const storage = multer.diskStorage({
+
   destination: (_req, _file, cb) => {
-    cb(null, uploadDir);
+    cb(null, tempDir);
   },
 
   filename: (_req, file, cb) => {
-    const safeName = path
-      .basename(file.originalname)
-      .replace(/[^a-zA-Z0-9._-]/g, "_");
 
-    cb(null, `${Date.now()}-${safeName}`);
+    const safeName =
+      path
+        .basename(file.originalname)
+        .replace(
+          /[^a-zA-Z0-9._-]/g,
+          "_"
+        );
+
+    cb(
+      null,
+      `${Date.now()}-${safeName}`
+    );
   }
+
 });
 
+
 const upload = multer({
+
   storage,
 
   limits: {
-    fileSize: 1024 * 1024 * 1024
+    fileSize:
+      1024 * 1024 * 1024
   },
 
   fileFilter: (_req, file, cb) => {
 
     if (file.fieldname === "video") {
 
-      if (!/\.(mp4|webm|ogg)$/i.test(file.originalname)) {
+      if (
+        !/\.(mp4|webm|ogg)$/i.test(
+          file.originalname
+        )
+      ) {
+
         return cb(
-          new Error("Video must be MP4, WEBM or OGG")
+          new Error(
+            "Video must be MP4, WEBM or OGG"
+          )
         );
+
       }
 
       return cb(null, true);
     }
+
 
     if (file.fieldname === "poster") {
 
-      if (!/\.(jpg|jpeg|png|webp)$/i.test(file.originalname)) {
+      if (
+        !/\.(jpg|jpeg|png|webp)$/i.test(
+          file.originalname
+        )
+      ) {
+
         return cb(
-          new Error("Poster must be JPG, JPEG, PNG or WEBP")
+          new Error(
+            "Poster must be JPG, JPEG, PNG or WEBP"
+          )
         );
+
       }
 
       return cb(null, true);
     }
 
-    cb(new Error("Unexpected file field"));
+
+    cb(
+      new Error(
+        "Unexpected file field"
+      )
+    );
+
   }
+
 });
 
 
@@ -130,20 +137,39 @@ const upload = multer({
 // ===============================
 
 app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+
+app.use(
+  express.urlencoded({
+    extended: true
+  })
+);
+
 
 app.use(
   session({
+
     secret: SESSION_SECRET,
+
     resave: false,
+
     saveUninitialized: false,
 
     cookie: {
+
       httpOnly: true,
+
       sameSite: "lax",
+
       secure: false,
-      maxAge: 1000 * 60 * 60 * 8
+
+      maxAge:
+        1000 *
+        60 *
+        60 *
+        8
+
     }
+
   })
 );
 
@@ -152,116 +178,474 @@ app.use(
 // ADMIN CHECK
 // ===============================
 
-function adminOnly(req, res, next) {
+function adminOnly(
+  req,
+  res,
+  next
+) {
 
-  if (req.session?.isAdmin) {
+  if (
+    req.session?.isAdmin
+  ) {
+
     return next();
+
   }
 
   res.status(401).json({
-    error: "Admin login required"
+
+    error:
+      "Admin login required"
+
   });
+
 }
 
 
 // ===============================
-// STATIC UPLOAD FILES
+// CLOUDINARY DATABASE
 // ===============================
 
-app.use(
-  "/uploads",
-  express.static(uploadDir)
-);
+const DATA_PUBLIC_ID =
+  "animeverse/anime-data";
+
+
+// Load anime data from Cloudinary
+async function loadAnime() {
+
+  try {
+
+    const url =
+      cloudinary.url(
+        DATA_PUBLIC_ID,
+        {
+          resource_type: "raw",
+          type: "upload",
+          secure: true
+        }
+      );
+
+    const response =
+      await fetch(url);
+
+    if (!response.ok) {
+
+      return [];
+
+    }
+
+    const data =
+      await response.json();
+
+    if (!Array.isArray(data)) {
+
+      return [];
+
+    }
+
+    return data;
+
+  } catch (error) {
+
+    console.log(
+      "No existing Cloudinary database found."
+    );
+
+    return [];
+
+  }
+
+}
+
+
+// Save anime data to Cloudinary
+async function saveAnime(
+  anime
+) {
+
+  const tempFile =
+    path.join(
+      tempDir,
+      "anime-data.json"
+    );
+
+
+  fs.writeFileSync(
+    tempFile,
+    JSON.stringify(
+      anime,
+      null,
+      2
+    )
+  );
+
+
+  await new Promise(
+    (resolve, reject) => {
+
+      cloudinary.uploader.upload(
+        tempFile,
+        {
+
+          resource_type: "raw",
+
+          type: "upload",
+
+          public_id:
+            DATA_PUBLIC_ID,
+
+          overwrite: true
+
+        },
+
+        (error, result) => {
+
+          if (error) {
+
+            return reject(
+              error
+            );
+
+          }
+
+          resolve(result);
+
+        }
+
+      );
+
+    }
+  );
+
+
+  try {
+
+    fs.unlinkSync(
+      tempFile
+    );
+
+  } catch {}
+
+}
+
+
+// ===============================
+// CLOUDINARY VIDEO UPLOAD
+// ===============================
+
+async function uploadVideo(
+  filePath
+) {
+
+  return new Promise(
+    (resolve, reject) => {
+
+      const stream =
+        cloudinary.uploader.upload_chunked(
+          filePath,
+          {
+
+            resource_type: "video",
+
+            folder:
+              "animeverse/videos",
+
+            chunk_size:
+              20 * 1024 * 1024
+
+          }
+        );
+
+
+      let finalResult = null;
+
+
+      stream.on(
+        "data",
+        (result) => {
+
+          if (
+            result?.done === true
+          ) {
+
+            finalResult =
+              result;
+
+          }
+
+        }
+      );
+
+
+      stream.on(
+        "error",
+        (error) => {
+
+          reject(error);
+
+        }
+      );
+
+
+      stream.on(
+        "end",
+        () => {
+
+          if (finalResult) {
+
+            resolve(
+              finalResult
+            );
+
+          } else {
+
+            reject(
+              new Error(
+                "Cloudinary video upload did not complete"
+              )
+            );
+
+          }
+
+        }
+      );
+
+    }
+  );
+
+}
+
+
+// ===============================
+// CLOUDINARY POSTER UPLOAD
+// ===============================
+
+async function uploadPoster(
+  filePath
+) {
+
+  return new Promise(
+    (resolve, reject) => {
+
+      cloudinary.uploader.upload(
+        filePath,
+        {
+
+          resource_type: "image",
+
+          folder:
+            "animeverse/posters"
+
+        },
+
+        (error, result) => {
+
+          if (error) {
+
+            return reject(
+              error
+            );
+
+          }
+
+          resolve(result);
+
+        }
+
+      );
+
+    }
+  );
+
+}
+
+
+// ===============================
+// DELETE CLOUDINARY FILE
+// ===============================
+
+async function deleteCloudinaryFile(
+  publicId,
+  resourceType
+) {
+
+  if (!publicId) {
+    return;
+  }
+
+  try {
+
+    await cloudinary.uploader.destroy(
+      publicId,
+      {
+        resource_type:
+          resourceType,
+
+        type: "upload"
+      }
+    );
+
+  } catch (error) {
+
+    console.error(
+      "CLOUDINARY DELETE ERROR:",
+      error
+    );
+
+  }
+
+}
 
 
 // ===============================
 // HTML FILES
 // ===============================
 
-app.get("/", (_req, res) => {
-  res.sendFile(
-    path.join(__dirname, "index.html")
-  );
-});
+app.get(
+  "/",
+  (_req, res) => {
 
-app.get("/index.html", (_req, res) => {
-  res.sendFile(
-    path.join(__dirname, "index.html")
-  );
-});
+    res.sendFile(
+      path.join(
+        __dirname,
+        "index.html"
+      )
+    );
 
-app.get("/watch.html", (_req, res) => {
-  res.sendFile(
-    path.join(__dirname, "watch.html")
-  );
-});
+  }
+);
 
-app.get("/admin.html", (_req, res) => {
-  res.sendFile(
-    path.join(__dirname, "admin.html")
-  );
-});
 
-app.get("/style.css", (_req, res) => {
-  res.sendFile(
-    path.join(__dirname, "style.css")
-  );
-});
+app.get(
+  "/index.html",
+  (_req, res) => {
 
-app.get("/admin.js", (_req, res) => {
-  res.sendFile(
-    path.join(__dirname, "admin.js")
-  );
-});
+    res.sendFile(
+      path.join(
+        __dirname,
+        "index.html"
+      )
+    );
 
-app.get("/app.js", (_req, res) => {
-  res.sendFile(
-    path.join(__dirname, "app.js")
-  );
-});
+  }
+);
+
+
+app.get(
+  "/watch.html",
+  (_req, res) => {
+
+    res.sendFile(
+      path.join(
+        __dirname,
+        "watch.html"
+      )
+    );
+
+  }
+);
+
+
+app.get(
+  "/admin.html",
+  (_req, res) => {
+
+    res.sendFile(
+      path.join(
+        __dirname,
+        "admin.html"
+      )
+    );
+
+  }
+);
+
+
+app.get(
+  "/style.css",
+  (_req, res) => {
+
+    res.sendFile(
+      path.join(
+        __dirname,
+        "style.css"
+      )
+    );
+
+  }
+);
+
+
+app.get(
+  "/admin.js",
+  (_req, res) => {
+
+    res.sendFile(
+      path.join(
+        __dirname,
+        "admin.js"
+      )
+    );
+
+  }
+);
+
+
+app.get(
+  "/app.js",
+  (_req, res) => {
+
+    res.sendFile(
+      path.join(
+        __dirname,
+        "app.js"
+      )
+    );
+
+  }
+);
 
 
 // ===============================
 // GET ALL ANIME
 // ===============================
 
-app.get("/api/anime", (_req, res) => {
+app.get(
+  "/api/anime",
+  async (_req, res) => {
 
-  try {
+    try {
 
-    const anime = db.prepare(`
-      SELECT
-        id,
-        title,
-        description,
-        category,
-        poster,
-        video,
-        episode,
-        created_at
-      FROM anime
-      ORDER BY id DESC
-    `).all();
+      const anime =
+        await loadAnime();
 
-    console.log(
-      "API /api/anime:",
-      anime
-    );
 
-    res.json(anime);
+      console.log(
+        "Anime count:",
+        anime.length
+      );
 
-  } catch (error) {
 
-    console.error(
-      "ANIME API ERROR:",
-      error
-    );
+      res.json(anime);
 
-    res.status(500).json({
-      error: error.message
-    });
+    } catch (error) {
+
+      console.error(
+        "ANIME API ERROR:",
+        error
+      );
+
+      res.status(500).json({
+
+        error:
+          error.message
+
+      });
+
+    }
+
   }
-});
+);
 
 
 // ===============================
@@ -278,15 +662,25 @@ app.post(
     ) {
 
       return res.status(401).json({
-        error: "Wrong password"
+
+        error:
+          "Wrong password"
+
       });
+
     }
 
-    req.session.isAdmin = true;
+
+    req.session.isAdmin =
+      true;
+
 
     res.json({
+
       ok: true
+
     });
+
   }
 );
 
@@ -300,9 +694,12 @@ app.get(
   (req, res) => {
 
     res.json({
+
       isAdmin:
         !!req.session?.isAdmin
+
     });
+
   }
 );
 
@@ -312,63 +709,88 @@ app.get(
 // ===============================
 
 app.post(
+
   "/api/admin/anime",
+
   adminOnly,
 
   upload.fields([
+
     {
       name: "video",
       maxCount: 1
     },
+
     {
       name: "poster",
       maxCount: 1
     }
+
   ]),
 
-  (req, res) => {
+  async (req, res) => {
 
     console.log(
       "Anime upload request received"
     );
 
+
+    const video =
+      req.files?.video?.[0];
+
+    const poster =
+      req.files?.poster?.[0];
+
+
     try {
 
-      const video =
-        req.files?.video?.[0];
+      // ===============================
+      // VIDEO CHECK
+      // ===============================
 
-      const poster =
-        req.files?.poster?.[0];
-
-
-      // Video check
       if (!video) {
 
         return res.status(400).json({
-          error: "Video is required"
+
+          error:
+            "Video is required"
+
         });
+
       }
 
 
-      // Title
+      // ===============================
+      // TITLE
+      // ===============================
+
       const title =
         String(
           req.body.title || ""
         ).trim();
 
+
       if (!title) {
 
         return res.status(400).json({
-          error: "Title is required"
+
+          error:
+            "Title is required"
+
         });
+
       }
 
 
-      // Episode number
+      // ===============================
+      // EPISODE
+      // ===============================
+
       let episode =
         Number(
           req.body.episode || 1
         );
+
 
       if (
         !Number.isInteger(episode) ||
@@ -376,53 +798,125 @@ app.post(
       ) {
 
         episode = 1;
+
       }
 
 
-      // Video path
-      const videoPath =
-        `/uploads/${video.filename}`;
+      // ===============================
+      // UPLOAD VIDEO
+      // ===============================
+
+      console.log(
+        "Uploading video to Cloudinary..."
+      );
 
 
-      // Poster path
-      const posterPath =
-        poster
-          ? `/uploads/${poster.filename}`
-          : null;
+      const videoResult =
+        await uploadVideo(
+          video.path
+        );
 
 
-      // Save to database
-      const info = db
-        .prepare(`
-          INSERT INTO anime
-          (
-            title,
-            description,
-            category,
-            poster,
-            video,
-            episode
-          )
-          VALUES (?, ?, ?, ?, ?, ?)
-        `)
-        .run(
+      // ===============================
+      // UPLOAD POSTER
+      // ===============================
+
+      let posterResult =
+        null;
+
+
+      if (poster) {
+
+        console.log(
+          "Uploading poster to Cloudinary..."
+        );
+
+
+        posterResult =
+          await uploadPoster(
+            poster.path
+          );
+
+      }
+
+
+      // ===============================
+      // GET CURRENT DATA
+      // ===============================
+
+      const anime =
+        await loadAnime();
+
+
+      // ===============================
+      // NEW ANIME
+      // ===============================
+
+      const newAnime = {
+
+        id:
+          Date.now(),
+
+        title:
 
           title,
+
+        description:
 
           String(
             req.body.description || ""
           ),
 
+        category:
+
           String(
-            req.body.category || "Anime"
+            req.body.category ||
+            "Anime"
           ),
 
-          posterPath,
+        poster:
 
-          videoPath,
+          posterResult
+            ? posterResult.secure_url
+            : null,
 
-          episode
-        );
+        video:
+
+          videoResult.secure_url,
+
+        episode:
+
+          episode,
+
+        created_at:
+
+          new Date().toISOString(),
+
+        video_public_id:
+
+          videoResult.public_id,
+
+        poster_public_id:
+
+          posterResult
+            ? posterResult.public_id
+            : null
+
+      };
+
+
+      anime.unshift(
+        newAnime
+      );
+
+
+      // ===============================
+      // SAVE DATABASE
+      // ===============================
+
+      await saveAnime(
+        anime
+      );
 
 
       console.log(
@@ -437,10 +931,14 @@ app.post(
 
         ok: true,
 
-        id: info.lastInsertRowid,
+        id:
+          newAnime.id,
 
-        episode: episode
+        episode:
+          episode
+
       });
+
 
     } catch (error) {
 
@@ -449,6 +947,7 @@ app.post(
         error
       );
 
+
       res.status(500).json({
 
         error:
@@ -456,8 +955,48 @@ app.post(
           "Upload failed"
 
       });
+
+
+    } finally {
+
+      // Temporary files delete
+      // Cloudinary files नहीं delete होंगे
+
+      try {
+
+        if (
+          video?.path &&
+          fs.existsSync(video.path)
+        ) {
+
+          fs.unlinkSync(
+            video.path
+          );
+
+        }
+
+      } catch {}
+
+
+      try {
+
+        if (
+          poster?.path &&
+          fs.existsSync(poster.path)
+        ) {
+
+          fs.unlinkSync(
+            poster.path
+          );
+
+        }
+
+      } catch {}
+
     }
+
   }
+
 );
 
 
@@ -471,13 +1010,18 @@ app.post(
 
   (req, res) => {
 
-    req.session.destroy(() => {
+    req.session.destroy(
+      () => {
 
-      res.json({
-        ok: true
-      });
+        res.json({
 
-    });
+          ok: true
+
+        });
+
+      }
+    );
+
   }
 );
 
@@ -487,86 +1031,93 @@ app.post(
 // ===============================
 
 app.delete(
+
   "/api/admin/anime/:id",
+
   adminOnly,
 
-  (req, res) => {
+  async (req, res) => {
 
     try {
 
-      const item = db
-        .prepare(
-          "SELECT poster, video FROM anime WHERE id=?"
-        )
-        .get(req.params.id);
+      const anime =
+        await loadAnime();
 
 
-      if (!item) {
+      const index =
+        anime.findIndex(
+          item =>
+            String(item.id) ===
+            String(req.params.id)
+        );
+
+
+      if (index === -1) {
 
         return res.status(404).json({
-          error: "Not found"
+
+          error:
+            "Not found"
+
         });
+
       }
 
 
-      // Delete uploaded files
-      for (
-        const filePath of [
-          item.poster,
-          item.video
-        ]
+      const item =
+        anime[index];
+
+
+      // Delete video from Cloudinary
+      if (
+        item.video_public_id
       ) {
 
-        if (filePath) {
+        await deleteCloudinaryFile(
 
-          const filename =
-            filePath.replace(
-              /^\/uploads\//,
-              ""
-            );
+          item.video_public_id,
 
-          const file =
-            path.join(
-              uploadDir,
-              filename
-            );
+          "video"
 
-          const resolvedFile =
-            path.resolve(file);
+        );
 
-          const resolvedUploadDir =
-            path.resolve(uploadDir);
-
-          // केवल uploads folder के अंदर की file delete होगी
-          if (
-            resolvedFile.startsWith(
-              resolvedUploadDir + path.sep
-            )
-          ) {
-
-            if (
-              fs.existsSync(resolvedFile)
-            ) {
-
-              fs.unlinkSync(resolvedFile);
-
-            }
-
-          }
-
-        }
       }
 
 
-      // Delete database record
-      db.prepare(
-        "DELETE FROM anime WHERE id=?"
-      ).run(req.params.id);
+      // Delete poster from Cloudinary
+      if (
+        item.poster_public_id
+      ) {
+
+        await deleteCloudinaryFile(
+
+          item.poster_public_id,
+
+          "image"
+
+        );
+
+      }
+
+
+      // Remove from database
+      anime.splice(
+        index,
+        1
+      );
+
+
+      await saveAnime(
+        anime
+      );
 
 
       res.json({
+
         ok: true
+
       });
+
 
     } catch (error) {
 
@@ -575,11 +1126,18 @@ app.delete(
         error
       );
 
+
       res.status(500).json({
-        error: error.message
+
+        error:
+          error.message
+
       });
+
     }
+
   }
+
 );
 
 
@@ -588,12 +1146,14 @@ app.delete(
 // ===============================
 
 app.use(
+
   (err, _req, res, _next) => {
 
     console.error(
       "SERVER ERROR:",
       err
     );
+
 
     res.status(400).json({
 
@@ -604,6 +1164,7 @@ app.use(
     });
 
   }
+
 );
 
 
@@ -612,20 +1173,15 @@ app.use(
 // ===============================
 
 app.listen(
+
   PORT,
+
   () => {
 
     console.log(
       `Anime site running on port ${PORT}`
     );
 
-    console.log(
-      `Data directory: ${dataDir}`
-    );
-
-    console.log(
-      `Upload directory: ${uploadDir}`
-    );
-
   }
+
 );
