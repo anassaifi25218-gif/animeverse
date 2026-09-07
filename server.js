@@ -71,42 +71,52 @@ function adminOnly(req, res, next) {
 // ===============================
 
 async function loadAnime() {
-  try {
-    const url = cloudinary.url(DATA_PUBLIC_ID, {
-      resource_type: "raw",
-      type: "upload",
-      secure: true
-    });
+  const databaseIds = [
+    "animeverse/anime-data",
+    "animeverse/anime-data.json"
+  ];
 
-    const response = await fetch(
-      `${url}?t=${Date.now()}`
-    );
-
-    if (!response.ok) {
-      console.log(
-        "Database HTTP error:",
-        response.status
+  for (const publicId of databaseIds) {
+    try {
+      const result = await cloudinary.api.resource(
+        publicId,
+        {
+          resource_type: "raw",
+          type: "upload"
+        }
       );
 
-      return [];
+      const response = await fetch(
+        result.secure_url + "?t=" + Date.now()
+      );
+
+      if (!response.ok) {
+        continue;
+      }
+
+      const data = await response.json();
+
+      if (Array.isArray(data)) {
+        console.log(
+          "Anime database found:",
+          publicId,
+          "Count:",
+          data.length
+        );
+
+        return data;
+      }
+
+    } catch (error) {
+      console.log(
+        "Database not found:",
+        publicId
+      );
     }
-
-    const data = await response.json();
-
-    if (!Array.isArray(data)) {
-      return [];
-    }
-
-    return data;
-
-  } catch (error) {
-    console.error(
-      "LOAD DATABASE ERROR:",
-      error.message
-    );
-
-    return [];
   }
+
+  console.log("No anime database found.");
+  return [];
 }
 
 
