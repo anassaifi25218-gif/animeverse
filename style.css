@@ -34,11 +34,16 @@ body {
   width: 46px;
   height: 46px;
   border: 0;
-  border-radius: 5px;
+  border-radius: 8px;
   background: #168ff0;
   color: white;
   font-size: 25px;
   cursor: pointer;
+  transition: .2s ease;
+}
+
+.menu-btn:hover {
+  transform: scale(1.05);
 }
 
 .logo {
@@ -72,10 +77,12 @@ body {
   color: white;
   outline: none;
   font-size: 14px;
+  transition: .2s ease;
 }
 
 .search:focus {
   border-color: #168ff0;
+  box-shadow: 0 0 0 3px rgba(22,143,240,.12);
 }
 
 .search::placeholder {
@@ -133,10 +140,12 @@ body {
   text-decoration: none;
   border-radius: 8px;
   margin-bottom: 5px;
+  transition: .2s ease;
 }
 
 .side-menu a:hover {
   background: #30323d;
+  transform: translateX(3px);
 }
 
 .menu-overlay {
@@ -172,7 +181,6 @@ main {
   padding: 42px;
   border-radius: 15px;
   overflow: hidden;
-
   background:
     radial-gradient(
       circle at 85% 20%,
@@ -189,12 +197,26 @@ main {
       #102c34,
       #171a29
     );
-
   border: 1px solid #343743;
+  position: relative;
+}
+
+.hero::after {
+  content: "";
+  position: absolute;
+  width: 220px;
+  height: 220px;
+  right: -80px;
+  bottom: -100px;
+  border-radius: 50%;
+  background: rgba(179,92,255,.16);
+  filter: blur(20px);
 }
 
 .hero-content {
   max-width: 720px;
+  position: relative;
+  z-index: 1;
 }
 
 .eyebrow {
@@ -223,19 +245,78 @@ main {
   line-height: 1.6;
 }
 
-.watch-btn {
+.hero-buttons {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.watch-btn,
+.secondary-btn {
   display: inline-block;
   padding: 11px 20px;
-  background: #168ff0;
-  color: white;
   border-radius: 7px;
   text-decoration: none;
   font-weight: 700;
   font-size: 14px;
+  transition: .2s ease;
+}
+
+.watch-btn {
+  background: #168ff0;
+  color: white;
 }
 
 .watch-btn:hover {
   background: #087bd8;
+  transform: translateY(-2px);
+}
+
+.secondary-btn {
+  background: rgba(255,255,255,.08);
+  border: 1px solid #555866;
+  color: white;
+}
+
+.secondary-btn:hover {
+  background: rgba(255,255,255,.14);
+}
+
+/* =========================
+   QUICK INFO
+========================= */
+
+.quick-info {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  margin-top: 20px;
+}
+
+.info-box {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px;
+  background: #20222c;
+  border: 1px solid #343641;
+  border-radius: 10px;
+}
+
+.info-icon {
+  font-size: 23px;
+}
+
+.info-box strong {
+  display: block;
+  font-size: 14px;
+}
+
+.info-box small {
+  display: block;
+  margin-top: 3px;
+  color: #888b98;
+  font-size: 11px;
 }
 
 /* =========================
@@ -296,46 +377,83 @@ main {
 .anime-card {
   min-width: 0;
   overflow: hidden;
+  display: block;
   background: #22242e;
   border: 1px solid #343641;
-  border-radius: 10px;
-  transition: transform .2s ease, border-color .2s ease;
+  border-radius: 12px;
+  transition:
+    transform .2s ease,
+    border-color .2s ease,
+    box-shadow .2s ease;
   position: relative;
+  text-decoration: none;
+  color: inherit;
 }
 
 .anime-card:hover {
   transform: translateY(-4px);
   border-color: #168ff0;
+  box-shadow: 0 12px 30px rgba(0,0,0,.25);
 }
 
-/* POSTER - 16:9 */
+/* =========================
+   POSTER
+========================= */
 
-.anime-card img {
+.anime-poster {
   width: 100%;
   aspect-ratio: 16 / 9;
-  height: auto;
-  display: block;
-  object-fit: cover;
-  object-position: center;
+  position: relative;
+  overflow: hidden;
   background: #090a0f;
 }
 
-.anime-card h3,
-.anime-card p {
-  margin-left: 12px;
-  margin-right: 12px;
+.anime-card img {
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: cover;
+  object-position: center;
+  transition: transform .35s ease;
+}
+
+.anime-card:hover img {
+  transform: scale(1.025);
+}
+
+/* =========================
+   EPISODE BADGE
+========================= */
+
+.episode-badge {
+  position: absolute;
+  left: 10px;
+  bottom: 10px;
+  padding: 5px 9px;
+  border-radius: 6px;
+  background: rgba(0,0,0,.82);
+  color: white;
+  font-size: 11px;
+  font-weight: 800;
+  backdrop-filter: blur(5px);
+}
+
+/* =========================
+   ANIME INFO
+========================= */
+
+.anime-info {
+  padding: 12px 12px 13px;
 }
 
 .anime-card h3 {
-  margin-top: 12px;
-  margin-bottom: 5px;
+  margin: 0 0 5px;
   font-size: 15px;
   line-height: 1.4;
 }
 
 .anime-card p {
-  margin-top: 0;
-  margin-bottom: 13px;
+  margin: 0;
   color: #999ca8;
   font-size: 12px;
   line-height: 1.4;
@@ -362,6 +480,53 @@ main {
   font-size: 13px;
   font-weight: 700;
   box-shadow: 0 3px 10px rgba(0,0,0,.25);
+}
+
+/* =========================
+   CATEGORY BUTTONS
+========================= */
+
+.category-buttons {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.category-buttons button {
+  border: 1px solid #3a3c48;
+  background: #22242e;
+  color: #ddd;
+  border-radius: 20px;
+  padding: 9px 14px;
+  cursor: pointer;
+  transition: .2s ease;
+}
+
+.category-buttons button:hover {
+  background: #168ff0;
+  border-color: #168ff0;
+  color: white;
+}
+
+/* =========================
+   ABOUT
+========================= */
+
+.about-box {
+  padding: 25px;
+  background: #20222c;
+  border: 1px solid #343641;
+  border-radius: 12px;
+}
+
+.about-box h2 {
+  margin: 4px 0 8px;
+}
+
+.about-box p:last-child {
+  margin: 0;
+  color: #999ca8;
+  line-height: 1.6;
 }
 
 /* =========================
@@ -417,7 +582,10 @@ body.light-mode .muted {
   color: #60636e;
 }
 
-body.light-mode .anime-card {
+body.light-mode .anime-card,
+body.light-mode .info-box,
+body.light-mode .about-box,
+body.light-mode .category-buttons button {
   background: white;
   border-color: #ddd;
 }
@@ -432,11 +600,12 @@ body.light-mode #category {
 ========================= */
 
 @media (max-width: 600px) {
-  .grid {
-    grid-template-columns: 1fr;
-    gap: 10px;
+
+  .nav {
+    height: 64px;
+    padding: 8px 10px;
+    gap: 8px;
   }
-}
 
   .menu-btn {
     width: 42px;
@@ -493,9 +662,19 @@ body.light-mode #category {
     font-size: 12px;
   }
 
-  .watch-btn {
+  .watch-btn,
+  .secondary-btn {
     font-size: 12px;
     padding: 10px 15px;
+  }
+
+  .quick-info {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+
+  .info-box {
+    padding: 11px 13px;
   }
 
   .section {
@@ -518,46 +697,38 @@ body.light-mode #category {
   }
 
   .grid {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 10px;
+    grid-template-columns: 1fr;
+    gap: 10px;
   }
 
   .anime-card {
-    border-radius: 8px;
+    border-radius: 9px;
   }
 
-  /* MOBILE POSTER - 16:9 */
-
-  .anime-card img {
-    width: 100%;
+  .anime-poster {
     aspect-ratio: 16 / 9;
-    height: auto;
-    display: block;
-    object-fit: cover;
-    object-position: center;
   }
 
   .anime-card h3 {
     font-size: 13px;
-    margin-top: 9px;
   }
 
   .anime-card p {
     font-size: 10px;
   }
 
-  /* =========================
-     VIDEO PLAYER
-  ========================= */
+  .episode-badge {
+    font-size: 10px;
+    padding: 4px 7px;
+  }
 
-  .player {
-    width: 100%;
-    aspect-ratio: 16 / 9;
-    height: auto !important;
-    object-fit: contain;
-    display: block;
-    background: #000;
+  .category-buttons {
+    gap: 6px;
+  }
+
+  .category-buttons button {
+    padding: 7px 11px;
+    font-size: 11px;
   }
 
   .theme-btn {
