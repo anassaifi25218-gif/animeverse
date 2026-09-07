@@ -1,4 +1,4 @@
-        import express from "express";
+import express from "express";
 import session from "express-session";
 import multer from "multer";
 import Database from "better-sqlite3";
@@ -16,10 +16,27 @@ const ADMIN_PASSWORD =
 const SESSION_SECRET =
   process.env.SESSION_SECRET || "replace-this-secret";
 
-const uploadDir = path.join(__dirname, "uploads");
+// ===============================
+// STORAGE
+// ===============================
+
+// Render Persistent Disk का Mount Path /var/data होना चाहिए.
+// Local computer पर यह ./data इस्तेमाल करेगा.
+const dataDir =
+  process.env.RENDER_DISK_PATH ||
+  (process.env.RENDER
+    ? "/var/data"
+    : path.join(__dirname, "data"));
+
+fs.mkdirSync(dataDir, { recursive: true });
+
+const uploadDir = path.join(dataDir, "uploads");
 fs.mkdirSync(uploadDir, { recursive: true });
 
-const db = new Database(path.join(__dirname, "anime.db"));
+// Database भी Persistent Disk पर रहेगा
+const db = new Database(
+  path.join(dataDir, "anime.db")
+);
 
 
 // ===============================
@@ -502,23 +519,41 @@ app.delete(
 
         if (filePath) {
 
-          const file =
-            path.join(
-              __dirname,
-              filePath.replace(
-                /^\/uploads\//,
-                "uploads/"
-              )
+          const filename =
+            filePath.replace(
+              /^\/uploads\//,
+              ""
             );
 
+          const file =
+            path.join(
+              uploadDir,
+              filename
+            );
 
+          const resolvedFile =
+            path.resolve(file);
+
+          const resolvedUploadDir =
+            path.resolve(uploadDir);
+
+          // केवल uploads folder के अंदर की file delete होगी
           if (
-            fs.existsSync(file)
+            resolvedFile.startsWith(
+              resolvedUploadDir + path.sep
+            )
           ) {
 
-            fs.unlinkSync(file);
+            if (
+              fs.existsSync(resolvedFile)
+            ) {
+
+              fs.unlinkSync(resolvedFile);
+
+            }
 
           }
+
         }
       }
 
@@ -567,6 +602,7 @@ app.use(
         "Upload failed"
 
     });
+
   }
 );
 
@@ -581,6 +617,14 @@ app.listen(
 
     console.log(
       `Anime site running on port ${PORT}`
+    );
+
+    console.log(
+      `Data directory: ${dataDir}`
+    );
+
+    console.log(
+      `Upload directory: ${uploadDir}`
     );
 
   }
