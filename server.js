@@ -22,7 +22,7 @@ cloudinary.config({
   api_secret: process.env.CLOUDINARY_API_SECRET
 });
 
-const DATA_PUBLIC_ID = "animeverse/anime-data";
+const DATA_PUBLIC_ID = "animeverse/anime-data.json";
 
 const tempDir = path.join(__dirname, "temp-uploads");
 fs.mkdirSync(tempDir, { recursive: true });
