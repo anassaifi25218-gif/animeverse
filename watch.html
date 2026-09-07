@@ -11,7 +11,14 @@
 
 <header class="nav">
   <a class="logo" href="/">ANIME<span>VERSE</span></a>
-  <a class="admin-link" href="/admin.html">Admin</a>
+
+  <!-- Admin link is hidden by default -->
+  <a
+    class="admin-link"
+    href="/admin.html"
+    id="adminLink"
+    hidden
+  >Admin</a>
 </header>
 
 <main class="watch-page">
@@ -30,46 +37,114 @@
 <script>
 (async () => {
 
-  const id = new URLSearchParams(location.search).get("id");
+  const id =
+    new URLSearchParams(location.search).get("id");
 
-  const watch = document.getElementById("watch");
-  const episodes = document.getElementById("episodes");
+  const watch =
+    document.getElementById("watch");
+
+  const episodes =
+    document.getElementById("episodes");
+
+  const adminLink =
+    document.getElementById("adminLink");
+
+
+  // ===============================
+  // SHOW ADMIN ONLY WHEN LOGGED IN
+  // ===============================
 
   try {
 
-    const response = await fetch("/api/anime");
+    const adminResponse =
+      await fetch("/api/admin/status", {
+        credentials: "same-origin",
+        cache: "no-store"
+      });
+
+    if (adminResponse.ok) {
+
+      const adminData =
+        await adminResponse.json();
+
+      adminLink.hidden =
+        !adminData.isAdmin;
+
+    }
+
+  } catch (error) {
+
+    console.error(
+      "ADMIN STATUS ERROR:",
+      error
+    );
+
+    adminLink.hidden = true;
+  }
+
+
+  // ===============================
+  // LOAD ANIME
+  // ===============================
+
+  try {
+
+    const response =
+      await fetch("/api/anime", {
+        cache: "no-store"
+      });
 
     if (!response.ok) {
       throw new Error("Anime load failed");
     }
 
-    const list = await response.json();
+    const list =
+      await response.json();
 
-    const anime = list.find(
-      x => String(x.id) === String(id)
-    );
+    const anime =
+      list.find(
+        x =>
+          String(x.id) === String(id)
+      );
 
     if (!anime) {
-      watch.innerHTML = "<h1>Anime नहीं मिला</h1>";
+
+      watch.innerHTML =
+        "<h1>Anime नहीं मिला</h1>";
+
       return;
     }
 
-    document.title = anime.title + " — AnimeVerse";
+
+    document.title =
+      anime.title + " — AnimeVerse";
+
 
     /*
       Same title वाले सभी uploads को episodes माना जाएगा.
     */
 
-    const sameAnime = list
-      .filter(x =>
-        String(x.title).trim().toLowerCase() ===
-        String(anime.title).trim().toLowerCase()
-      )
-      .sort((a, b) => {
-        const epA = Number(a.episode || a.id);
-        const epB = Number(b.episode || b.id);
-        return epA - epB;
-      });
+    const sameAnime =
+      list
+        .filter(x =>
+          String(x.title)
+            .trim()
+            .toLowerCase() ===
+          String(anime.title)
+            .trim()
+            .toLowerCase()
+        )
+        .sort((a, b) => {
+
+          const epA =
+            Number(a.episode || a.id);
+
+          const epB =
+            Number(b.episode || b.id);
+
+          return epA - epB;
+        });
+
 
     watch.innerHTML = `
       <h1>${escapeHtml(anime.title)}</h1>
@@ -89,34 +164,48 @@
 
       <div class="details">
         <h2>${escapeHtml(anime.title)}</h2>
+
         <p>
           ${escapeHtml(
-            anime.description || "No description available."
+            anime.description ||
+            "No description available."
           )}
         </p>
       </div>
     `;
 
+
+    // ===============================
+    // EPISODES
+    // ===============================
+
     if (sameAnime.length > 0) {
 
-      episodes.innerHTML = sameAnime.map((ep, index) => {
+      episodes.innerHTML =
+        sameAnime
+          .map((ep, index) => {
 
-        const episodeNumber =
-          ep.episode || (index + 1);
+            const episodeNumber =
+              ep.episode ||
+              (index + 1);
 
-        const active =
-          String(ep.id) === String(anime.id);
+            const active =
+              String(ep.id) ===
+              String(anime.id);
 
-        return `
-          <a
-            class="episode-btn ${active ? "active" : ""}"
-            href="/watch.html?id=${ep.id}"
-          >
-            ▶ Episode ${episodeNumber}
-          </a>
-        `;
+            return `
+              <a
+                class="episode-btn ${
+                  active ? "active" : ""
+                }"
+                href="/watch.html?id=${ep.id}"
+              >
+                ▶ Episode ${episodeNumber}
+              </a>
+            `;
 
-      }).join("");
+          })
+          .join("");
 
     } else {
 
@@ -124,6 +213,7 @@
         "<p class='muted'>No episodes available.</p>";
 
     }
+
 
   } catch (error) {
 
@@ -133,6 +223,11 @@
       "<h1>Anime load नहीं हो पाया।</h1>";
 
   }
+
+
+  // ===============================
+  // ESCAPE HTML
+  // ===============================
 
   function escapeHtml(s) {
 
