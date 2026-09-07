@@ -30,23 +30,22 @@ async function loadAnime() {
 
     console.log("Anime loaded:", animeList);
 
-    /*
-      Newest anime first.
-
-      Agar server upload order already newest-first
-      bhej raha hai to usi order ko maintain karenge.
-    */
-
     setupCategories();
+
     displayAnime(animeList);
 
   } catch (error) {
-    console.error("LOAD ANIME ERROR:", error);
+
+    console.error(
+      "LOAD ANIME ERROR:",
+      error
+    );
 
     if (grid) {
       grid.innerHTML =
         "<p class='empty'>Anime load नहीं हो पाया।</p>";
     }
+
   }
 }
 
@@ -56,21 +55,20 @@ async function loadAnime() {
 =============================== */
 
 function setupCategories() {
+
   if (!category) return;
 
   const categories = new Set();
 
   animeList.forEach(anime => {
 
-    if (anime.category) {
+    if (!anime.category) return;
 
-      anime.category
-        .split("|")
-        .map(c => c.trim())
-        .filter(Boolean)
-        .forEach(c => categories.add(c));
-
-    }
+    anime.category
+      .split("|")
+      .map(c => c.trim())
+      .filter(Boolean)
+      .forEach(c => categories.add(c));
 
   });
 
@@ -90,6 +88,7 @@ function setupCategories() {
       category.appendChild(option);
 
     });
+
 }
 
 
@@ -122,24 +121,13 @@ function displayAnime(list) {
   }
 
 
-  /*
-    IMPORTANT:
-    List ka order reverse नहीं किया जा रहा।
-    
-    Server jis order me anime bhejta hai,
-    wahi order website par rahega.
-
-    Agar newest upload server se first aa raha hai,
-    to newest anime automatically sabse upar रहेगा.
-  */
-
-
-  list.forEach((anime, index) => {
+  list.forEach(anime => {
 
     const card =
       document.createElement("a");
 
-    card.className = "anime-card";
+    card.className =
+      "anime-card";
 
     card.href =
       `/watch.html?id=${encodeURIComponent(anime.id)}`;
@@ -151,18 +139,14 @@ function displayAnime(list) {
 
 
     const title =
-      anime.title || "Untitled Anime";
+      anime.title ||
+      "Untitled Anime";
 
 
     const animeCategory =
-      anime.category || "Anime";
+      anime.category ||
+      "Anime";
 
-
-    /*
-      Episode information
-      Agar API me episode field hai
-      to badge show hoga.
-    */
 
     const episode =
       anime.episode ||
@@ -191,7 +175,6 @@ function displayAnime(list) {
         }
 
       </div>
-
 
       <div class="anime-info">
 
@@ -228,11 +211,12 @@ function escapeHTML(text) {
     text || "";
 
   return div.innerHTML;
+
 }
 
 
 /* ===============================
-   FILTER ANIME
+   FILTER
 =============================== */
 
 function filterAnime() {
@@ -284,6 +268,7 @@ function filterAnime() {
 
 
   displayAnime(filtered);
+
 }
 
 
@@ -313,6 +298,18 @@ if (category) {
   );
 
 }
+
+
+/* ===============================
+   AUTO REFRESH
+   New uploads appear automatically
+=============================== */
+
+setInterval(() => {
+
+  loadAnime();
+
+}, 30000);
 
 
 /* ===============================
