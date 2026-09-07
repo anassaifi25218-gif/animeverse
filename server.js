@@ -33,8 +33,7 @@ cloudinary.config({
 // TEMPORARY UPLOAD FOLDER
 // ===============================
 
-const tempDir =
-  path.join(__dirname, "temp-uploads");
+const tempDir = path.join(__dirname, "temp-uploads");
 
 fs.mkdirSync(tempDir, {
   recursive: true
@@ -53,13 +52,9 @@ const storage = multer.diskStorage({
 
   filename: (_req, file, cb) => {
 
-    const safeName =
-      path
-        .basename(file.originalname)
-        .replace(
-          /[^a-zA-Z0-9._-]/g,
-          "_"
-        );
+    const safeName = path
+      .basename(file.originalname)
+      .replace(/[^a-zA-Z0-9._-]/g, "_");
 
     cb(
       null,
@@ -75,8 +70,7 @@ const upload = multer({
   storage,
 
   limits: {
-    fileSize:
-      1024 * 1024 * 1024
+    fileSize: 1024 * 1024 * 1024
   },
 
   fileFilter: (_req, file, cb) => {
@@ -178,25 +172,14 @@ app.use(
 // ADMIN CHECK
 // ===============================
 
-function adminOnly(
-  req,
-  res,
-  next
-) {
+function adminOnly(req, res, next) {
 
-  if (
-    req.session?.isAdmin
-  ) {
-
+  if (req.session?.isAdmin) {
     return next();
-
   }
 
   res.status(401).json({
-
-    error:
-      "Admin login required"
-
+    error: "Admin login required"
   });
 
 }
@@ -229,18 +212,14 @@ async function loadAnime() {
       await fetch(url);
 
     if (!response.ok) {
-
       return [];
-
     }
 
     const data =
       await response.json();
 
     if (!Array.isArray(data)) {
-
       return [];
-
     }
 
     return data;
@@ -259,9 +238,7 @@ async function loadAnime() {
 
 
 // Save anime data to Cloudinary
-async function saveAnime(
-  anime
-) {
+async function saveAnime(anime) {
 
   const tempFile =
     path.join(
@@ -302,9 +279,7 @@ async function saveAnime(
 
           if (error) {
 
-            return reject(
-              error
-            );
+            return reject(error);
 
           }
 
@@ -333,81 +308,55 @@ async function saveAnime(
 // CLOUDINARY VIDEO UPLOAD
 // ===============================
 
-async function uploadVideo(
-  filePath
-) {
+async function uploadVideo(filePath) {
 
   return new Promise(
     (resolve, reject) => {
 
-      const stream =
-        cloudinary.uploader.upload_chunked(
-          filePath,
-          {
-
-            resource_type: "video",
-
-            folder:
-              "animeverse/videos",
-
-            chunk_size:
-              20 * 1024 * 1024
-
-          }
-        );
-
-
-      let finalResult = null;
-
-
-      stream.on(
-        "data",
-        (result) => {
-
-          if (
-            result?.done === true
-          ) {
-
-            finalResult =
-              result;
-
-          }
-
-        }
+      console.log(
+        "Starting Cloudinary video upload..."
       );
 
+      cloudinary.uploader.upload_large(
+        filePath,
+        {
 
-      stream.on(
-        "error",
-        (error) => {
+          resource_type: "video",
 
-          reject(error);
+          folder:
+            "animeverse/videos",
 
-        }
-      );
+          chunk_size:
+            20 * 1024 * 1024
 
+        },
 
-      stream.on(
-        "end",
-        () => {
+        (error, result) => {
 
-          if (finalResult) {
+          if (error) {
 
-            resolve(
-              finalResult
+            console.error(
+              "CLOUDINARY VIDEO ERROR:",
+              error
             );
 
-          } else {
-
-            reject(
-              new Error(
-                "Cloudinary video upload did not complete"
-              )
+            return reject(
+              error
             );
 
           }
 
+          console.log(
+            "Cloudinary video upload complete:",
+            result.secure_url
+          );
+
+          resolve(
+            result
+          );
+
         }
+
       );
 
     }
@@ -420,9 +369,7 @@ async function uploadVideo(
 // CLOUDINARY POSTER UPLOAD
 // ===============================
 
-async function uploadPoster(
-  filePath
-) {
+async function uploadPoster(filePath) {
 
   return new Promise(
     (resolve, reject) => {
@@ -448,7 +395,9 @@ async function uploadPoster(
 
           }
 
-          resolve(result);
+          resolve(
+            result
+          );
 
         }
 
@@ -478,10 +427,12 @@ async function deleteCloudinaryFile(
     await cloudinary.uploader.destroy(
       publicId,
       {
+
         resource_type:
           resourceType,
 
         type: "upload"
+
       }
     );
 
@@ -626,7 +577,9 @@ app.get(
       );
 
 
-      res.json(anime);
+      res.json(
+        anime
+      );
 
     } catch (error) {
 
@@ -858,46 +811,37 @@ app.post(
           Date.now(),
 
         title:
-
           title,
 
         description:
-
           String(
             req.body.description || ""
           ),
 
         category:
-
           String(
             req.body.category ||
             "Anime"
           ),
 
         poster:
-
           posterResult
             ? posterResult.secure_url
             : null,
 
         video:
-
           videoResult.secure_url,
 
         episode:
-
           episode,
 
         created_at:
-
           new Date().toISOString(),
 
         video_public_id:
-
           videoResult.public_id,
 
         poster_public_id:
-
           posterResult
             ? posterResult.public_id
             : null
@@ -960,7 +904,7 @@ app.post(
     } finally {
 
       // Temporary files delete
-      // Cloudinary files नहीं delete होंगे
+      // Cloudinary files delete नहीं होंगे
 
       try {
 
