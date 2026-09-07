@@ -74,33 +74,33 @@ function adminOnly(req, res, next) {
 // ===============================
 // CLOUDINARY DATABASE
 // ===============================
-
 async function loadAnime() {
   try {
-    const url = cloudinary.url(DATA_PUBLIC_ID, {
-      resource_type: "raw",
-      type: "upload",
-      secure: true
-    });
+    const result = await cloudinary.api.resource(
+      DATA_PUBLIC_ID,
+      {
+        resource_type: "raw",
+        type: "upload"
+      }
+    );
 
-    const response = await fetch(url);
+    const response = await fetch(result.secure_url);
 
     if (!response.ok) {
+      console.log("Database fetch failed:", response.status);
       return [];
     }
 
     const data = await response.json();
 
-    if (!Array.isArray(data)) {
-      return [];
-    }
+    return Array.isArray(data) ? data : [];
 
-    return data;
   } catch (error) {
-    console.log("No existing Cloudinary database found.");
+    console.log("LOAD DATABASE ERROR:", error.message);
     return [];
   }
 }
+
 
 
 async function saveAnime(anime) {
