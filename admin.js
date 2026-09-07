@@ -23,17 +23,26 @@ const adminList =
   document.getElementById("adminList");
 
 
+// ===============================
+// STATUS
+// ===============================
+
 async function checkStatus() {
-
   try {
+    const res = await fetch(
+      "/api/admin/status",
+      {
+        credentials: "same-origin",
+        cache: "no-store"
+      }
+    );
 
-    const res =
-      await fetch(
-        "/api/admin/status"
-      );
+    if (!res.ok) {
+      showLogin();
+      return;
+    }
 
-    const data =
-      await res.json();
+    const data = await res.json();
 
     if (data.isAdmin) {
       showDashboard();
@@ -42,32 +51,22 @@ async function checkStatus() {
     }
 
   } catch (e) {
-
     loginMsg.textContent =
       "Server connection error";
-
   }
-
 }
 
 
 function showDashboard() {
-
   loginBox.hidden = true;
-
   dashboard.hidden = false;
-
   loadAnime();
-
 }
 
 
 function showLogin() {
-
   loginBox.hidden = false;
-
   dashboard.hidden = true;
-
 }
 
 
@@ -91,23 +90,24 @@ loginForm.addEventListener(
 
     try {
 
-      const res =
-        await fetch(
-          "/api/admin/login",
-          {
-            method: "POST",
+      const res = await fetch(
+        "/api/admin/login",
+        {
+          method: "POST",
 
-            headers: {
-              "Content-Type":
-                "application/json"
-            },
+          headers: {
+            "Content-Type":
+              "application/json"
+          },
 
-            body:
-              JSON.stringify({
-                password
-              })
-          }
-        );
+          credentials:
+            "same-origin",
+
+          body: JSON.stringify({
+            password
+          })
+        }
+      );
 
       const data =
         await res.json();
@@ -119,7 +119,6 @@ loginForm.addEventListener(
           "Login failed";
 
         return;
-
       }
 
       loginForm.reset();
@@ -130,11 +129,15 @@ loginForm.addEventListener(
 
     } catch (e) {
 
+      console.error(
+        "LOGIN ERROR:",
+        e
+      );
+
       loginMsg.textContent =
         "Server connection error";
 
     }
-
   }
 );
 
@@ -147,6 +150,12 @@ async function uploadToCloudinary(
   file,
   resourceType
 ) {
+
+  if (!file) {
+    throw new Error(
+      "File select nahi hui"
+    );
+  }
 
   // Get signed upload information
   const signRes =
@@ -163,13 +172,23 @@ async function uploadToCloudinary(
         credentials:
           "same-origin",
 
-        body:
-          JSON.stringify({
-            resource_type:
-              resourceType
-          })
+        body: JSON.stringify({
+          resource_type:
+            resourceType
+        })
       }
     );
+
+
+  // Login/session expired
+  if (signRes.status === 401) {
+
+    showLogin();
+
+    throw new Error(
+      "Session expire ho gaya. Dobara login karo."
+    );
+  }
 
 
   const signData =
@@ -182,12 +201,27 @@ async function uploadToCloudinary(
       signData.error ||
       "Unable to start upload"
     );
+  }
 
+
+  if (
+    !signData.cloud_name ||
+    !signData.api_key ||
+    !signData.signature ||
+    !signData.timestamp ||
+    !signData.folder
+  ) {
+
+    throw new Error(
+      "Cloudinary configuration incomplete hai."
+    );
   }
 
 
   const uploadUrl =
-    `https://api.cloudinary.com/v1_1/${signData.cloud_name}/${resourceType}/upload`;
+    `https://api.cloudinary.com/v1_1/${encodeURIComponent(
+      signData.cloud_name
+    )}/${resourceType}/upload`;
 
 
   const cloudinaryForm =
@@ -219,8 +253,11 @@ async function uploadToCloudinary(
   );
 
 
-  const uploadRes =
-    await fetch(
+  let uploadRes;
+
+  try {
+
+    uploadRes = await fetch(
       uploadUrl,
       {
         method: "POST",
@@ -228,9 +265,27 @@ async function uploadToCloudinary(
       }
     );
 
+  } catch (error) {
 
-  const uploadData =
-    await uploadRes.json();
+    console.error(
+      "CLOUDINARY FETCH ERROR:",
+      error
+    );
+
+    throw new Error(
+      "Cloudinary se connection nahi ho pa raha. Internet check karo."
+    );
+  }
+
+
+  let uploadData = {};
+
+  try {
+    uploadData =
+      await uploadRes.json();
+  } catch {
+    uploadData = {};
+  }
 
 
   if (!uploadRes.ok) {
@@ -239,12 +294,21 @@ async function uploadToCloudinary(
       uploadData.error?.message ||
       "Cloudinary upload failed"
     );
+  }
 
+
+  if (
+    !uploadData.secure_url ||
+    !uploadData.public_id
+  ) {
+
+    throw new Error(
+      "Cloudinary ne upload URL return nahi kiya."
+    );
   }
 
 
   return uploadData;
-
 }
 
 
@@ -256,15 +320,20 @@ logoutBtn.addEventListener(
   "click",
   async () => {
 
-    await fetch(
-      "/api/admin/logout",
-      {
-        method: "POST"
-      }
-    );
+    try {
+
+      await fetch(
+        "/api/admin/logout",
+        {
+          method: "POST",
+          credentials:
+            "same-origin"
+        }
+      );
+
+    } catch {}
 
     showLogin();
-
   }
 );
 
@@ -307,14 +376,13 @@ uploadForm.addEventListener(
         "Video select karo.";
 
       return;
-
     }
 
 
     try {
 
       // ===============================
-      // VIDEO DIRECT CLOUDINARY
+      // VIDEO
       // ===============================
 
       uploadMsg.textContent =
@@ -329,7 +397,7 @@ uploadForm.addEventListener(
 
 
       // ===============================
-      // POSTER DIRECT CLOUDINARY
+      // POSTER
       // ===============================
 
       let posterResult = null;
@@ -346,12 +414,11 @@ uploadForm.addEventListener(
             posterFile,
             "image"
           );
-
       }
 
 
       // ===============================
-      // SAVE DATA TO SERVER
+      // SAVE DATA
       // ===============================
 
       uploadMsg.textContent =
@@ -401,9 +468,7 @@ uploadForm.addEventListener(
                   posterResult.public_id
 
               }
-
             : null
-
       };
 
 
@@ -427,6 +492,16 @@ uploadForm.addEventListener(
         );
 
 
+      if (saveRes.status === 401) {
+
+        showLogin();
+
+        throw new Error(
+          "Session expire ho gaya. Dobara login karo."
+        );
+      }
+
+
       const saveData =
         await saveRes.json();
 
@@ -440,7 +515,6 @@ uploadForm.addEventListener(
           saveData.error ||
           "Anime save failed"
         );
-
       }
 
 
@@ -450,7 +524,6 @@ uploadForm.addEventListener(
       uploadForm.reset();
 
       await loadAnime();
-
 
     } catch (e) {
 
@@ -462,9 +535,7 @@ uploadForm.addEventListener(
       uploadMsg.textContent =
         "Upload error: " +
         e.message;
-
     }
-
   }
 );
 
@@ -479,7 +550,10 @@ async function loadAnime() {
 
     const res =
       await fetch(
-        "/api/anime"
+        "/api/anime",
+        {
+          cache: "no-store"
+        }
       );
 
     const list =
@@ -495,7 +569,6 @@ async function loadAnime() {
         "<p class='muted'>No anime uploaded yet.</p>";
 
       return;
-
     }
 
 
@@ -548,18 +621,19 @@ async function loadAnime() {
         adminList.appendChild(
           item
         );
-
       }
     );
 
-
   } catch (e) {
+
+    console.error(
+      "LOAD ANIME ERROR:",
+      e
+    );
 
     adminList.innerHTML =
       "<p class='msg'>Unable to load anime.</p>";
-
   }
-
 }
 
 
@@ -585,10 +659,23 @@ async function deleteAnime(id) {
         `/api/admin/anime/${id}`,
         {
           method: "DELETE",
+
           credentials:
             "same-origin"
         }
       );
+
+
+    if (res.status === 401) {
+
+      showLogin();
+
+      alert(
+        "Session expire ho gaya. Dobara login karo."
+      );
+
+      return;
+    }
 
 
     const data =
@@ -603,21 +690,22 @@ async function deleteAnime(id) {
       );
 
       return;
-
     }
 
 
-    loadAnime();
-
+    await loadAnime();
 
   } catch (e) {
+
+    console.error(
+      "DELETE ERROR:",
+      e
+    );
 
     alert(
       "Delete error"
     );
-
   }
-
 }
 
 
@@ -639,7 +727,6 @@ function escapeHtml(s) {
 
     }[c])
   );
-
 }
 
 
