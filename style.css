@@ -285,7 +285,7 @@ main {
 
 .grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  grid-template-columns: 1fr;
   gap: 18px;
 }
 
@@ -432,12 +432,11 @@ body.light-mode #category {
 ========================= */
 
 @media (max-width: 600px) {
-
-  .nav {
-    height: 64px;
-    padding: 8px 10px;
-    gap: 8px;
+  .grid {
+    grid-template-columns: 1fr;
+    gap: 10px;
   }
+}
 
   .menu-btn {
     width: 42px;
