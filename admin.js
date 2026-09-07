@@ -7,25 +7,11 @@ const uploadMsg = document.getElementById("uploadMsg");
 const logoutBtn = document.getElementById("logout");
 const adminList = document.getElementById("adminList");
 
-
-// ===============================
-// SHOW LOGIN / DASHBOARD
-// ===============================
-
-function showDashboard() {
-  loginBox.hidden = true;
-  dashboard.hidden = false;
-  loadAnime();
-}
-
-function showLogin() {
-  loginBox.hidden = false;
-  dashboard.hidden = true;
-}
+const CLOUDINARY_UPLOAD_PRESET = "animeverse_upload";
 
 
 // ===============================
-// CHECK LOGIN STATUS
+// LOGIN STATUS
 // ===============================
 
 async function checkStatus() {
@@ -50,6 +36,19 @@ async function checkStatus() {
 }
 
 
+function showDashboard() {
+  loginBox.hidden = true;
+  dashboard.hidden = false;
+  loadAnime();
+}
+
+
+function showLogin() {
+  loginBox.hidden = false;
+  dashboard.hidden = true;
+}
+
+
 // ===============================
 // LOGIN
 // ===============================
@@ -63,16 +62,23 @@ loginForm.addEventListener("submit", async (e) => {
     document.getElementById("password").value;
 
   try {
-    const res = await fetch("/api/admin/login", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      credentials: "same-origin",
-      body: JSON.stringify({
-        password: password
-      })
-    });
+
+    const res = await fetch(
+      "/api/admin/login",
+      {
+        method: "POST",
+
+        headers: {
+          "Content-Type": "application/json"
+        },
+
+        credentials: "same-origin",
+
+        body: JSON.stringify({
+          password
+        })
+      }
+    );
 
     const data = await res.json();
 
@@ -88,7 +94,9 @@ loginForm.addEventListener("submit", async (e) => {
     showDashboard();
 
   } catch (error) {
+
     console.error("LOGIN ERROR:", error);
+
     loginMsg.textContent =
       "Server connection error";
   }
@@ -96,7 +104,7 @@ loginForm.addEventListener("submit", async (e) => {
 
 
 // ===============================
-// CLOUDINARY UPLOAD
+// CLOUDINARY DIRECT UPLOAD
 // ===============================
 
 async function uploadToCloudinary(file, resourceType) {
@@ -105,8 +113,32 @@ async function uploadToCloudinary(file, resourceType) {
     throw new Error("File select nahi hui.");
   }
 
-  // Server se signature lo
-  const signRes = await fetch(
+  // Cloudinary cloud name server se milega
+  const statusRes = await fetch(
+    "/api/admin/status",
+    {
+      credentials: "same-origin",
+      cache: "no-store"
+    }
+  );
+
+  if (statusRes.status === 401) {
+    showLogin();
+
+    throw new Error(
+      "Session expire ho gaya. Dobara login karo."
+    );
+  }
+
+  /*
+    Cloud name lene ke liye upload-signature endpoint use
+    nahi kar rahe. Isliye browser me Cloudinary cloud name
+    manually nahi rakhna padega.
+
+    Server endpoint se configuration lenge.
+  */
+
+  const configRes = await fetch(
     "/api/admin/upload-signature",
     {
       method: "POST",
@@ -123,7 +155,7 @@ async function uploadToCloudinary(file, resourceType) {
     }
   );
 
-  if (signRes.status === 401) {
+  if (configRes.status === 401) {
     showLogin();
 
     throw new Error(
@@ -131,52 +163,36 @@ async function uploadToCloudinary(file, resourceType) {
     );
   }
 
-  let signData;
+  const config = await configRes.json();
 
-  try {
-    signData = await signRes.json();
-  } catch {
+  if (!configRes.ok) {
     throw new Error(
-      "Server se valid response nahi mila."
+      config.error ||
+      "Cloudinary configuration nahi mili."
     );
   }
 
-  if (!signRes.ok) {
+  if (!config.cloud_name) {
     throw new Error(
-      signData.error ||
-      "Upload signature nahi mili."
-    );
-  }
-
-  if (
-    !signData.cloud_name ||
-    !signData.api_key ||
-    !signData.signature ||
-    !signData.timestamp ||
-    !signData.folder
-  ) {
-    throw new Error(
-      "Cloudinary configuration incomplete hai."
+      "Cloudinary Cloud Name missing hai."
     );
   }
 
 
-  // Cloudinary URL
   const uploadUrl =
-    `https://api.cloudinary.com/v1_1/${signData.cloud_name}/${resourceType}/upload`;
+    `https://api.cloudinary.com/v1_1/${config.cloud_name}/${resourceType}/upload`;
 
 
   const form = new FormData();
 
   form.append("file", file);
-  form.append("api_key", signData.api_key);
-  form.append("timestamp", signData.timestamp);
-  form.append("signature", signData.signature);
-  form.append("folder", signData.folder);
+
+  form.append(
+    "upload_preset",
+    CLOUDINARY_UPLOAD_PRESET
+  );
 
 
-  // XMLHttpRequest use kar rahe hain
-  // taaki large video upload properly handle ho
   return await new Promise((resolve, reject) => {
 
     const xhr = new XMLHttpRequest();
@@ -188,7 +204,7 @@ async function uploadToCloudinary(file, resourceType) {
     );
 
 
-    // Upload progress
+    // Progress
     xhr.upload.onprogress = (event) => {
 
       if (event.lengthComputable) {
@@ -204,15 +220,16 @@ async function uploadToCloudinary(file, resourceType) {
     };
 
 
-    // Upload complete
+    // Complete
     xhr.onload = () => {
 
       let data = {};
 
       try {
-        data = JSON.parse(
-          xhr.responseText
-        );
+        data =
+          JSON.parse(
+            xhr.responseText
+          );
       } catch {
         data = {};
       }
@@ -256,7 +273,7 @@ async function uploadToCloudinary(file, resourceType) {
 
       reject(
         new Error(
-          "Cloudinary se connection nahi ho pa raha."
+          "Cloudinary upload connection fail hui."
         )
       );
     };
@@ -320,204 +337,196 @@ logoutBtn.addEventListener("click", async () => {
 // UPLOAD ANIME
 // ===============================
 
-uploadForm.addEventListener(
-  "submit",
-  async (e) => {
+uploadForm.addEventListener("submit", async (e) => {
 
-    e.preventDefault();
+  e.preventDefault();
+
+  uploadMsg.textContent =
+    "Starting upload...";
+
+
+  const videoInput =
+    uploadForm.querySelector(
+      '[name="video"]'
+    );
+
+  const posterInput =
+    uploadForm.querySelector(
+      '[name="poster"]'
+    );
+
+
+  const videoFile =
+    videoInput?.files?.[0];
+
+  const posterFile =
+    posterInput?.files?.[0];
+
+
+  if (!videoFile) {
 
     uploadMsg.textContent =
-      "Starting upload...";
+      "Video select karo.";
 
-
-    const videoInput =
-      uploadForm.querySelector(
-        '[name="video"]'
-      );
-
-    const posterInput =
-      uploadForm.querySelector(
-        '[name="poster"]'
-      );
-
-
-    const videoFile =
-      videoInput?.files?.[0];
-
-    const posterFile =
-      posterInput?.files?.[0];
-
-
-    if (!videoFile) {
-
-      uploadMsg.textContent =
-        "Video select karo.";
-
-      return;
-    }
-
-
-    try {
-
-      // ===============================
-      // VIDEO UPLOAD
-      // ===============================
-
-      uploadMsg.textContent =
-        "Uploading video...";
-
-
-      const videoResult =
-        await uploadToCloudinary(
-          videoFile,
-          "video"
-        );
-
-
-      // ===============================
-      // POSTER UPLOAD
-      // ===============================
-
-      let posterResult = null;
-
-
-      if (posterFile) {
-
-        uploadMsg.textContent =
-          "Uploading poster...";
-
-
-        posterResult =
-          await uploadToCloudinary(
-            posterFile,
-            "image"
-          );
-      }
-
-
-      // ===============================
-      // SAVE ANIME DATA
-      // ===============================
-
-      uploadMsg.textContent =
-        "Saving anime information...";
-
-
-      const formData =
-        new FormData(
-          uploadForm
-        );
-
-
-      const body = {
-
-        title:
-          formData.get("title") || "",
-
-        description:
-          formData.get("description") || "",
-
-        category:
-          formData.get("category") ||
-          "Anime",
-
-        episode:
-          formData.get("episode") ||
-          1,
-
-        video: {
-
-          secure_url:
-            videoResult.secure_url,
-
-          public_id:
-            videoResult.public_id
-
-        },
-
-        poster:
-          posterResult
-            ? {
-
-                secure_url:
-                  posterResult.secure_url,
-
-                public_id:
-                  posterResult.public_id
-
-              }
-
-            : null
-      };
-
-
-      const saveRes =
-        await fetch(
-          "/api/admin/anime",
-          {
-            method: "POST",
-
-            headers: {
-              "Content-Type":
-                "application/json"
-            },
-
-            credentials:
-              "same-origin",
-
-            body:
-              JSON.stringify(body)
-          }
-        );
-
-
-      if (saveRes.status === 401) {
-
-        showLogin();
-
-        throw new Error(
-          "Session expire ho gaya. Dobara login karo."
-        );
-      }
-
-
-      const saveData =
-        await saveRes.json();
-
-
-      if (
-        !saveRes.ok ||
-        !saveData.ok
-      ) {
-
-        throw new Error(
-          saveData.error ||
-          "Anime save failed"
-        );
-      }
-
-
-      uploadMsg.textContent =
-        "Anime uploaded successfully!";
-
-
-      uploadForm.reset();
-
-      await loadAnime();
-
-    } catch (error) {
-
-      console.error(
-        "UPLOAD ERROR:",
-        error
-      );
-
-      uploadMsg.textContent =
-        "Upload error: " +
-        error.message;
-    }
+    return;
   }
-);
+
+
+  try {
+
+    // ===============================
+    // VIDEO
+    // ===============================
+
+    uploadMsg.textContent =
+      "Uploading video...";
+
+
+    const videoResult =
+      await uploadToCloudinary(
+        videoFile,
+        "video"
+      );
+
+
+    // ===============================
+    // POSTER
+    // ===============================
+
+    let posterResult = null;
+
+
+    if (posterFile) {
+
+      uploadMsg.textContent =
+        "Uploading poster...";
+
+
+      posterResult =
+        await uploadToCloudinary(
+          posterFile,
+          "image"
+        );
+    }
+
+
+    // ===============================
+    // SAVE DATABASE
+    // ===============================
+
+    uploadMsg.textContent =
+      "Saving anime information...";
+
+
+    const formData =
+      new FormData(uploadForm);
+
+
+    const body = {
+
+      title:
+        formData.get("title") || "",
+
+      description:
+        formData.get("description") || "",
+
+      category:
+        formData.get("category") ||
+        "Anime",
+
+      episode:
+        formData.get("episode") ||
+        1,
+
+      video: {
+
+        secure_url:
+          videoResult.secure_url,
+
+        public_id:
+          videoResult.public_id
+      },
+
+      poster:
+        posterResult
+          ? {
+
+              secure_url:
+                posterResult.secure_url,
+
+              public_id:
+                posterResult.public_id
+            }
+
+          : null
+    };
+
+
+    const saveRes =
+      await fetch(
+        "/api/admin/anime",
+        {
+          method: "POST",
+
+          headers: {
+            "Content-Type":
+              "application/json"
+          },
+
+          credentials:
+            "same-origin",
+
+          body:
+            JSON.stringify(body)
+        }
+      );
+
+
+    if (saveRes.status === 401) {
+
+      showLogin();
+
+      throw new Error(
+        "Session expire ho gaya. Dobara login karo."
+      );
+    }
+
+
+    const saveData =
+      await saveRes.json();
+
+
+    if (
+      !saveRes.ok ||
+      !saveData.ok
+    ) {
+
+      throw new Error(
+        saveData.error ||
+        "Anime save failed"
+      );
+    }
+
+
+    uploadMsg.textContent =
+      "Anime uploaded successfully!";
+
+    uploadForm.reset();
+
+    await loadAnime();
+
+  } catch (error) {
+
+    console.error(
+      "UPLOAD ERROR:",
+      error
+    );
+
+    uploadMsg.textContent =
+      "Upload error: " +
+      error.message;
+  }
+});
 
 
 // ===============================
@@ -536,7 +545,6 @@ async function loadAnime() {
         }
       );
 
-
     const list =
       await res.json();
 
@@ -544,7 +552,10 @@ async function loadAnime() {
     adminList.innerHTML = "";
 
 
-    if (!Array.isArray(list) || !list.length) {
+    if (
+      !Array.isArray(list) ||
+      !list.length
+    ) {
 
       adminList.innerHTML =
         "<p class='muted'>No anime uploaded yet.</p>";
@@ -589,15 +600,12 @@ async function loadAnime() {
         .addEventListener(
           "click",
           () => {
-            deleteAnime(
-              anime.id
-            );
+            deleteAnime(anime.id);
           }
         );
 
 
       adminList.appendChild(item);
-
     });
 
   } catch (error) {
@@ -635,9 +643,7 @@ async function deleteAnime(id) {
         `/api/admin/anime/${id}`,
         {
           method: "DELETE",
-
-          credentials:
-            "same-origin"
+          credentials: "same-origin"
         }
       );
 
@@ -678,9 +684,7 @@ async function deleteAnime(id) {
       error
     );
 
-    alert(
-      "Delete error"
-    );
+    alert("Delete error");
   }
 }
 
