@@ -2,12 +2,32 @@ const loginForm = document.getElementById("loginForm");
 const loginBox = document.getElementById("loginBox");
 const dashboard = document.getElementById("dashboard");
 const loginMsg = document.getElementById("loginMsg");
+
 const uploadForm = document.getElementById("uploadForm");
 const uploadMsg = document.getElementById("uploadMsg");
+
 const logoutBtn = document.getElementById("logout");
 const adminList = document.getElementById("adminList");
 
-const CLOUDINARY_UPLOAD_PRESET = "animeverse_upload";
+const videoUploadBtn =
+  document.getElementById("videoUploadBtn");
+
+const posterUploadBtn =
+  document.getElementById("posterUploadBtn");
+
+const videoStatus =
+  document.getElementById("videoStatus");
+
+const posterStatus =
+  document.getElementById("posterStatus");
+
+
+const CLOUDINARY_UPLOAD_PRESET =
+  "animeverse_upload";
+
+
+let uploadedVideo = null;
+let uploadedPoster = null;
 
 
 // ===============================
@@ -15,11 +35,16 @@ const CLOUDINARY_UPLOAD_PRESET = "animeverse_upload";
 // ===============================
 
 async function checkStatus() {
+
   try {
-    const res = await fetch("/api/admin/status", {
-      credentials: "same-origin",
-      cache: "no-store"
-    });
+
+    const res = await fetch(
+      "/api/admin/status",
+      {
+        credentials: "same-origin",
+        cache: "no-store"
+      }
+    );
 
     const data = await res.json();
 
@@ -30,20 +55,29 @@ async function checkStatus() {
     }
 
   } catch (error) {
-    console.error("STATUS ERROR:", error);
-    loginMsg.textContent = "Server connection error";
+
+    console.error(
+      "STATUS ERROR:",
+      error
+    );
+
+    loginMsg.textContent =
+      "Server connection error";
   }
 }
 
 
 function showDashboard() {
+
   loginBox.hidden = true;
   dashboard.hidden = false;
+
   loadAnime();
 }
 
 
 function showLogin() {
+
   loginBox.hidden = false;
   dashboard.hidden = true;
 }
@@ -53,79 +87,109 @@ function showLogin() {
 // LOGIN
 // ===============================
 
-loginForm.addEventListener("submit", async (e) => {
-  e.preventDefault();
+loginForm.addEventListener(
+  "submit",
+  async (e) => {
 
-  loginMsg.textContent = "Logging in...";
+    e.preventDefault();
 
-  const password =
-    document.getElementById("password").value;
-
-  try {
-    const res = await fetch("/api/admin/login", {
-      method: "POST",
-
-      headers: {
-        "Content-Type": "application/json"
-      },
-
-      credentials: "same-origin",
-
-      body: JSON.stringify({
-        password
-      })
-    });
-
-    const data = await res.json();
-
-    if (!res.ok) {
-      loginMsg.textContent =
-        data.error || "Login failed";
-      return;
-    }
-
-    loginForm.reset();
-    loginMsg.textContent = "";
-
-    showDashboard();
-
-  } catch (error) {
-    console.error("LOGIN ERROR:", error);
     loginMsg.textContent =
-      "Server connection error";
-  }
-});
+      "Logging in...";
 
 
-// ===============================
-// CLOUDINARY UPLOAD WIDGET
-// ===============================
+    const password =
+      document.getElementById(
+        "password"
+      ).value;
 
-async function uploadToCloudinary(file, resourceType) {
 
-  if (!file) {
-    throw new Error("File select nahi hui.");
-  }
+    try {
 
-  // Cloud name server se lo
-  const configRes = await fetch(
-    "/api/admin/upload-signature",
-    {
-      method: "POST",
+      const res = await fetch(
+        "/api/admin/login",
+        {
+          method: "POST",
 
-      headers: {
-        "Content-Type": "application/json"
-      },
+          headers: {
+            "Content-Type":
+              "application/json"
+          },
 
-      credentials: "same-origin",
+          credentials:
+            "same-origin",
 
-      body: JSON.stringify({
-        resource_type: resourceType
-      })
+          body:
+            JSON.stringify({
+              password
+            })
+        }
+      );
+
+
+      const data =
+        await res.json();
+
+
+      if (!res.ok) {
+
+        loginMsg.textContent =
+          data.error ||
+          "Login failed";
+
+        return;
+      }
+
+
+      loginForm.reset();
+
+      loginMsg.textContent = "";
+
+      showDashboard();
+
+    } catch (error) {
+
+      console.error(
+        "LOGIN ERROR:",
+        error
+      );
+
+      loginMsg.textContent =
+        "Server connection error";
     }
-  );
+  }
+);
 
-  if (configRes.status === 401) {
+
+// ===============================
+// GET CLOUDINARY CONFIG
+// ===============================
+
+async function getCloudinaryConfig() {
+
+  const res =
+    await fetch(
+      "/api/admin/upload-signature",
+      {
+        method: "POST",
+
+        headers: {
+          "Content-Type":
+            "application/json"
+        },
+
+        credentials:
+          "same-origin",
+
+        body:
+          JSON.stringify({
+            resource_type: "video"
+          })
+      }
+    );
+
+
+  if (res.status === 401) {
+
     showLogin();
 
     throw new Error(
@@ -133,263 +197,362 @@ async function uploadToCloudinary(file, resourceType) {
     );
   }
 
-  const config = await configRes.json();
 
-  if (!configRes.ok) {
+  const data =
+    await res.json();
+
+
+  if (!res.ok) {
+
     throw new Error(
-      config.error ||
+      data.error ||
       "Cloudinary configuration nahi mili."
     );
   }
 
-  if (!config.cloud_name) {
+
+  if (!data.cloud_name) {
+
     throw new Error(
       "Cloudinary Cloud Name missing hai."
     );
   }
 
 
-  return new Promise((resolve, reject) => {
-
-    if (
-      typeof cloudinary === "undefined"
-    ) {
-      reject(
-        new Error(
-          "Cloudinary Widget load nahi hua."
-        )
-      );
-
-      return;
-    }
+  return data;
+}
 
 
-    const widget =
-      cloudinary.createUploadWidget(
-        {
-          cloudName:
-            config.cloud_name,
+// ===============================
+// CLOUDINARY WIDGET
+// ===============================
 
-          uploadPreset:
-            CLOUDINARY_UPLOAD_PRESET,
+async function openCloudinaryWidget(
+  resourceType
+) {
 
-          resourceType:
-            resourceType,
-
-          multiple: false,
-
-          sources: [
-            "local"
-          ],
-
-          clientAllowedFormats:
-            resourceType === "video"
-              ? ["mp4", "webm", "ogg"]
-              : ["jpg", "jpeg", "png", "webp"],
-
-          maxFileSize:
-            resourceType === "video"
-              ? 1000000000
-              : 10000000
-
-        },
-
-        (error, result) => {
-
-          if (error) {
-
-            console.error(
-              "CLOUDINARY WIDGET ERROR:",
-              error
-            );
-
-            reject(
-              new Error(
-                error.status?.status ||
-                error.status?.message ||
-                error.message ||
-                "Cloudinary upload failed."
-              )
-            );
-
-            return;
-          }
+  const config =
+    await getCloudinaryConfig();
 
 
-          if (
-            result &&
-            result.event === "success"
-          ) {
+  if (
+    typeof cloudinary ===
+    "undefined"
+  ) {
 
-            const info =
-              result.info;
+    throw new Error(
+      "Cloudinary Widget load nahi hua."
+    );
+  }
 
-            if (
-              !info.secure_url ||
-              !info.public_id
-            ) {
 
-              reject(
-                new Error(
-                  "Cloudinary ne file URL nahi di."
-                )
+  return new Promise(
+    (resolve, reject) => {
+
+      let finished = false;
+
+
+      const widget =
+        cloudinary.createUploadWidget(
+          {
+
+            cloudName:
+              config.cloud_name,
+
+            uploadPreset:
+              CLOUDINARY_UPLOAD_PRESET,
+
+            resourceType:
+              resourceType,
+
+            multiple: false,
+
+            sources: [
+              "local"
+            ],
+
+            clientAllowedFormats:
+              resourceType === "video"
+                ? [
+                    "mp4",
+                    "webm",
+                    "ogg"
+                  ]
+                : [
+                    "jpg",
+                    "jpeg",
+                    "png",
+                    "webp"
+                  ]
+
+          },
+
+          (error, result) => {
+
+            if (error) {
+
+              console.error(
+                "CLOUDINARY ERROR:",
+                error
               );
+
+              if (!finished) {
+
+                finished = true;
+
+                reject(
+                  new Error(
+                    error.message ||
+                    "Cloudinary upload failed."
+                  )
+                );
+              }
 
               return;
             }
 
-            resolve({
-              secure_url:
-                info.secure_url,
-
-              public_id:
-                info.public_id
-            });
-
-            return;
-          }
-
-
-          if (
-            result &&
-            result.event === "upload-progress"
-          ) {
-
-            const percent =
-              result.info?.progress;
 
             if (
-              typeof percent === "number"
+              result &&
+              result.event === "upload-added"
             ) {
 
               uploadMsg.textContent =
-                `Uploading ${resourceType}... ${percent}%`;
+                "Uploading...";
             }
-          }
 
-        }
+
+            if (
+              result &&
+              result.event ===
+                "success"
+            ) {
+
+              const info =
+                result.info;
+
+
+              if (
+                !info.secure_url ||
+                !info.public_id
+              ) {
+
+                if (!finished) {
+
+                  finished = true;
+
+                  reject(
+                    new Error(
+                      "Cloudinary URL nahi mili."
+                    )
+                  );
+                }
+
+                return;
+              }
+
+
+              if (!finished) {
+
+                finished = true;
+
+                resolve({
+                  secure_url:
+                    info.secure_url,
+
+                  public_id:
+                    info.public_id
+                });
+              }
+            }
+
+          }
+        );
+
+
+      widget.open();
+
+    }
+  );
+}
+
+
+// ===============================
+// VIDEO BUTTON
+// ===============================
+
+videoUploadBtn.addEventListener(
+  "click",
+  async () => {
+
+    try {
+
+      videoUploadBtn.disabled =
+        true;
+
+      videoStatus.textContent =
+        "Cloudinary upload open ho raha hai...";
+
+
+      const result =
+        await openCloudinaryWidget(
+          "video"
+        );
+
+
+      uploadedVideo = result;
+
+
+      videoStatus.textContent =
+        "✅ Video uploaded";
+
+
+      uploadMsg.textContent =
+        "Video ready. Ab poster select kar sakte ho.";
+
+    } catch (error) {
+
+      console.error(
+        "VIDEO ERROR:",
+        error
       );
 
+      videoStatus.textContent =
+        "❌ Video upload failed";
 
-    widget.open();
-  });
-}
+      uploadMsg.textContent =
+        "Upload error: " +
+        error.message;
+
+    } finally {
+
+      videoUploadBtn.disabled =
+        false;
+    }
+  }
+);
+
+
+// ===============================
+// POSTER BUTTON
+// ===============================
+
+posterUploadBtn.addEventListener(
+  "click",
+  async () => {
+
+    try {
+
+      posterUploadBtn.disabled =
+        true;
+
+      posterStatus.textContent =
+        "Cloudinary upload open ho raha hai...";
+
+
+      const result =
+        await openCloudinaryWidget(
+          "image"
+        );
+
+
+      uploadedPoster = result;
+
+
+      posterStatus.textContent =
+        "✅ Poster uploaded";
+
+
+      uploadMsg.textContent =
+        "Poster ready.";
+
+    } catch (error) {
+
+      console.error(
+        "POSTER ERROR:",
+        error
+      );
+
+      posterStatus.textContent =
+        "❌ Poster upload failed";
+
+      uploadMsg.textContent =
+        "Poster error: " +
+        error.message;
+
+    } finally {
+
+      posterUploadBtn.disabled =
+        false;
+    }
+  }
+);
 
 
 // ===============================
 // LOGOUT
 // ===============================
 
-logoutBtn.addEventListener("click", async () => {
+logoutBtn.addEventListener(
+  "click",
+  async () => {
 
-  try {
+    try {
 
-    await fetch(
-      "/api/admin/logout",
-      {
-        method: "POST",
-        credentials: "same-origin"
-      }
-    );
-
-  } catch (error) {
-    console.error(
-      "LOGOUT ERROR:",
-      error
-    );
-  }
-
-  showLogin();
-});
-
-
-// ===============================
-// UPLOAD ANIME
-// ===============================
-
-uploadForm.addEventListener("submit", async (e) => {
-
-  e.preventDefault();
-
-  uploadMsg.textContent =
-    "Starting upload...";
-
-
-  const videoInput =
-    uploadForm.querySelector(
-      '[name="video"]'
-    );
-
-  const posterInput =
-    uploadForm.querySelector(
-      '[name="poster"]'
-    );
-
-
-  const videoFile =
-    videoInput?.files?.[0];
-
-  const posterFile =
-    posterInput?.files?.[0];
-
-
-  if (!videoFile) {
-
-    uploadMsg.textContent =
-      "Video select karo.";
-
-    return;
-  }
-
-
-  try {
-
-    // ===============================
-    // VIDEO
-    // ===============================
-
-    uploadMsg.textContent =
-      "Opening Cloudinary upload...";
-
-
-    const videoResult =
-      await uploadToCloudinary(
-        videoFile,
-        "video"
+      await fetch(
+        "/api/admin/logout",
+        {
+          method: "POST",
+          credentials:
+            "same-origin"
+        }
       );
 
+    } catch (error) {
 
-    // ===============================
-    // POSTER
-    // ===============================
-
-    let posterResult = null;
-
-
-    if (posterFile) {
-
-      uploadMsg.textContent =
-        "Opening poster upload...";
-
-
-      posterResult =
-        await uploadToCloudinary(
-          posterFile,
-          "image"
-        );
+      console.error(
+        "LOGOUT ERROR:",
+        error
+      );
     }
 
 
-    // ===============================
-    // SAVE DATA
-    // ===============================
+    uploadedVideo = null;
+    uploadedPoster = null;
+
+    showLogin();
+  }
+);
+
+
+// ===============================
+// SAVE ANIME
+// ===============================
+
+uploadForm.addEventListener(
+  "submit",
+  async (e) => {
+
+    e.preventDefault();
+
+
+    if (!uploadedVideo) {
+
+      uploadMsg.textContent =
+        "Pehle Video select karo.";
+
+      return;
+    }
+
 
     uploadMsg.textContent =
       "Saving anime information...";
 
 
     const formData =
-      new FormData(uploadForm);
+      new FormData(
+        uploadForm
+      );
 
 
     const body = {
@@ -411,94 +574,111 @@ uploadForm.addEventListener("submit", async (e) => {
       video: {
 
         secure_url:
-          videoResult.secure_url,
+          uploadedVideo.secure_url,
 
         public_id:
-          videoResult.public_id
-
+          uploadedVideo.public_id
       },
 
       poster:
-        posterResult
+        uploadedPoster
           ? {
 
               secure_url:
-                posterResult.secure_url,
+                uploadedPoster.secure_url,
 
               public_id:
-                posterResult.public_id
+                uploadedPoster.public_id
 
             }
-
           : null
     };
 
 
-    const saveRes =
-      await fetch(
-        "/api/admin/anime",
-        {
-          method: "POST",
+    try {
 
-          headers: {
-            "Content-Type":
-              "application/json"
-          },
+      const saveRes =
+        await fetch(
+          "/api/admin/anime",
+          {
+            method: "POST",
 
-          credentials:
-            "same-origin",
+            headers: {
+              "Content-Type":
+                "application/json"
+            },
 
-          body:
-            JSON.stringify(body)
-        }
+            credentials:
+              "same-origin",
+
+            body:
+              JSON.stringify(body)
+          }
+        );
+
+
+      if (
+        saveRes.status ===
+        401
+      ) {
+
+        showLogin();
+
+        throw new Error(
+          "Session expire ho gaya. Dobara login karo."
+        );
+      }
+
+
+      const saveData =
+        await saveRes.json();
+
+
+      if (
+        !saveRes.ok ||
+        !saveData.ok
+      ) {
+
+        throw new Error(
+          saveData.error ||
+          "Anime save failed"
+        );
+      }
+
+
+      uploadMsg.textContent =
+        "✅ Anime uploaded successfully!";
+
+
+      uploadForm.reset();
+
+
+      uploadedVideo = null;
+      uploadedPoster = null;
+
+
+      videoStatus.textContent =
+        "No video selected";
+
+      posterStatus.textContent =
+        "No poster selected";
+
+
+      await loadAnime();
+
+    } catch (error) {
+
+      console.error(
+        "SAVE ERROR:",
+        error
       );
 
-
-    if (saveRes.status === 401) {
-
-      showLogin();
-
-      throw new Error(
-        "Session expire ho gaya. Dobara login karo."
-      );
+      uploadMsg.textContent =
+        "Upload error: " +
+        error.message;
     }
-
-
-    const saveData =
-      await saveRes.json();
-
-
-    if (
-      !saveRes.ok ||
-      !saveData.ok
-    ) {
-
-      throw new Error(
-        saveData.error ||
-        "Anime save failed"
-      );
-    }
-
-
-    uploadMsg.textContent =
-      "Anime uploaded successfully!";
-
-    uploadForm.reset();
-
-    await loadAnime();
-
-  } catch (error) {
-
-    console.error(
-      "UPLOAD ERROR:",
-      error
-    );
-
-    uploadMsg.textContent =
-      "Upload error: " +
-      error.message;
   }
-});
+);
 
 
 // ===============================
@@ -517,8 +697,10 @@ async function loadAnime() {
         }
       );
 
+
     const list =
       await res.json();
+
 
     adminList.innerHTML = "";
 
@@ -535,54 +717,67 @@ async function loadAnime() {
     }
 
 
-    list.forEach((anime) => {
+    list.forEach(
+      (anime) => {
 
-      const item =
-        document.createElement("div");
-
-      item.className =
-        "admin-anime";
-
-
-      item.innerHTML = `
-        <strong>
-          ${escapeHtml(anime.title)}
-        </strong>
-
-        <span class="muted">
-          Episode ${anime.episode || 1}
-          •
-          ${escapeHtml(
-            anime.category || "Anime"
-          )}
-        </span>
-
-        <button
-          class="secondary"
-          data-id="${anime.id}"
-        >
-          Delete
-        </button>
-      `;
+        const item =
+          document.createElement(
+            "div"
+          );
 
 
-      item
-        .querySelector("button")
-        .addEventListener(
-          "click",
-          () => {
-            deleteAnime(anime.id);
-          }
+        item.className =
+          "admin-anime";
+
+
+        item.innerHTML = `
+          <strong>
+            ${escapeHtml(
+              anime.title
+            )}
+          </strong>
+
+          <span class="muted">
+            Episode ${anime.episode || 1}
+            •
+            ${escapeHtml(
+              anime.category ||
+              "Anime"
+            )}
+          </span>
+
+          <button
+            class="secondary"
+            data-id="${anime.id}"
+          >
+            Delete
+          </button>
+        `;
+
+
+        item
+          .querySelector("button")
+          .addEventListener(
+            "click",
+            () => {
+              deleteAnime(
+                anime.id
+              );
+            }
+          );
+
+
+        adminList.appendChild(
+          item
         );
 
-
-      adminList.appendChild(item);
-    });
+      }
+    );
 
   } catch (error) {
 
     console.error(
-      "LOAD ANIME ERROR:",
+      "LOAD ERROR:",
       error
     );
 
@@ -614,12 +809,17 @@ async function deleteAnime(id) {
         `/api/admin/anime/${id}`,
         {
           method: "DELETE",
-          credentials: "same-origin"
+
+          credentials:
+            "same-origin"
         }
       );
 
 
-    if (res.status === 401) {
+    if (
+      res.status ===
+      401
+    ) {
 
       showLogin();
 
@@ -655,7 +855,9 @@ async function deleteAnime(id) {
       error
     );
 
-    alert("Delete error");
+    alert(
+      "Delete error"
+    );
   }
 }
 
