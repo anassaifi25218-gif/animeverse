@@ -1,13 +1,26 @@
-const loginForm = document.getElementById("loginForm");
-const loginBox = document.getElementById("loginBox");
-const dashboard = document.getElementById("dashboard");
-const loginMsg = document.getElementById("loginMsg");
+const loginForm =
+  document.getElementById("loginForm");
 
-const uploadForm = document.getElementById("uploadForm");
-const uploadMsg = document.getElementById("uploadMsg");
+const loginBox =
+  document.getElementById("loginBox");
 
-const logoutBtn = document.getElementById("logout");
-const adminList = document.getElementById("adminList");
+const dashboard =
+  document.getElementById("dashboard");
+
+const loginMsg =
+  document.getElementById("loginMsg");
+
+const uploadForm =
+  document.getElementById("uploadForm");
+
+const uploadMsg =
+  document.getElementById("uploadMsg");
+
+const logoutBtn =
+  document.getElementById("logout");
+
+const adminList =
+  document.getElementById("adminList");
 
 const videoUploadBtn =
   document.getElementById("videoUploadBtn");
@@ -21,6 +34,15 @@ const videoStatus =
 const posterStatus =
   document.getElementById("posterStatus");
 
+const searchAdmin =
+  document.getElementById("searchAdmin");
+
+const totalAnime =
+  document.getElementById("totalAnime");
+
+const totalEpisodes =
+  document.getElementById("totalEpisodes");
+
 
 const CLOUDINARY_UPLOAD_PRESET =
   "animeverse_upload";
@@ -28,6 +50,8 @@ const CLOUDINARY_UPLOAD_PRESET =
 
 let uploadedVideo = null;
 let uploadedPoster = null;
+
+let allAnime = [];
 
 
 // ===============================
@@ -38,15 +62,19 @@ async function checkStatus() {
 
   try {
 
-    const res = await fetch(
-      "/api/admin/status",
-      {
-        credentials: "same-origin",
-        cache: "no-store"
-      }
-    );
+    const res =
+      await fetch(
+        "/api/admin/status",
+        {
+          credentials:
+            "same-origin",
+          cache:
+            "no-store"
+        }
+      );
 
-    const data = await res.json();
+    const data =
+      await res.json();
 
     if (data.isAdmin) {
       showDashboard();
@@ -66,6 +94,10 @@ async function checkStatus() {
   }
 }
 
+
+// ===============================
+// SHOW DASHBOARD
+// ===============================
 
 function showDashboard() {
 
@@ -105,25 +137,26 @@ loginForm.addEventListener(
 
     try {
 
-      const res = await fetch(
-        "/api/admin/login",
-        {
-          method: "POST",
+      const res =
+        await fetch(
+          "/api/admin/login",
+          {
+            method: "POST",
 
-          headers: {
-            "Content-Type":
-              "application/json"
-          },
+            headers: {
+              "Content-Type":
+                "application/json"
+            },
 
-          credentials:
-            "same-origin",
+            credentials:
+              "same-origin",
 
-          body:
-            JSON.stringify({
-              password
-            })
-        }
-      );
+            body:
+              JSON.stringify({
+                password
+              })
+          }
+        );
 
 
       const data =
@@ -161,10 +194,12 @@ loginForm.addEventListener(
 
 
 // ===============================
-// GET CLOUDINARY CONFIG
+// CLOUDINARY CONFIG
 // ===============================
 
-async function getCloudinaryConfig() {
+async function getCloudinaryConfig(
+  resourceType
+) {
 
   const res =
     await fetch(
@@ -182,7 +217,8 @@ async function getCloudinaryConfig() {
 
         body:
           JSON.stringify({
-            resource_type: "video"
+            resource_type:
+              resourceType
           })
       }
     );
@@ -211,14 +247,6 @@ async function getCloudinaryConfig() {
   }
 
 
-  if (!data.cloud_name) {
-
-    throw new Error(
-      "Cloudinary Cloud Name missing hai."
-    );
-  }
-
-
   return data;
 }
 
@@ -232,7 +260,9 @@ async function openCloudinaryWidget(
 ) {
 
   const config =
-    await getCloudinaryConfig();
+    await getCloudinaryConfig(
+      resourceType
+    );
 
 
   if (
@@ -314,7 +344,8 @@ async function openCloudinaryWidget(
 
             if (
               result &&
-              result.event === "upload-added"
+              result.event ===
+                "upload-added"
             ) {
 
               uploadMsg.textContent =
@@ -378,7 +409,7 @@ async function openCloudinaryWidget(
 
 
 // ===============================
-// VIDEO BUTTON
+// VIDEO UPLOAD
 // ===============================
 
 videoUploadBtn.addEventListener(
@@ -391,7 +422,7 @@ videoUploadBtn.addEventListener(
         true;
 
       videoStatus.textContent =
-        "Cloudinary upload open ho raha hai...";
+        "Uploading video...";
 
 
       const result =
@@ -400,7 +431,8 @@ videoUploadBtn.addEventListener(
         );
 
 
-      uploadedVideo = result;
+      uploadedVideo =
+        result;
 
 
       videoStatus.textContent =
@@ -408,7 +440,7 @@ videoUploadBtn.addEventListener(
 
 
       uploadMsg.textContent =
-        "Video ready. Ab poster select kar sakte ho.";
+        "Video ready.";
 
     } catch (error) {
 
@@ -434,7 +466,7 @@ videoUploadBtn.addEventListener(
 
 
 // ===============================
-// POSTER BUTTON
+// POSTER UPLOAD
 // ===============================
 
 posterUploadBtn.addEventListener(
@@ -447,7 +479,7 @@ posterUploadBtn.addEventListener(
         true;
 
       posterStatus.textContent =
-        "Cloudinary upload open ho raha hai...";
+        "Uploading poster...";
 
 
       const result =
@@ -456,7 +488,8 @@ posterUploadBtn.addEventListener(
         );
 
 
-      uploadedPoster = result;
+      uploadedPoster =
+        result;
 
 
       posterStatus.textContent =
@@ -490,42 +523,6 @@ posterUploadBtn.addEventListener(
 
 
 // ===============================
-// LOGOUT
-// ===============================
-
-logoutBtn.addEventListener(
-  "click",
-  async () => {
-
-    try {
-
-      await fetch(
-        "/api/admin/logout",
-        {
-          method: "POST",
-          credentials:
-            "same-origin"
-        }
-      );
-
-    } catch (error) {
-
-      console.error(
-        "LOGOUT ERROR:",
-        error
-      );
-    }
-
-
-    uploadedVideo = null;
-    uploadedPoster = null;
-
-    showLogin();
-  }
-);
-
-
-// ===============================
 // SAVE ANIME
 // ===============================
 
@@ -539,14 +536,14 @@ uploadForm.addEventListener(
     if (!uploadedVideo) {
 
       uploadMsg.textContent =
-        "Pehle Video select karo.";
+        "Pehle Video upload karo.";
 
       return;
     }
 
 
     uploadMsg.textContent =
-      "Saving anime information...";
+      "Publishing anime...";
 
 
     const formData =
@@ -583,13 +580,11 @@ uploadForm.addEventListener(
       poster:
         uploadedPoster
           ? {
-
               secure_url:
                 uploadedPoster.secure_url,
 
               public_id:
                 uploadedPoster.public_id
-
             }
           : null
     };
@@ -618,8 +613,7 @@ uploadForm.addEventListener(
 
 
       if (
-        saveRes.status ===
-        401
+        saveRes.status === 401
       ) {
 
         showLogin();
@@ -647,11 +641,10 @@ uploadForm.addEventListener(
 
 
       uploadMsg.textContent =
-        "✅ Anime uploaded successfully!";
+        "✅ Anime published successfully!";
 
 
       uploadForm.reset();
-
 
       uploadedVideo = null;
       uploadedPoster = null;
@@ -693,85 +686,35 @@ async function loadAnime() {
       await fetch(
         "/api/anime",
         {
-          cache: "no-store"
+          cache:
+            "no-store"
         }
       );
+
+
+    if (!res.ok) {
+      throw new Error(
+        "Anime load failed"
+      );
+    }
 
 
     const list =
       await res.json();
 
 
-    adminList.innerHTML = "";
+    allAnime =
+      Array.isArray(list)
+        ? list
+        : [];
 
 
-    if (
-      !Array.isArray(list) ||
-      !list.length
-    ) {
+    updateStats(
+      allAnime
+    );
 
-      adminList.innerHTML =
-        "<p class='muted'>No anime uploaded yet.</p>";
-
-      return;
-    }
-
-
-    list.forEach(
-      (anime) => {
-
-        const item =
-          document.createElement(
-            "div"
-          );
-
-
-        item.className =
-          "admin-anime";
-
-
-        item.innerHTML = `
-          <strong>
-            ${escapeHtml(
-              anime.title
-            )}
-          </strong>
-
-          <span class="muted">
-            Episode ${anime.episode || 1}
-            •
-            ${escapeHtml(
-              anime.category ||
-              "Anime"
-            )}
-          </span>
-
-          <button
-            class="secondary"
-            data-id="${anime.id}"
-          >
-            Delete
-          </button>
-        `;
-
-
-        item
-          .querySelector("button")
-          .addEventListener(
-            "click",
-            () => {
-              deleteAnime(
-                anime.id
-              );
-            }
-          );
-
-
-        adminList.appendChild(
-          item
-        );
-
-      }
+    displayAdminAnime(
+      allAnime
     );
 
   } catch (error) {
@@ -788,16 +731,407 @@ async function loadAnime() {
 
 
 // ===============================
-// DELETE ANIME
+// STATS
 // ===============================
 
-async function deleteAnime(id) {
+function updateStats(list) {
 
-  if (
-    !confirm(
-      "Delete this anime?"
-    )
-  ) {
+  const uniqueTitles =
+    new Set(
+      list.map(
+        anime =>
+          String(
+            anime.title || ""
+          ).trim().toLowerCase()
+      )
+    );
+
+  totalAnime.textContent =
+    uniqueTitles.size;
+
+  totalEpisodes.textContent =
+    list.length;
+}
+
+
+// ===============================
+// SEARCH
+// ===============================
+
+if (searchAdmin) {
+
+  searchAdmin.addEventListener(
+    "input",
+    () => {
+
+      const query =
+        searchAdmin.value
+          .toLowerCase()
+          .trim();
+
+
+      const filtered =
+        allAnime.filter(
+          anime => {
+
+            const title =
+              String(
+                anime.title || ""
+              ).toLowerCase();
+
+            const category =
+              String(
+                anime.category || ""
+              ).toLowerCase();
+
+            return (
+              title.includes(query) ||
+              category.includes(query)
+            );
+          }
+        );
+
+
+      displayAdminAnime(
+        filtered
+      );
+    }
+  );
+}
+
+
+// ===============================
+// DISPLAY ADMIN LIST
+// ===============================
+
+function displayAdminAnime(
+  list
+) {
+
+  adminList.innerHTML = "";
+
+
+  if (!list.length) {
+
+    adminList.innerHTML =
+      "<p class='muted'>No anime found.</p>";
+
+    return;
+  }
+
+
+  list.forEach(
+    anime => {
+
+      const item =
+        document.createElement(
+          "div"
+        );
+
+
+      item.className =
+        "admin-anime";
+
+
+      item.innerHTML = `
+
+        <div class="anime-main">
+
+          <strong>
+            ${escapeHtml(
+              anime.title
+            )}
+          </strong>
+
+          <span class="muted">
+            Episode ${anime.episode || 1}
+          </span>
+
+          <span class="muted">
+            ${escapeHtml(
+              anime.category ||
+              "Anime"
+            )}
+          </span>
+
+        </div>
+
+
+        <div class="anime-actions">
+
+          <button
+            class="edit-btn"
+            type="button"
+          >
+            ✏️ Edit
+          </button>
+
+          <button
+            class="episode-btn"
+            type="button"
+          >
+            ➕ Episode
+          </button>
+
+          <button
+            class="delete-btn"
+            type="button"
+          >
+            🗑️ Delete
+          </button>
+
+        </div>
+      `;
+
+
+      item
+        .querySelector(
+          ".edit-btn"
+        )
+        .addEventListener(
+          "click",
+          () => {
+            editAnime(anime);
+          }
+        );
+
+
+      item
+        .querySelector(
+          ".episode-btn"
+        )
+        .addEventListener(
+          "click",
+          () => {
+
+            prepareNewEpisode(
+              anime
+            );
+          }
+        );
+
+
+      item
+        .querySelector(
+          ".delete-btn"
+        )
+        .addEventListener(
+          "click",
+          () => {
+
+            deleteAnime(
+              anime.id
+            );
+          }
+        );
+
+
+      adminList.appendChild(
+        item
+      );
+
+    }
+  );
+}
+
+
+// ===============================
+// EDIT ANIME
+// ===============================
+
+async function editAnime(
+  anime
+) {
+
+  const title =
+    prompt(
+      "Anime title:",
+      anime.title || ""
+    );
+
+  if (title === null) {
+    return;
+  }
+
+
+  const description =
+    prompt(
+      "Description:",
+      anime.description || ""
+    );
+
+  if (description === null) {
+    return;
+  }
+
+
+  const category =
+    prompt(
+      "Category:",
+      anime.category || "Anime"
+    );
+
+  if (category === null) {
+    return;
+  }
+
+
+  const episode =
+    prompt(
+      "Episode number:",
+      anime.episode || 1
+    );
+
+  if (episode === null) {
+    return;
+  }
+
+
+  uploadMsg.textContent =
+    "Saving changes...";
+
+
+  try {
+
+    const res =
+      await fetch(
+        `/api/admin/anime/${anime.id}`,
+        {
+          method: "PUT",
+
+          headers: {
+            "Content-Type":
+              "application/json"
+          },
+
+          credentials:
+            "same-origin",
+
+          body:
+            JSON.stringify({
+              title,
+              description,
+              category,
+              episode
+            })
+        }
+      );
+
+
+    const data =
+      await res.json();
+
+
+    if (
+      res.status === 401
+    ) {
+
+      showLogin();
+
+      return;
+    }
+
+
+    if (!res.ok) {
+
+      throw new Error(
+        data.error ||
+        "Edit failed"
+      );
+    }
+
+
+    uploadMsg.textContent =
+      "✅ Anime updated successfully!";
+
+
+    await loadAnime();
+
+  } catch (error) {
+
+    console.error(
+      "EDIT ERROR:",
+      error
+    );
+
+    uploadMsg.textContent =
+      "Edit error: " +
+      error.message;
+  }
+}
+
+
+// ===============================
+// NEW EPISODE
+// ===============================
+
+function prepareNewEpisode(
+  anime
+) {
+
+  document.getElementById(
+    "title"
+  ).value =
+    anime.title || "";
+
+  document.getElementById(
+    "description"
+  ).value =
+    anime.description || "";
+
+  document.getElementById(
+    "category"
+  ).value =
+    anime.category || "Anime";
+
+  document.getElementById(
+    "episode"
+  ).value =
+    Number(anime.episode || 1) + 1;
+
+
+  uploadMsg.textContent =
+    `Episode ${
+      Number(anime.episode || 1) + 1
+    } ke liye video upload karo.`;
+
+  window.scrollTo({
+    top: 0,
+    behavior: "smooth"
+  });
+}
+
+
+// ===============================
+// DELETE
+// ===============================
+
+async function deleteAnime(
+  id
+) {
+
+  const anime =
+    allAnime.find(
+      item =>
+        String(item.id) ===
+        String(id)
+    );
+
+
+  if (!anime) {
+    return;
+  }
+
+
+  const confirmed =
+    confirm(
+      `Delete "${anime.title}" Episode ${
+        anime.episode || 1
+      }?\n\nVideo aur poster bhi Cloudinary se delete ho sakte hain.`
+    );
+
+
+  if (!confirmed) {
     return;
   }
 
@@ -817,8 +1151,7 @@ async function deleteAnime(id) {
 
 
     if (
-      res.status ===
-      401
+      res.status === 401
     ) {
 
       showLogin();
@@ -846,6 +1179,9 @@ async function deleteAnime(id) {
     }
 
 
+    uploadMsg.textContent =
+      "✅ Anime deleted.";
+
     await loadAnime();
 
   } catch (error) {
@@ -856,21 +1192,22 @@ async function deleteAnime(id) {
     );
 
     alert(
-      "Delete error"
+      "Delete error: " +
+      error.message
     );
   }
 }
 
 
 // ===============================
-// ESCAPE HTML
+// ESCAPE
 // ===============================
 
 function escapeHtml(s) {
 
-  return String(s).replace(
+  return String(s || "").replace(
     /[&<>"']/g,
-    (c) => ({
+    c => ({
       "&": "&amp;",
       "<": "&lt;",
       ">": "&gt;",
