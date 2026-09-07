@@ -62,23 +62,19 @@ loginForm.addEventListener("submit", async (e) => {
     document.getElementById("password").value;
 
   try {
+    const res = await fetch("/api/admin/login", {
+      method: "POST",
 
-    const res = await fetch(
-      "/api/admin/login",
-      {
-        method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
 
-        headers: {
-          "Content-Type": "application/json"
-        },
+      credentials: "same-origin",
 
-        credentials: "same-origin",
-
-        body: JSON.stringify({
-          password
-        })
-      }
-    );
+      body: JSON.stringify({
+        password
+      })
+    });
 
     const data = await res.json();
 
@@ -94,9 +90,7 @@ loginForm.addEventListener("submit", async (e) => {
     showDashboard();
 
   } catch (error) {
-
     console.error("LOGIN ERROR:", error);
-
     loginMsg.textContent =
       "Server connection error";
   }
@@ -104,7 +98,7 @@ loginForm.addEventListener("submit", async (e) => {
 
 
 // ===============================
-// CLOUDINARY DIRECT UPLOAD
+// CLOUDINARY UPLOAD WIDGET
 // ===============================
 
 async function uploadToCloudinary(file, resourceType) {
@@ -113,31 +107,7 @@ async function uploadToCloudinary(file, resourceType) {
     throw new Error("File select nahi hui.");
   }
 
-  // Cloudinary cloud name server se milega
-  const statusRes = await fetch(
-    "/api/admin/status",
-    {
-      credentials: "same-origin",
-      cache: "no-store"
-    }
-  );
-
-  if (statusRes.status === 401) {
-    showLogin();
-
-    throw new Error(
-      "Session expire ho gaya. Dobara login karo."
-    );
-  }
-
-  /*
-    Cloud name lene ke liye upload-signature endpoint use
-    nahi kar rahe. Isliye browser me Cloudinary cloud name
-    manually nahi rakhna padega.
-
-    Server endpoint se configuration lenge.
-  */
-
+  // Cloud name server se lo
   const configRes = await fetch(
     "/api/admin/upload-signature",
     {
@@ -179,129 +149,129 @@ async function uploadToCloudinary(file, resourceType) {
   }
 
 
-  const uploadUrl =
-    `https://api.cloudinary.com/v1_1/${config.cloud_name}/${resourceType}/upload`;
+  return new Promise((resolve, reject) => {
+
+    if (
+      typeof cloudinary === "undefined"
+    ) {
+      reject(
+        new Error(
+          "Cloudinary Widget load nahi hua."
+        )
+      );
+
+      return;
+    }
 
 
-  const form = new FormData();
+    const widget =
+      cloudinary.createUploadWidget(
+        {
+          cloudName:
+            config.cloud_name,
 
-  form.append("file", file);
+          uploadPreset:
+            CLOUDINARY_UPLOAD_PRESET,
 
-  form.append(
-    "upload_preset",
-    CLOUDINARY_UPLOAD_PRESET
-  );
+          resourceType:
+            resourceType,
 
+          multiple: false,
 
-  return await new Promise((resolve, reject) => {
+          sources: [
+            "local"
+          ],
 
-    const xhr = new XMLHttpRequest();
+          clientAllowedFormats:
+            resourceType === "video"
+              ? ["mp4", "webm", "ogg"]
+              : ["jpg", "jpeg", "png", "webp"],
 
-    xhr.open(
-      "POST",
-      uploadUrl,
-      true
-    );
+          maxFileSize:
+            resourceType === "video"
+              ? 1000000000
+              : 10000000
 
+        },
 
-    // Progress
-    xhr.upload.onprogress = (event) => {
+        (error, result) => {
 
-      if (event.lengthComputable) {
+          if (error) {
 
-        const percent =
-          Math.round(
-            (event.loaded / event.total) * 100
-          );
+            console.error(
+              "CLOUDINARY WIDGET ERROR:",
+              error
+            );
 
-        uploadMsg.textContent =
-          `Uploading ${resourceType}... ${percent}%`;
-      }
-    };
+            reject(
+              new Error(
+                error.status?.status ||
+                error.status?.message ||
+                error.message ||
+                "Cloudinary upload failed."
+              )
+            );
 
-
-    // Complete
-    xhr.onload = () => {
-
-      let data = {};
-
-      try {
-        data =
-          JSON.parse(
-            xhr.responseText
-          );
-      } catch {
-        data = {};
-      }
+            return;
+          }
 
 
-      if (
-        xhr.status >= 200 &&
-        xhr.status < 300
-      ) {
+          if (
+            result &&
+            result.event === "success"
+          ) {
 
-        if (
-          !data.secure_url ||
-          !data.public_id
-        ) {
+            const info =
+              result.info;
 
-          reject(
-            new Error(
-              "Cloudinary ne file URL nahi di."
-            )
-          );
+            if (
+              !info.secure_url ||
+              !info.public_id
+            ) {
 
-          return;
+              reject(
+                new Error(
+                  "Cloudinary ne file URL nahi di."
+                )
+              );
+
+              return;
+            }
+
+            resolve({
+              secure_url:
+                info.secure_url,
+
+              public_id:
+                info.public_id
+            });
+
+            return;
+          }
+
+
+          if (
+            result &&
+            result.event === "upload-progress"
+          ) {
+
+            const percent =
+              result.info?.progress;
+
+            if (
+              typeof percent === "number"
+            ) {
+
+              uploadMsg.textContent =
+                `Uploading ${resourceType}... ${percent}%`;
+            }
+          }
+
         }
-
-        resolve(data);
-        return;
-      }
-
-
-      reject(
-        new Error(
-          data.error?.message ||
-          `Cloudinary error (${xhr.status})`
-        )
       );
-    };
 
 
-    // Network error
-    xhr.onerror = () => {
-
-      reject(
-        new Error(
-          "Cloudinary upload connection fail hui."
-        )
-      );
-    };
-
-
-    xhr.onabort = () => {
-
-      reject(
-        new Error(
-          "Upload cancel ho gaya."
-        )
-      );
-    };
-
-
-    xhr.ontimeout = () => {
-
-      reject(
-        new Error(
-          "Upload timeout ho gaya."
-        )
-      );
-    };
-
-
-    xhr.timeout = 0;
-
-    xhr.send(form);
+    widget.open();
   });
 }
 
@@ -379,7 +349,7 @@ uploadForm.addEventListener("submit", async (e) => {
     // ===============================
 
     uploadMsg.textContent =
-      "Uploading video...";
+      "Opening Cloudinary upload...";
 
 
     const videoResult =
@@ -399,7 +369,7 @@ uploadForm.addEventListener("submit", async (e) => {
     if (posterFile) {
 
       uploadMsg.textContent =
-        "Uploading poster...";
+        "Opening poster upload...";
 
 
       posterResult =
@@ -411,7 +381,7 @@ uploadForm.addEventListener("submit", async (e) => {
 
 
     // ===============================
-    // SAVE DATABASE
+    // SAVE DATA
     // ===============================
 
     uploadMsg.textContent =
@@ -445,6 +415,7 @@ uploadForm.addEventListener("submit", async (e) => {
 
         public_id:
           videoResult.public_id
+
       },
 
       poster:
@@ -456,6 +427,7 @@ uploadForm.addEventListener("submit", async (e) => {
 
               public_id:
                 posterResult.public_id
+
             }
 
           : null
@@ -547,7 +519,6 @@ async function loadAnime() {
 
     const list =
       await res.json();
-
 
     adminList.innerHTML = "";
 
