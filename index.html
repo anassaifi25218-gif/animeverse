@@ -30,19 +30,34 @@
     <span class="search-icon">⌕</span>
   </div>
 
-  <a class="admin-link" href="/admin.html">
+  <!-- Admin: hidden for normal visitors -->
+  <a
+    class="admin-link admin-only"
+    href="/admin.html"
+    hidden
+  >
     Admin
   </a>
 
 </header>
 
 <div class="side-menu" id="sideMenu">
+
   <div class="menu-title">ANIMEVERSE</div>
 
   <a href="/">🏠 Home</a>
   <a href="#latest">🔥 Latest Anime</a>
   <a href="#categories">📂 Categories</a>
-  <a href="/admin.html">⚙️ Admin</a>
+
+  <!-- Admin: hidden for normal visitors -->
+  <a
+    href="/admin.html"
+    class="admin-only"
+    hidden
+  >
+    ⚙️ Admin
+  </a>
+
 </div>
 
 <div class="menu-overlay" id="menuOverlay"></div>
@@ -53,7 +68,10 @@
   <section class="hero">
 
     <div class="hero-content">
-      <p class="eyebrow">WELCOME TO ANIMEVERSE</p>
+
+      <p class="eyebrow">
+        WELCOME TO ANIMEVERSE
+      </p>
 
       <h1>
         अपने पसंदीदा Anime
@@ -68,6 +86,7 @@
       <a href="#latest" class="watch-btn">
         ▶ Latest Anime
       </a>
+
     </div>
 
   </section>
@@ -78,12 +97,19 @@
     <div class="section-head">
 
       <div>
-        <p class="small-title">ANIME COLLECTION</p>
-        <h2>Latest Anime</h2>
+        <p class="small-title">
+          ANIME COLLECTION
+        </p>
+
+        <h2>
+          Latest Anime
+        </h2>
       </div>
 
       <select id="category">
-        <option value="">All categories</option>
+        <option value="">
+          All categories
+        </option>
       </select>
 
     </div>
@@ -99,45 +125,165 @@
 </main>
 
 <!-- DARK MODE -->
-<button class="theme-btn" id="themeBtn" aria-label="Dark mode">
+<button
+  class="theme-btn"
+  id="themeBtn"
+  aria-label="Dark mode"
+>
   ☾
 </button>
 
 <script src="/app.js"></script>
 
 <script>
-  const menuBtn = document.getElementById("menuBtn");
-  const sideMenu = document.getElementById("sideMenu");
-  const menuOverlay = document.getElementById("menuOverlay");
+
+  // ===============================
+  // MENU
+  // ===============================
+
+  const menuBtn =
+    document.getElementById("menuBtn");
+
+  const sideMenu =
+    document.getElementById("sideMenu");
+
+  const menuOverlay =
+    document.getElementById("menuOverlay");
+
 
   function openMenu() {
     sideMenu.classList.add("open");
     menuOverlay.classList.add("show");
   }
 
+
   function closeMenu() {
     sideMenu.classList.remove("open");
     menuOverlay.classList.remove("show");
   }
 
-  menuBtn.addEventListener("click", openMenu);
-  menuOverlay.addEventListener("click", closeMenu);
 
-  document.querySelectorAll(".side-menu a").forEach(link => {
-    link.addEventListener("click", closeMenu);
-  });
+  menuBtn.addEventListener(
+    "click",
+    openMenu
+  );
 
-  const themeBtn = document.getElementById("themeBtn");
 
-  themeBtn.addEventListener("click", () => {
-    document.body.classList.toggle("light-mode");
+  menuOverlay.addEventListener(
+    "click",
+    closeMenu
+  );
 
-    if (document.body.classList.contains("light-mode")) {
-      themeBtn.textContent = "☀";
-    } else {
-      themeBtn.textContent = "☾";
+
+  document
+    .querySelectorAll(".side-menu a")
+    .forEach(link => {
+
+      link.addEventListener(
+        "click",
+        closeMenu
+      );
+
+    });
+
+
+  // ===============================
+  // DARK MODE
+  // ===============================
+
+  const themeBtn =
+    document.getElementById("themeBtn");
+
+
+  themeBtn.addEventListener(
+    "click",
+    () => {
+
+      document.body.classList.toggle(
+        "light-mode"
+      );
+
+
+      if (
+        document.body.classList.contains(
+          "light-mode"
+        )
+      ) {
+
+        themeBtn.textContent = "☀";
+
+      } else {
+
+        themeBtn.textContent = "☾";
+
+      }
+
     }
-  });
+  );
+
+
+  // ===============================
+  // ADMIN LINK
+  // ONLY SHOW WHEN LOGGED IN
+  // ===============================
+
+  async function checkAdminLinks() {
+
+    const adminLinks =
+      document.querySelectorAll(
+        ".admin-only"
+      );
+
+
+    // Default: hidden
+    adminLinks.forEach(link => {
+      link.hidden = true;
+    });
+
+
+    try {
+
+      const response =
+        await fetch(
+          "/api/admin/status",
+          {
+            credentials: "same-origin",
+            cache: "no-store"
+          }
+        );
+
+
+      if (!response.ok) {
+        return;
+      }
+
+
+      const data =
+        await response.json();
+
+
+      if (data.isAdmin === true) {
+
+        adminLinks.forEach(link => {
+          link.hidden = false;
+        });
+
+      }
+
+    } catch (error) {
+
+      console.error(
+        "ADMIN STATUS ERROR:",
+        error
+      );
+
+    }
+
+  }
+
+
+  checkAdminLinks();
+
 </script>
 
 </body>
