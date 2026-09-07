@@ -5,6 +5,11 @@ const category = document.getElementById("category");
 
 let animeList = [];
 
+
+/* ===============================
+   LOAD ANIME
+=============================== */
+
 async function loadAnime() {
   try {
     const response = await fetch("/api/anime", {
@@ -25,6 +30,13 @@ async function loadAnime() {
 
     console.log("Anime loaded:", animeList);
 
+    /*
+      Newest anime first.
+
+      Agar server upload order already newest-first
+      bhej raha hai to usi order ko maintain karenge.
+    */
+
     setupCategories();
     displayAnime(animeList);
 
@@ -39,19 +51,27 @@ async function loadAnime() {
 }
 
 
+/* ===============================
+   CATEGORIES
+=============================== */
+
 function setupCategories() {
   if (!category) return;
 
   const categories = new Set();
 
   animeList.forEach(anime => {
+
     if (anime.category) {
+
       anime.category
         .split("|")
         .map(c => c.trim())
         .filter(Boolean)
         .forEach(c => categories.add(c));
+
     }
+
   });
 
   category.innerHTML =
@@ -60,25 +80,36 @@ function setupCategories() {
   [...categories]
     .sort()
     .forEach(cat => {
-      const option = document.createElement("option");
+
+      const option =
+        document.createElement("option");
 
       option.value = cat;
       option.textContent = cat;
 
       category.appendChild(option);
+
     });
 }
 
 
+/* ===============================
+   DISPLAY ANIME
+=============================== */
+
 function displayAnime(list) {
+
   if (!grid) {
-    console.error("ERROR: #grid element नहीं मिला");
+    console.error(
+      "ERROR: #grid element नहीं मिला"
+    );
     return;
   }
 
   grid.innerHTML = "";
 
   if (!list.length) {
+
     if (empty) {
       empty.hidden = false;
     }
@@ -90,80 +121,202 @@ function displayAnime(list) {
     empty.hidden = true;
   }
 
-  list.forEach(anime => {
-    const card = document.createElement("a");
+
+  /*
+    IMPORTANT:
+    List ka order reverse नहीं किया जा रहा।
+    
+    Server jis order me anime bhejta hai,
+    wahi order website par rahega.
+
+    Agar newest upload server se first aa raha hai,
+    to newest anime automatically sabse upar रहेगा.
+  */
+
+
+  list.forEach((anime, index) => {
+
+    const card =
+      document.createElement("a");
 
     card.className = "anime-card";
-    card.href = `/watch.html?id=${encodeURIComponent(anime.id)}`;
+
+    card.href =
+      `/watch.html?id=${encodeURIComponent(anime.id)}`;
+
 
     const poster =
       anime.poster ||
       "https://via.placeholder.com/300x420?text=No+Poster";
 
+
+    const title =
+      anime.title || "Untitled Anime";
+
+
+    const animeCategory =
+      anime.category || "Anime";
+
+
+    /*
+      Episode information
+      Agar API me episode field hai
+      to badge show hoga.
+    */
+
+    const episode =
+      anime.episode ||
+      anime.episodes ||
+      "";
+
+
     card.innerHTML = `
+
       <div class="anime-poster">
+
         <img
           src="${escapeHTML(poster)}"
-          alt="${escapeHTML(anime.title)}"
+          alt="${escapeHTML(title)}"
           loading="lazy"
         >
+
+        ${
+          episode
+            ? `
+              <span class="episode-badge">
+                EP ${escapeHTML(String(episode))}
+              </span>
+            `
+            : ""
+        }
+
       </div>
+
 
       <div class="anime-info">
-        <h3>${escapeHTML(anime.title)}</h3>
-        <p>${escapeHTML(anime.category || "Anime")}</p>
+
+        <h3>
+          ${escapeHTML(title)}
+        </h3>
+
+        <p>
+          ${escapeHTML(animeCategory)}
+        </p>
+
       </div>
+
     `;
 
+
     grid.appendChild(card);
+
   });
+
 }
 
 
+/* ===============================
+   ESCAPE HTML
+=============================== */
+
 function escapeHTML(text) {
-  const div = document.createElement("div");
-  div.textContent = text || "";
+
+  const div =
+    document.createElement("div");
+
+  div.textContent =
+    text || "";
+
   return div.innerHTML;
 }
 
 
+/* ===============================
+   FILTER ANIME
+=============================== */
+
 function filterAnime() {
+
   const searchText =
-    search ? search.value.toLowerCase().trim() : "";
+    search
+      ? search.value.toLowerCase().trim()
+      : "";
+
 
   const selectedCategory =
-    category ? category.value : "";
+    category
+      ? category.value
+      : "";
 
-  const filtered = animeList.filter(anime => {
-    const title =
-      (anime.title || "").toLowerCase();
 
-    const categories =
-      (anime.category || "")
-        .split("|")
-        .map(c => c.trim());
+  const filtered =
+    animeList.filter(anime => {
 
-    const matchesSearch =
-      !searchText ||
-      title.includes(searchText);
+      const title =
+        (anime.title || "")
+          .toLowerCase();
 
-    const matchesCategory =
-      !selectedCategory ||
-      categories.includes(selectedCategory);
 
-    return matchesSearch && matchesCategory;
-  });
+      const categories =
+        (anime.category || "")
+          .split("|")
+          .map(c => c.trim());
+
+
+      const matchesSearch =
+        !searchText ||
+        title.includes(searchText);
+
+
+      const matchesCategory =
+        !selectedCategory ||
+        categories.includes(
+          selectedCategory
+        );
+
+
+      return (
+        matchesSearch &&
+        matchesCategory
+      );
+
+    });
+
 
   displayAnime(filtered);
 }
 
 
+/* ===============================
+   SEARCH
+=============================== */
+
 if (search) {
-  search.addEventListener("input", filterAnime);
+
+  search.addEventListener(
+    "input",
+    filterAnime
+  );
+
 }
 
+
+/* ===============================
+   CATEGORY
+=============================== */
+
 if (category) {
-  category.addEventListener("change", filterAnime);
+
+  category.addEventListener(
+    "change",
+    filterAnime
+  );
+
 }
+
+
+/* ===============================
+   START
+=============================== */
 
 loadAnime();
