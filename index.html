@@ -1,10 +1,25 @@
 <!doctype html>
 <html lang="hi">
 <head>
- <meta charset="UTF-8">
-  <meta name="google-site-verification" content="KAmB5vn0kxP5mRNv6BAVv4IuHhNlqs92YY9VTW9Idm8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta charset="UTF-8">
+
+  <meta
+    name="google-site-verification"
+    content="KAmB5vn0kxP5mRNv6BAVv4IuHhNlqs92YY9VTW9Idm8"
+  >
+
+  <meta
+    name="viewport"
+    content="width=device-width,initial-scale=1"
+  >
+
+  <meta
+    name="description"
+    content="AnimeVerse - Anime collection aur latest episodes."
+  >
+
   <title>AnimeVerse</title>
+
   <link rel="stylesheet" href="/style.css">
 </head>
 
@@ -12,7 +27,11 @@
 
 <header class="nav">
 
-  <button class="menu-btn" id="menuBtn" aria-label="Menu">
+  <button
+    class="menu-btn"
+    id="menuBtn"
+    aria-label="Menu"
+  >
     ☰
   </button>
 
@@ -21,17 +40,20 @@
   </a>
 
   <div class="search-box">
+
     <input
       id="search"
       class="search"
       type="search"
       placeholder="Anime search करें..."
       aria-label="Search anime"
+      autocomplete="off"
     >
+
     <span class="search-icon">⌕</span>
+
   </div>
 
-  <!-- Admin: hidden for normal visitors -->
   <a
     class="admin-link admin-only"
     href="/admin.html"
@@ -42,15 +64,37 @@
 
 </header>
 
+
+<!-- =========================
+     SIDE MENU
+========================= -->
+
 <div class="side-menu" id="sideMenu">
 
-  <div class="menu-title">ANIMEVERSE</div>
+  <div class="menu-title">
+    ANIMEVERSE
+  </div>
 
-  <a href="/">🏠 Home</a>
-  <a href="#latest">🔥 Latest Anime</a>
-  <a href="#categories">📂 Categories</a>
+  <a href="/">
+    🏠 Home
+  </a>
 
-  <!-- Admin: hidden for normal visitors -->
+  <a href="#latest">
+    🆕 Latest Anime
+  </a>
+
+  <a href="#trending">
+    🔥 Trending Anime
+  </a>
+
+  <a href="#categories">
+    📂 Categories
+  </a>
+
+  <a href="#about">
+    ℹ️ About
+  </a>
+
   <a
     href="/admin.html"
     class="admin-only"
@@ -61,11 +105,18 @@
 
 </div>
 
-<div class="menu-overlay" id="menuOverlay"></div>
+<div
+  class="menu-overlay"
+  id="menuOverlay"
+></div>
+
 
 <main>
 
-  <!-- HERO -->
+  <!-- =========================
+       HERO
+  ========================= -->
+
   <section class="hero">
 
     <div class="hero-content">
@@ -81,51 +132,273 @@
       </h1>
 
       <p class="muted">
-        Latest Anime episodes देखें और अपनी पसंदीदा series का आनंद लें।
+        Latest Anime episodes देखें और अपनी पसंदीदा
+        series का आनंद लें।
       </p>
 
-      <a href="#latest" class="watch-btn">
-        ▶ Latest Anime
-      </a>
+      <div class="hero-buttons">
+
+        <a
+          href="#latest"
+          class="watch-btn"
+        >
+          ▶ Latest Anime
+        </a>
+
+        <a
+          href="#trending"
+          class="secondary-btn"
+        >
+          🔥 Trending
+        </a>
+
+      </div>
 
     </div>
 
   </section>
 
-  <!-- LATEST -->
-  <section class="section" id="latest">
+
+  <!-- =========================
+       QUICK INFO
+  ========================= -->
+
+  <section class="quick-info">
+
+    <div class="info-box">
+      <span class="info-icon">🆕</span>
+
+      <div>
+        <strong>Latest</strong>
+        <small>New Episodes</small>
+      </div>
+    </div>
+
+    <div class="info-box">
+      <span class="info-icon">🔥</span>
+
+      <div>
+        <strong>Trending</strong>
+        <small>Popular Anime</small>
+      </div>
+    </div>
+
+    <div class="info-box">
+      <span class="info-icon">🎬</span>
+
+      <div>
+        <strong>Episodes</strong>
+        <small>Watch Collection</small>
+      </div>
+    </div>
+
+  </section>
+
+
+  <!-- =========================
+       LATEST
+  ========================= -->
+
+  <section
+    class="section"
+    id="latest"
+  >
 
     <div class="section-head">
 
       <div>
+
         <p class="small-title">
           ANIME COLLECTION
         </p>
 
         <h2>
-          Latest Anime
+          🆕 Latest Anime
         </h2>
+
       </div>
 
       <select id="category">
+
         <option value="">
           All categories
         </option>
+
       </select>
 
     </div>
 
-    <div id="grid" class="grid"></div>
 
-    <p id="empty" class="empty" hidden>
+    <div
+      id="grid"
+      class="grid"
+    ></div>
+
+
+    <p
+      id="empty"
+      class="empty"
+      hidden
+    >
       अभी कोई anime upload नहीं किया गया है।
     </p>
 
   </section>
 
+
+  <!-- =========================
+       TRENDING
+  ========================= -->
+
+  <section
+    class="section trending-section"
+    id="trending"
+  >
+
+    <div class="section-head">
+
+      <div>
+
+        <p class="small-title">
+          POPULAR NOW
+        </p>
+
+        <h2>
+          🔥 Trending Anime
+        </h2>
+
+      </div>
+
+    </div>
+
+
+    <div
+      id="trendingGrid"
+      class="grid"
+    ></div>
+
+
+    <p
+      id="trendingEmpty"
+      class="empty"
+      hidden
+    >
+      अभी trending anime उपलब्ध नहीं हैं।
+    </p>
+
+  </section>
+
+
+  <!-- =========================
+       CATEGORIES
+  ========================= -->
+
+  <section
+    class="section categories-section"
+    id="categories"
+  >
+
+    <div class="section-head">
+
+      <div>
+
+        <p class="small-title">
+          EXPLORE
+        </p>
+
+        <h2>
+          📂 Categories
+        </h2>
+
+      </div>
+
+    </div>
+
+
+    <div class="category-buttons">
+
+      <button
+        type="button"
+        data-category=""
+      >
+        All
+      </button>
+
+      <button
+        type="button"
+        data-category="Action"
+      >
+        ⚔️ Action
+      </button>
+
+      <button
+        type="button"
+        data-category="Adventure"
+      >
+        🌍 Adventure
+      </button>
+
+      <button
+        type="button"
+        data-category="Comedy"
+      >
+        😂 Comedy
+      </button>
+
+      <button
+        type="button"
+        data-category="Romance"
+      >
+        ❤️ Romance
+      </button>
+
+      <button
+        type="button"
+        data-category="Fantasy"
+      >
+        ✨ Fantasy
+      </button>
+
+    </div>
+
+  </section>
+
+
+  <!-- =========================
+       ABOUT
+  ========================= -->
+
+  <section
+    class="section about-section"
+    id="about"
+  >
+
+    <div class="about-box">
+
+      <p class="small-title">
+        ABOUT ANIMEVERSE
+      </p>
+
+      <h2>
+        AnimeVerse
+      </h2>
+
+      <p>
+        AnimeVerse पर anime collection को आसान और
+        clean तरीके से explore करें।
+      </p>
+
+    </div>
+
+  </section>
+
 </main>
 
-<!-- DARK MODE -->
+
+<!-- =========================
+     THEME BUTTON
+========================= -->
+
 <button
   class="theme-btn"
   id="themeBtn"
@@ -134,13 +407,15 @@
   ☾
 </button>
 
+
 <script src="/app.js"></script>
+
 
 <script>
 
-  // ===============================
-  // MENU
-  // ===============================
+  /* ===============================
+     MENU
+  =============================== */
 
   const menuBtn =
     document.getElementById("menuBtn");
@@ -153,14 +428,20 @@
 
 
   function openMenu() {
+
     sideMenu.classList.add("open");
+
     menuOverlay.classList.add("show");
+
   }
 
 
   function closeMenu() {
+
     sideMenu.classList.remove("open");
+
     menuOverlay.classList.remove("show");
+
   }
 
 
@@ -188,9 +469,9 @@
     });
 
 
-  // ===============================
-  // DARK MODE
-  // ===============================
+  /* ===============================
+     DARK MODE
+  =============================== */
 
   const themeBtn =
     document.getElementById("themeBtn");
@@ -205,28 +486,67 @@
       );
 
 
-      if (
+      const light =
         document.body.classList.contains(
           "light-mode"
-        )
-      ) {
+        );
 
-        themeBtn.textContent = "☀";
 
-      } else {
-
-        themeBtn.textContent = "☾";
-
-      }
+      themeBtn.textContent =
+        light ? "☀" : "☾";
 
     }
   );
 
 
-  // ===============================
-  // ADMIN LINK
-  // ONLY SHOW WHEN LOGGED IN
-  // ===============================
+  /* ===============================
+     CATEGORY BUTTONS
+  =============================== */
+
+  document
+    .querySelectorAll(
+      ".category-buttons button"
+    )
+    .forEach(button => {
+
+      button.addEventListener(
+        "click",
+        () => {
+
+          const category =
+            button.dataset.category || "";
+
+          const select =
+            document.getElementById(
+              "category"
+            );
+
+          if (select) {
+
+            select.value = category;
+
+            select.dispatchEvent(
+              new Event("change")
+            );
+
+          }
+
+          document
+            .getElementById("latest")
+            ?.scrollIntoView({
+              behavior: "smooth"
+            });
+
+        }
+      );
+
+    });
+
+
+  /* ===============================
+     ADMIN LINK
+     ONLY SHOW WHEN LOGGED IN
+  =============================== */
 
   async function checkAdminLinks() {
 
@@ -236,9 +556,10 @@
       );
 
 
-    // Default: hidden
     adminLinks.forEach(link => {
+
       link.hidden = true;
+
     });
 
 
@@ -255,7 +576,9 @@
 
 
       if (!response.ok) {
+
         return;
+
       }
 
 
@@ -266,7 +589,9 @@
       if (data.isAdmin === true) {
 
         adminLinks.forEach(link => {
+
           link.hidden = false;
+
         });
 
       }
