@@ -22,15 +22,10 @@ cloudinary.config({
   api_secret: process.env.CLOUDINARY_API_SECRET
 });
 
-const DATA_PUBLIC_ID = "animeverse/anime-data.json";
+const DATA_PUBLIC_ID = "animeverse/anime-data";
 
 const tempDir = path.join(__dirname, "temp-uploads");
 fs.mkdirSync(tempDir, { recursive: true });
-
-
-// ===============================
-// MIDDLEWARE
-// ===============================
 
 app.use(express.json({ limit: "10mb" }));
 
@@ -74,33 +69,45 @@ function adminOnly(req, res, next) {
 // ===============================
 // CLOUDINARY DATABASE
 // ===============================
+
 async function loadAnime() {
   try {
-    const result = await cloudinary.api.resource(
-      DATA_PUBLIC_ID,
-      {
-        resource_type: "raw",
-        type: "upload"
-      }
+    const url = cloudinary.url(DATA_PUBLIC_ID, {
+      resource_type: "raw",
+      type: "upload",
+      secure: true
+    });
+
+    const response = await fetch(
+      `${url}?t=${Date.now()}`
     );
 
-    const response = await fetch(result.secure_url);
-
     if (!response.ok) {
-      console.log("Database fetch failed:", response.status);
+      console.log(
+        "Database HTTP error:",
+        response.status
+      );
+
       return [];
     }
 
     const data = await response.json();
 
-    return Array.isArray(data) ? data : [];
+    if (!Array.isArray(data)) {
+      return [];
+    }
+
+    return data;
 
   } catch (error) {
-    console.log("LOAD DATABASE ERROR:", error.message);
+    console.error(
+      "LOAD DATABASE ERROR:",
+      error.message
+    );
+
     return [];
   }
 }
-
 
 
 async function saveAnime(anime) {
@@ -115,6 +122,7 @@ async function saveAnime(anime) {
   );
 
   await new Promise((resolve, reject) => {
+
     cloudinary.uploader.upload(
       tempFile,
       {
@@ -123,7 +131,9 @@ async function saveAnime(anime) {
         public_id: DATA_PUBLIC_ID,
         overwrite: true
       },
+
       (error, result) => {
+
         if (error) {
           return reject(error);
         }
@@ -131,6 +141,7 @@ async function saveAnime(anime) {
         resolve(result);
       }
     );
+
   });
 
   try {
@@ -147,7 +158,9 @@ app.post(
   "/api/admin/upload-signature",
   adminOnly,
   (req, res) => {
+
     try {
+
       const resourceType =
         req.body.resource_type === "image"
           ? "image"
@@ -184,6 +197,7 @@ app.post(
       });
 
     } catch (error) {
+
       console.error(
         "SIGNATURE ERROR:",
         error
@@ -251,17 +265,21 @@ app.get("/app.js", (_req, res) => {
 app.get(
   "/api/anime",
   async (_req, res) => {
-    try {
-      const anime = await loadAnime();
 
-      console.log(
-        "Anime count:",
-        anime.length
+    try {
+
+      const anime =
+        await loadAnime();
+
+      res.set(
+        "Cache-Control",
+        "no-store, no-cache, must-revalidate"
       );
 
       res.json(anime);
 
     } catch (error) {
+
       console.error(
         "ANIME API ERROR:",
         error
@@ -282,10 +300,12 @@ app.get(
 app.post(
   "/api/admin/login",
   (req, res) => {
+
     if (
       req.body.password !==
       ADMIN_PASSWORD
     ) {
+
       return res.status(401).json({
         error: "Wrong password"
       });
@@ -307,6 +327,7 @@ app.post(
 app.get(
   "/api/admin/status",
   (req, res) => {
+
     res.json({
       isAdmin:
         !!req.session?.isAdmin
@@ -316,7 +337,7 @@ app.get(
 
 
 // ===============================
-// SAVE UPLOADED ANIME
+// SAVE NEW ANIME / EPISODE
 // ===============================
 
 app.post(
@@ -332,6 +353,7 @@ app.post(
         ).trim();
 
       if (!title) {
+
         return res.status(400).json({
           error: "Title is required"
         });
@@ -346,6 +368,7 @@ app.post(
         !video.secure_url ||
         !video.public_id
       ) {
+
         return res.status(400).json({
           error:
             "Video upload is required"
@@ -362,6 +385,7 @@ app.post(
         !Number.isInteger(episode) ||
         episode < 1
       ) {
+
         episode = 1;
       }
 
@@ -378,7 +402,7 @@ app.post(
 
         id: Date.now(),
 
-        title: title,
+        title,
 
         description:
           String(
@@ -397,7 +421,7 @@ app.post(
         video:
           video.secure_url,
 
-        episode: episode,
+        episode,
 
         created_at:
           new Date().toISOString(),
@@ -407,18 +431,12 @@ app.post(
 
         poster_public_id:
           poster?.public_id || null
-
       };
 
 
-      anime.unshift(
-        newAnime
-      );
+      anime.unshift(newAnime);
 
-
-      await saveAnime(
-        anime
-      );
+      await saveAnime(anime);
 
 
       console.log(
@@ -432,9 +450,8 @@ app.post(
       res.json({
         ok: true,
         id: newAnime.id,
-        episode: episode
+        episode
       });
-
 
     } catch (error) {
 
@@ -454,28 +471,116 @@ app.post(
 
 
 // ===============================
-// ADMIN LOGOUT
+// EDIT ANIME
 // ===============================
 
-app.post(
-  "/api/admin/logout",
+app.put(
+  "/api/admin/anime/:id",
   adminOnly,
-  (req, res) => {
+  async (req, res) => {
 
-    req.session.destroy(
-      () => {
-        res.json({
-          ok: true
+    try {
+
+      const anime =
+        await loadAnime();
+
+      const index =
+        anime.findIndex(
+          item =>
+            String(item.id) ===
+            String(req.params.id)
+        );
+
+      if (index === -1) {
+
+        return res.status(404).json({
+          error: "Anime not found"
         });
       }
-    );
 
+
+      const item =
+        anime[index];
+
+
+      const title =
+        String(
+          req.body.title || item.title
+        ).trim();
+
+
+      if (!title) {
+
+        return res.status(400).json({
+          error: "Title is required"
+        });
+      }
+
+
+      let episode =
+        Number(
+          req.body.episode ||
+          item.episode ||
+          1
+        );
+
+
+      if (
+        !Number.isInteger(episode) ||
+        episode < 1
+      ) {
+
+        episode =
+          item.episode || 1;
+      }
+
+
+      item.title = title;
+
+      item.description =
+        String(
+          req.body.description ??
+          item.description ??
+          ""
+        );
+
+      item.category =
+        String(
+          req.body.category ??
+          item.category ??
+          "Anime"
+        );
+
+      item.episode = episode;
+
+
+      await saveAnime(anime);
+
+
+      res.json({
+        ok: true,
+        anime: item
+      });
+
+    } catch (error) {
+
+      console.error(
+        "EDIT ERROR:",
+        error
+      );
+
+      res.status(500).json({
+        error:
+          error.message ||
+          "Edit failed"
+      });
+    }
   }
 );
 
 
 // ===============================
-// DELETE ANIME
+// DELETE CLOUDINARY FILE
 // ===============================
 
 async function deleteCloudinaryFile(
@@ -504,10 +609,13 @@ async function deleteCloudinaryFile(
       "CLOUDINARY DELETE ERROR:",
       error
     );
-
   }
 }
 
+
+// ===============================
+// DELETE ANIME
+// ===============================
 
 app.delete(
   "/api/admin/anime/:id",
@@ -529,6 +637,7 @@ app.delete(
 
 
       if (index === -1) {
+
         return res.status(404).json({
           error: "Not found"
         });
@@ -542,6 +651,7 @@ app.delete(
       if (
         item.video_public_id
       ) {
+
         await deleteCloudinaryFile(
           item.video_public_id,
           "video"
@@ -552,6 +662,7 @@ app.delete(
       if (
         item.poster_public_id
       ) {
+
         await deleteCloudinaryFile(
           item.poster_public_id,
           "image"
@@ -559,21 +670,14 @@ app.delete(
       }
 
 
-      anime.splice(
-        index,
-        1
-      );
+      anime.splice(index, 1);
 
-
-      await saveAnime(
-        anime
-      );
+      await saveAnime(anime);
 
 
       res.json({
         ok: true
       });
-
 
     } catch (error) {
 
@@ -586,9 +690,7 @@ app.delete(
         error:
           error.message
       });
-
     }
-
   }
 );
 
@@ -610,20 +712,21 @@ app.use(
         err.message ||
         "Request failed"
     });
-
   }
 );
 
 
 // ===============================
-// START SERVER
+// START
 // ===============================
 
 app.listen(
   PORT,
   () => {
+
     console.log(
       `Anime site running on port ${PORT}`
     );
+
   }
 );
