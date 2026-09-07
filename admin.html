@@ -1,720 +1,917 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta
-    name="viewport"
-    content="width=device-width,initial-scale=1"
-  >
 
-  <title>AnimeVerse • Admin</title>
+<meta charset="UTF-8">
 
-  <!-- Cloudinary Upload Widget -->
-  <script
-    src="https://widget.cloudinary.com/v2.0/global/all.js"
-    type="text/javascript">
-  </script>
+<meta
+  name="viewport"
+  content="width=device-width,initial-scale=1"
+>
 
-  <style>
-    * {
-      box-sizing: border-box;
-    }
+<title>AnimeVerse Admin</title>
 
-    body {
-      margin: 0;
-      min-height: 100vh;
-      font-family:
-        Inter,
-        system-ui,
-        -apple-system,
-        BlinkMacSystemFont,
-        "Segoe UI",
-        sans-serif;
-      background:
-        radial-gradient(
-          circle at top right,
-          #24104d 0,
-          transparent 35%
-        ),
-        radial-gradient(
-          circle at bottom left,
-          #082f49 0,
-          transparent 35%
-        ),
-        #070912;
-      color: #fff;
-    }
+<script
+  src="https://widget.cloudinary.com/v2.0/global/all.js"
+  type="text/javascript">
+</script>
 
-    button,
-    input,
-    textarea,
-    select {
-      font: inherit;
-    }
+<style>
 
-    .page {
-      width: min(1100px, 94%);
-      margin: auto;
-      padding: 28px 0 50px;
-    }
+* {
+  box-sizing: border-box;
+}
 
-    /* LOGIN */
+body {
+  margin: 0;
+  min-height: 100vh;
+  font-family:
+    system-ui,
+    -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
+    sans-serif;
 
-    #loginBox {
-      min-height: 100vh;
-      display: grid;
-      place-items: center;
-      padding: 20px;
-    }
+  color: white;
 
-    .login-card {
-      width: min(430px, 100%);
-      padding: 34px;
-      border: 1px solid rgba(255,255,255,.1);
-      border-radius: 28px;
-      background: rgba(15,18,32,.82);
-      box-shadow:
-        0 25px 80px rgba(0,0,0,.45);
-      backdrop-filter: blur(20px);
-    }
+  background:
+    radial-gradient(
+      circle at 15% 10%,
+      rgba(124,58,237,.25),
+      transparent 30%
+    ),
+    radial-gradient(
+      circle at 90% 80%,
+      rgba(37,99,235,.2),
+      transparent 30%
+    ),
+    #060810;
+}
 
-    .brand {
-      text-align: center;
-      margin-bottom: 30px;
-    }
+button,
+input,
+textarea {
+  font: inherit;
+}
 
-    .brand-icon {
-      width: 62px;
-      height: 62px;
-      margin: 0 auto 14px;
-      display: grid;
-      place-items: center;
-      border-radius: 20px;
-      background:
-        linear-gradient(135deg,#7c3aed,#2563eb);
-      font-size: 28px;
-      box-shadow:
-        0 12px 35px rgba(124,58,237,.35);
-    }
+button {
+  cursor: pointer;
+}
 
-    .brand h1 {
-      margin: 0;
-      font-size: 27px;
-    }
+.page {
+  width: min(1150px, 94%);
+  margin: auto;
+  padding: 25px 0 50px;
+}
 
-    .brand p {
-      margin: 7px 0 0;
-      color: #9ca3af;
-      font-size: 14px;
-    }
 
-    label {
-      display: block;
-      margin: 0 0 8px;
-      color: #d1d5db;
-      font-size: 13px;
-      font-weight: 600;
-    }
+/* LOGIN */
 
-    input,
-    textarea,
-    select {
-      width: 100%;
-      border: 1px solid #252a3d;
-      outline: none;
-      border-radius: 13px;
-      padding: 13px 14px;
-      background: #0c1020;
-      color: white;
-      transition: .2s;
-    }
+#loginBox {
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  padding: 20px;
+}
 
-    input:focus,
-    textarea:focus,
-    select:focus {
-      border-color: #7c3aed;
-      box-shadow: 0 0 0 3px rgba(124,58,237,.13);
-    }
+.login-card {
+  width: min(420px, 100%);
+  padding: 32px;
+  border-radius: 26px;
 
-    textarea {
-      min-height: 105px;
-      resize: vertical;
-    }
+  background: rgba(15,18,32,.86);
 
-    .field {
-      margin-bottom: 18px;
-    }
+  border: 1px solid
+    rgba(255,255,255,.1);
 
-    .primary-btn,
-    .upload-btn,
-    .secondary {
-      border: 0;
-      cursor: pointer;
-      border-radius: 13px;
-      transition: transform .18s, opacity .18s;
-    }
+  box-shadow:
+    0 25px 80px
+    rgba(0,0,0,.5);
 
-    .primary-btn:hover,
-    .upload-btn:hover,
-    .secondary:hover {
-      transform: translateY(-1px);
-    }
+  backdrop-filter: blur(18px);
+}
 
-    .primary-btn {
-      width: 100%;
-      padding: 14px;
-      color: white;
-      font-weight: 700;
-      background:
-        linear-gradient(135deg,#7c3aed,#2563eb);
-    }
+.logo-box {
+  text-align: center;
+  margin-bottom: 28px;
+}
 
-    /* DASHBOARD */
+.logo-icon {
+  width: 64px;
+  height: 64px;
+  display: grid;
+  place-items: center;
+  margin: auto auto 14px;
 
-    #dashboard {
-      display: none;
-    }
+  border-radius: 20px;
 
-    #dashboard:not([hidden]) {
-      display: block;
-    }
+  background:
+    linear-gradient(
+      135deg,
+      #7c3aed,
+      #2563eb
+    );
 
-    .topbar {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 15px;
-      margin-bottom: 28px;
-    }
+  font-size: 28px;
+}
 
-    .title-area h1 {
-      margin: 0;
-      font-size: clamp(25px,5vw,36px);
-      letter-spacing: -.7px;
-    }
+.logo-box h1 {
+  margin: 0;
+  font-size: 27px;
+}
 
-    .title-area p {
-      margin: 7px 0 0;
-      color: #8f96aa;
-      font-size: 14px;
-    }
+.logo-box p {
+  color: #858da2;
+  font-size: 13px;
+}
 
-    #logout {
-      padding: 10px 16px;
-      border: 1px solid #292e42;
-      border-radius: 12px;
-      background: #101423;
-      color: #e5e7eb;
-      cursor: pointer;
-    }
 
-    .stats {
-      display: grid;
-      grid-template-columns:
-        repeat(3,minmax(0,1fr));
-      gap: 14px;
-      margin-bottom: 22px;
-    }
+/* INPUTS */
 
-    .stat {
-      padding: 20px;
-      border: 1px solid rgba(255,255,255,.08);
-      border-radius: 20px;
-      background: rgba(14,18,31,.76);
-    }
+.field {
+  margin-bottom: 16px;
+}
 
-    .stat-icon {
-      font-size: 22px;
-      margin-bottom: 12px;
-    }
+label {
+  display: block;
+  margin-bottom: 7px;
 
-    .stat strong {
-      display: block;
-      font-size: 27px;
-    }
+  font-size: 13px;
+  font-weight: 600;
+  color: #cdd2df;
+}
 
-    .stat span {
-      color: #8f96aa;
-      font-size: 12px;
-    }
+input,
+textarea {
+  width: 100%;
 
-    .layout {
-      display: grid;
-      grid-template-columns: 1.15fr .85fr;
-      gap: 20px;
-    }
+  border: 1px solid #252a3d;
+  border-radius: 13px;
 
-    .panel {
-      border: 1px solid rgba(255,255,255,.08);
-      border-radius: 24px;
-      padding: 23px;
-      background: rgba(14,18,31,.8);
-      box-shadow: 0 18px 55px rgba(0,0,0,.18);
-    }
+  outline: none;
 
-    .panel-head {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      gap: 10px;
-      margin-bottom: 20px;
-    }
+  background: #0b0f1d;
+  color: white;
 
-    .panel-head h2 {
-      margin: 0;
-      font-size: 19px;
-    }
+  padding: 13px 14px;
+}
 
-    .panel-head span {
-      color: #7f879c;
-      font-size: 12px;
-    }
+input:focus,
+textarea:focus {
+  border-color: #7c3aed;
+}
 
-    .upload-box {
-      padding: 16px;
-      margin-bottom: 14px;
-      border: 1px solid #252a3d;
-      border-radius: 17px;
-      background: #0a0e1b;
-    }
+textarea {
+  min-height: 95px;
+  resize: vertical;
+}
 
-    .upload-box:last-child {
-      margin-bottom: 0;
-    }
 
-    .upload-title {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 12px;
-    }
+/* BUTTON */
 
-    .upload-title strong {
-      font-size: 14px;
-    }
+.primary {
+  width: 100%;
 
-    .upload-title small {
-      color: #7f879c;
-    }
+  border: 0;
+  border-radius: 13px;
 
-    .upload-btn {
-      width: 100%;
-      padding: 13px;
-      color: white;
-      background: #171c30;
-      border: 1px solid #30364d;
-    }
+  padding: 14px;
 
-    .upload-btn:disabled {
-      opacity: .55;
-      cursor: not-allowed;
-    }
+  color: white;
+  font-weight: 700;
 
-    .status {
-      display: block;
-      margin-top: 9px;
-      min-height: 18px;
-      color: #9ca3af;
-      font-size: 12px;
-    }
+  background:
+    linear-gradient(
+      135deg,
+      #7c3aed,
+      #2563eb
+    );
+}
 
-    .save-btn {
-      margin-top: 6px;
-    }
+#logout {
+  border: 1px solid #292e42;
+  border-radius: 12px;
 
-    #uploadMsg,
-    #loginMsg {
-      min-height: 20px;
-      margin: 12px 0 0;
-      color: #aab1c3;
-      font-size: 13px;
-    }
+  padding: 10px 16px;
 
-    /* ADMIN LIST */
+  color: white;
+  background: #101423;
+}
 
-    #adminList {
-      display: flex;
-      flex-direction: column;
-      gap: 11px;
-      max-height: 590px;
-      overflow-y: auto;
-      padding-right: 3px;
-    }
 
-    .admin-anime {
-      display: grid;
-      grid-template-columns: 1fr auto;
-      gap: 5px 12px;
-      align-items: center;
-      padding: 15px;
-      border: 1px solid #252a3d;
-      border-radius: 16px;
-      background: #0a0e1b;
-    }
+/* TOP */
 
-    .admin-anime strong {
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
-    }
+.topbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 
-    .admin-anime .muted {
-      grid-column: 1;
-      color: #7f879c;
-      font-size: 12px;
-    }
+  gap: 15px;
 
-    .secondary {
-      grid-column: 2;
-      grid-row: 1 / span 2;
-      padding: 9px 13px;
-      color: #ffb4b4;
-      background: #281319;
-      border: 1px solid #4b2229;
-    }
+  margin-bottom: 24px;
+}
 
-    .empty,
-    .muted,
-    .msg {
-      color: #7f879c;
-      font-size: 13px;
-    }
+.topbar h1 {
+  margin: 0;
+  font-size: clamp(25px,5vw,36px);
+}
 
-    @media (max-width: 800px) {
-      .layout {
-        grid-template-columns: 1fr;
-      }
+.topbar p {
+  margin: 5px 0 0;
+  color: #858da2;
+  font-size: 13px;
+}
 
-      .stats {
-        grid-template-columns: 1fr;
-      }
 
-      #adminList {
-        max-height: none;
-      }
-    }
+/* STATS */
 
-    @media (max-width: 520px) {
-      .page {
-        width: 92%;
-        padding-top: 20px;
-      }
+.stats {
+  display: grid;
 
-      .panel,
-      .login-card {
-        padding: 18px;
-        border-radius: 20px;
-      }
+  grid-template-columns:
+    repeat(3,1fr);
 
-      .topbar {
-        align-items: flex-start;
-      }
+  gap: 14px;
 
-      .title-area h1 {
-        font-size: 26px;
-      }
-    }
-  </style>
+  margin-bottom: 20px;
+}
+
+.stat {
+  padding: 20px;
+
+  border-radius: 20px;
+
+  background:
+    rgba(14,18,31,.8);
+
+  border:
+    1px solid
+    rgba(255,255,255,.08);
+}
+
+.stat-icon {
+  font-size: 23px;
+}
+
+.stat strong {
+  display: block;
+
+  margin-top: 8px;
+
+  font-size: 27px;
+}
+
+.stat span {
+  color: #858da2;
+  font-size: 12px;
+}
+
+
+/* LAYOUT */
+
+.layout {
+  display: grid;
+
+  grid-template-columns:
+    minmax(0,1fr)
+    minmax(0,1fr);
+
+  gap: 20px;
+}
+
+.panel {
+  padding: 22px;
+
+  border-radius: 23px;
+
+  background:
+    rgba(14,18,31,.84);
+
+  border:
+    1px solid
+    rgba(255,255,255,.08);
+}
+
+.panel-title {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+  margin-bottom: 20px;
+}
+
+.panel-title h2 {
+  margin: 0;
+  font-size: 19px;
+}
+
+.panel-title span {
+  color: #737b90;
+  font-size: 11px;
+}
+
+
+/* UPLOAD */
+
+.upload-box {
+  margin-top: 14px;
+  padding: 15px;
+
+  border-radius: 17px;
+
+  background: #090d19;
+
+  border:
+    1px solid #252a3d;
+}
+
+.upload-head {
+  display: flex;
+  justify-content: space-between;
+
+  margin-bottom: 10px;
+}
+
+.upload-head strong {
+  font-size: 13px;
+}
+
+.upload-head small {
+  color: #737b90;
+}
+
+.upload-button {
+  width: 100%;
+
+  padding: 13px;
+
+  border-radius: 12px;
+
+  color: white;
+
+  background: #151a2c;
+
+  border:
+    1px solid #30364d;
+}
+
+.upload-button:disabled {
+  opacity: .5;
+}
+
+.status {
+  display: block;
+
+  min-height: 18px;
+
+  margin-top: 8px;
+
+  color: #8d95aa;
+
+  font-size: 12px;
+}
+
+#uploadMsg,
+#loginMsg {
+  min-height: 20px;
+
+  color: #9ca3af;
+
+  font-size: 13px;
+}
+
+
+/* SEARCH */
+
+.search-box {
+  margin-bottom: 14px;
+}
+
+.search-box input {
+  padding: 12px 14px;
+}
+
+
+/* ADMIN LIST */
+
+#adminList {
+  display: flex;
+  flex-direction: column;
+
+  gap: 11px;
+
+  max-height: 620px;
+
+  overflow-y: auto;
+}
+
+.admin-anime {
+  padding: 14px;
+
+  border-radius: 16px;
+
+  background: #090d19;
+
+  border:
+    1px solid #252a3d;
+}
+
+.anime-main strong {
+  display: block;
+
+  margin-bottom: 5px;
+
+  font-size: 14px;
+}
+
+.muted {
+  color: #737b90;
+
+  font-size: 12px;
+}
+
+.anime-actions {
+  display: flex;
+
+  flex-wrap: wrap;
+
+  gap: 7px;
+
+  margin-top: 12px;
+}
+
+.anime-actions button {
+  border-radius: 10px;
+
+  padding: 8px 11px;
+
+  font-size: 12px;
+}
+
+.edit-btn {
+  color: #c4b5fd;
+
+  background: #17112a;
+
+  border:
+    1px solid #39256b;
+}
+
+.episode-btn {
+  color: #93c5fd;
+
+  background: #0d1b30;
+
+  border:
+    1px solid #1d416d;
+}
+
+.delete-btn {
+  color: #fca5a5;
+
+  background: #281319;
+
+  border:
+    1px solid #4b2229;
+}
+
+
+/* MOBILE */
+
+@media (max-width: 800px) {
+
+  .layout {
+    grid-template-columns: 1fr;
+  }
+
+  .stats {
+    grid-template-columns: 1fr;
+  }
+
+  #adminList {
+    max-height: none;
+  }
+}
+
+
+@media (max-width: 500px) {
+
+  .page {
+    width: 92%;
+    padding-top: 18px;
+  }
+
+  .panel,
+  .login-card {
+    padding: 17px;
+    border-radius: 19px;
+  }
+
+  .topbar {
+    align-items: flex-start;
+  }
+
+  .topbar h1 {
+    font-size: 25px;
+  }
+
+  #logout {
+    padding: 9px 12px;
+  }
+
+}
+
+</style>
+
 </head>
 
 <body>
 
-  <!-- =========================
-       LOGIN
-  ========================== -->
 
-  <section id="loginBox">
+<!-- =========================
+     LOGIN
+========================== -->
 
-    <div class="login-card">
+<section id="loginBox">
 
-      <div class="brand">
-        <div class="brand-icon">🎬</div>
-        <h1>AnimeVerse</h1>
-        <p>Administrator Control Panel</p>
+  <div class="login-card">
+
+    <div class="logo-box">
+
+      <div class="logo-icon">
+        🎬
       </div>
 
-      <form id="loginForm">
+      <h1>
+        AnimeVerse
+      </h1>
 
-        <div class="field">
-          <label for="password">
-            Admin Password
-          </label>
+      <p>
+        Admin Control Center
+      </p>
 
-          <input
-            id="password"
-            type="password"
-            placeholder="Enter admin password"
-            autocomplete="current-password"
-            required
-          >
-        </div>
+    </div>
 
-        <button
-          class="primary-btn"
-          type="submit"
+
+    <form id="loginForm">
+
+      <div class="field">
+
+        <label for="password">
+          Admin Password
+        </label>
+
+        <input
+          id="password"
+          type="password"
+          placeholder="Enter password"
+          autocomplete="current-password"
+          required
         >
-          🔐 Login to Dashboard
-        </button>
-
-        <p id="loginMsg"></p>
-
-      </form>
-
-    </div>
-
-  </section>
-
-
-  <!-- =========================
-       DASHBOARD
-  ========================== -->
-
-  <section id="dashboard" hidden>
-
-    <div class="page">
-
-      <header class="topbar">
-
-        <div class="title-area">
-          <h1>Anime Dashboard</h1>
-          <p>
-            Upload and manage your AnimeVerse library
-          </p>
-        </div>
-
-        <button id="logout">
-          Logout
-        </button>
-
-      </header>
-
-
-      <div class="stats">
-
-        <div class="stat">
-          <div class="stat-icon">📚</div>
-          <strong id="totalAnime">—</strong>
-          <span>Total Anime</span>
-        </div>
-
-        <div class="stat">
-          <div class="stat-icon">🎬</div>
-          <strong>Cloud</strong>
-          <span>Video Storage</span>
-        </div>
-
-        <div class="stat">
-          <div class="stat-icon">⚡</div>
-          <strong>Live</strong>
-          <span>Website Status</span>
-        </div>
 
       </div>
 
 
-      <div class="layout">
+      <button
+        type="submit"
+        class="primary"
+      >
+        🔐 Login
+      </button>
 
 
-        <!-- =====================
-             UPLOAD PANEL
-        ====================== -->
+      <p id="loginMsg"></p>
 
-        <div class="panel">
+    </form>
 
-          <div class="panel-head">
-            <h2>➕ Upload Anime</h2>
-            <span>New release</span>
-          </div>
+  </div>
+
+</section>
 
 
-          <form id="uploadForm">
+
+<!-- =========================
+     DASHBOARD
+========================== -->
+
+<section id="dashboard" hidden>
+
+<div class="page">
 
 
-            <div class="field">
-              <label for="title">
-                Anime Title
-              </label>
+<header class="topbar">
 
-              <input
-                id="title"
-                name="title"
-                type="text"
-                placeholder="Enter anime title"
-                required
-              >
-            </div>
+  <div>
 
+    <h1>
+      Anime Dashboard
+    </h1>
 
-            <div class="field">
-              <label for="description">
-                Description
-              </label>
+    <p>
+      Manage your AnimeVerse library
+    </p>
 
-              <textarea
-                id="description"
-                name="description"
-                placeholder="Enter anime description"
-              ></textarea>
-            </div>
+  </div>
 
 
-            <div class="field">
-              <label for="category">
-                Category
-              </label>
+  <button id="logout">
+    Logout
+  </button>
 
-              <input
-                id="category"
-                name="category"
-                type="text"
-                placeholder="Action | Adventure | Fantasy"
-              >
-            </div>
+</header>
 
 
-            <div class="field">
-              <label for="episode">
-                Episode Number
-              </label>
 
-              <input
-                id="episode"
-                name="episode"
-                type="number"
-                min="1"
-                value="1"
-                required
-              >
-            </div>
+<!-- STATS -->
 
+<div class="stats">
 
-            <!-- VIDEO -->
+  <div class="stat">
 
-            <div class="upload-box">
+    <div class="stat-icon">
+      📚
+    </div>
 
-              <div class="upload-title">
-                <strong>🎥 Anime Video</strong>
-                <small>MP4 / WEBM / OGG</small>
-              </div>
+    <strong id="totalAnime">
+      0
+    </strong>
 
-              <button
-                type="button"
-                id="videoUploadBtn"
-                class="upload-btn"
-              >
-                📤 Select & Upload Video
-              </button>
+    <span>
+      Total Anime
+    </span>
 
-              <span
-                id="videoStatus"
-                class="status"
-              >
-                No video selected
-              </span>
-
-            </div>
+  </div>
 
 
-            <!-- POSTER -->
+  <div class="stat">
 
-            <div class="upload-box">
+    <div class="stat-icon">
+      🎬
+    </div>
 
-              <div class="upload-title">
-                <strong>🖼️ Anime Poster</strong>
-                <small>JPG / PNG / WEBP</small>
-              </div>
+    <strong id="totalEpisodes">
+      0
+    </strong>
 
-              <button
-                type="button"
-                id="posterUploadBtn"
-                class="upload-btn"
-              >
-                🖼️ Select & Upload Poster
-              </button>
+    <span>
+      Total Episodes
+    </span>
 
-              <span
-                id="posterStatus"
-                class="status"
-              >
-                No poster selected
-              </span>
-
-            </div>
+  </div>
 
 
-            <button
-              type="submit"
-              class="primary-btn save-btn"
-            >
-              🚀 Publish Anime
-            </button>
+  <div class="stat">
 
-            <p id="uploadMsg"></p>
+    <div class="stat-icon">
+      ⚡
+    </div>
 
-          </form>
+    <strong>
+      LIVE
+    </strong>
 
-        </div>
+    <span>
+      Website Status
+    </span>
 
+  </div>
 
-        <!-- =====================
-             ANIME LIST
-        ====================== -->
-
-        <div class="panel">
-
-          <div class="panel-head">
-            <h2>📋 Anime Library</h2>
-            <span>Manage uploads</span>
-          </div>
-
-          <div id="adminList">
-            <p class="muted">
-              Loading anime...
-            </p>
-          </div>
-
-        </div>
+</div>
 
 
-      </div>
+
+<div class="layout">
+
+
+<!-- =========================
+     UPLOAD
+========================== -->
+
+<div class="panel">
+
+  <div class="panel-title">
+
+    <h2>
+      ➕ Upload Anime
+    </h2>
+
+    <span>
+      NEW RELEASE
+    </span>
+
+  </div>
+
+
+  <form id="uploadForm">
+
+
+    <div class="field">
+
+      <label for="title">
+        Anime Title
+      </label>
+
+      <input
+        id="title"
+        name="title"
+        type="text"
+        placeholder="Enter anime title"
+        required
+      >
 
     </div>
 
-  </section>
+
+    <div class="field">
+
+      <label for="description">
+        Description
+      </label>
+
+      <textarea
+        id="description"
+        name="description"
+        placeholder="Enter description"
+      ></textarea>
+
+    </div>
 
 
-  <script src="/admin.js"></script>
+    <div class="field">
 
-  <script>
-    /*
-      Stats counter:
-      Upload system is NOT changed.
-      This only reads the already existing anime list.
-    */
+      <label for="category">
+        Category
+      </label>
 
-    const originalLoadAnime = window.loadAnime;
+      <input
+        id="category"
+        name="category"
+        type="text"
+        placeholder="Action | Adventure | Fantasy"
+      >
 
-    if (typeof originalLoadAnime === "function") {
-      window.loadAnime = async function () {
-        await originalLoadAnime();
+    </div>
 
-        const list =
-          await fetch("/api/anime", {
-            cache: "no-store"
-          }).then(r => r.json());
 
-        const total =
-          document.getElementById("totalAnime");
+    <div class="field">
 
-        if (total) {
-          total.textContent =
-            Array.isArray(list)
-              ? list.length
-              : 0;
-        }
-      };
-    }
-  </script>
+      <label for="episode">
+        Episode Number
+      </label>
+
+      <input
+        id="episode"
+        name="episode"
+        type="number"
+        min="1"
+        value="1"
+        required
+      >
+
+    </div>
+
+
+    <!-- VIDEO -->
+
+    <div class="upload-box">
+
+      <div class="upload-head">
+
+        <strong>
+          🎥 Anime Video
+        </strong>
+
+        <small>
+          MP4 / WEBM / OGG
+        </small>
+
+      </div>
+
+
+      <button
+        type="button"
+        id="videoUploadBtn"
+        class="upload-button"
+      >
+        📤 Select & Upload Video
+      </button>
+
+
+      <span
+        id="videoStatus"
+        class="status"
+      >
+        No video selected
+      </span>
+
+    </div>
+
+
+
+    <!-- POSTER -->
+
+    <div class="upload-box">
+
+      <div class="upload-head">
+
+        <strong>
+          🖼️ Anime Poster
+        </strong>
+
+        <small>
+          JPG / PNG / WEBP
+        </small>
+
+      </div>
+
+
+      <button
+        type="button"
+        id="posterUploadBtn"
+        class="upload-button"
+      >
+        🖼️ Select & Upload Poster
+      </button>
+
+
+      <span
+        id="posterStatus"
+        class="status"
+      >
+        No poster selected
+      </span>
+
+    </div>
+
+
+
+    <button
+      type="submit"
+      class="primary"
+      style="margin-top:14px"
+    >
+      🚀 Publish Anime
+    </button>
+
+
+    <p id="uploadMsg"></p>
+
+
+  </form>
+
+</div>
+
+
+
+<!-- =========================
+     LIBRARY
+========================== -->
+
+<div class="panel">
+
+  <div class="panel-title">
+
+    <h2>
+      📚 Anime Library
+    </h2>
+
+    <span>
+      MANAGE
+    </span>
+
+  </div>
+
+
+  <div class="search-box">
+
+    <input
+      id="searchAdmin"
+      type="search"
+      placeholder="🔎 Search anime..."
+    >
+
+  </div>
+
+
+  <div id="adminList">
+
+    <p class="muted">
+      Loading anime...
+    </p>
+
+  </div>
+
+</div>
+
+
+</div>
+
+</div>
+
+</section>
+
+
+<script src="/admin.js"></script>
 
 </body>
 </html>
