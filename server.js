@@ -35,7 +35,7 @@ app.use(
     limit: "10mb"
   })
 );
-
+app.use(express.static(__dirname));
 app.use(
   session({
     secret: SESSION_SECRET,
