@@ -2,148 +2,219 @@
 <html lang="hi">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
 
   <title>Watch Anime</title>
 
   <link rel="stylesheet" href="/style.css">
 
   <style>
-    /* ===============================
+    /* =========================
        WATCH PAGE
-       =============================== */
+    ========================= */
 
     .watch-page {
-      display: block !important;
-      width: 100% !important;
-      max-width: 900px !important;
-      margin: 0 auto !important;
-      padding: 30px 20px 60px !important;
-      box-sizing: border-box !important;
+      width: 100%;
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 35px 20px 60px;
+      box-sizing: border-box;
     }
 
     .back {
       display: inline-block;
-      margin-bottom: 30px;
+      margin-bottom: 35px;
+      color: #8b5cf6;
+      text-decoration: none;
+      font-size: 20px;
     }
 
-    #watch {
-      display: block !important;
-      width: 100% !important;
+    /* Poster + information */
+    .anime-info {
+      display: block;
+      width: 100%;
     }
 
-    .anime-poster {
-      display: block !important;
-      width: 100% !important;
-      max-width: 450px !important;
-      margin: 0 auto 28px !important;
-    }
-
-    .anime-poster img {
-      display: block !important;
-      width: 100% !important;
-      height: auto !important;
-      max-height: 300px !important;
-      object-fit: cover !important;
-      border-radius: 14px !important;
+    .poster {
+      display: block;
+      width: 100%;
+      max-width: 450px;
+      height: 255px;
+      object-fit: cover;
+      margin: 0 auto 30px;
+      border-radius: 16px;
+      background: #222;
     }
 
     .anime-title {
-      display: block !important;
-      width: 100% !important;
-      margin: 0 0 18px !important;
-      font-size: 34px !important;
-      line-height: 1.25 !important;
+      margin: 0 0 25px;
+      font-size: 42px;
+      line-height: 1.2;
+      color: #fff;
     }
 
-    .anime-category {
-      display: inline-block !important;
-      margin: 0 0 28px !important;
-      padding: 10px 16px !important;
-      border-radius: 12px !important;
-      background: rgba(255,255,255,0.06) !important;
+    .category {
+      display: inline-block;
+      padding: 10px 16px;
+      margin-bottom: 35px;
+      border: 1px solid #3b3d49;
+      border-radius: 12px;
+      background: #20222c;
+      color: #ddd;
+      font-size: 17px;
     }
 
-    .anime-description {
-      display: block !important;
-      width: 100% !important;
-      margin: 0 0 35px !important;
-      font-size: 20px !important;
-      line-height: 1.7 !important;
+    .description {
+      margin: 0 0 45px;
+      color: #ddd;
+      font-size: 22px;
+      line-height: 1.7;
     }
+
+    /* =========================
+       VIDEO
+    ========================= */
 
     .watch-heading {
-      margin: 0 0 15px !important;
-      font-size: 30px !important;
+      margin: 0 0 20px;
+      font-size: 32px;
+      color: #fff;
+    }
+
+    .video-wrapper {
+      width: 100%;
+      margin-bottom: 25px;
     }
 
     #animeVideo {
-      display: block !important;
-      width: 100% !important;
-      max-width: 900px !important;
-      height: auto !important;
-      min-height: 220px !important;
-      background: #000 !important;
-      border-radius: 14px !important;
+      display: block;
+      width: 100%;
+      max-width: 900px;
+      height: auto;
+      min-height: 200px;
+      background: #000;
+      border-radius: 16px;
     }
 
-    .episodes-section {
-      display: block !important;
-      width: 100% !important;
-      margin-top: 35px !important;
+    /* =========================
+       PREVIOUS / NEXT
+    ========================= */
+
+    .episode-navigation {
+      display: flex;
+      gap: 15px;
+      margin: 20px 0 50px;
     }
+
+    .nav-btn {
+      display: inline-block;
+      padding: 14px 22px;
+      border-radius: 12px;
+      background: #fff;
+      color: #111;
+      text-decoration: none;
+      font-size: 17px;
+      border: none;
+    }
+
+    .nav-btn.disabled {
+      opacity: 0.35;
+      pointer-events: none;
+    }
+
+    /* =========================
+       EPISODES
+    ========================= */
 
     .episodes-section h2 {
-      font-size: 30px !important;
-      margin-bottom: 18px !important;
+      margin: 0 0 20px;
+      font-size: 32px;
+      color: #fff;
     }
 
     #episodes {
-      display: flex !important;
-      flex-wrap: wrap !important;
-      gap: 10px !important;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
     }
 
     .episode-btn {
-      display: inline-block !important;
-      padding: 12px 16px !important;
-      border-radius: 10px !important;
-      text-decoration: none !important;
+      display: inline-block;
+      padding: 12px 18px;
+      border-radius: 10px;
+      background: #252733;
+      border: 1px solid #3b3d49;
+      color: #fff;
+      text-decoration: none;
+      font-size: 16px;
     }
 
     .episode-btn.active {
-      font-weight: bold !important;
+      background: #7c3aed;
+      border-color: #7c3aed;
     }
+
+    .muted {
+      color: #aaa;
+    }
+
+    /* =========================
+       MOBILE
+    ========================= */
 
     @media (max-width: 600px) {
 
       .watch-page {
-        padding: 25px 28px 50px !important;
+        padding: 25px 28px 50px;
       }
 
-      .anime-poster {
-        max-width: 450px !important;
-        margin-left: auto !important;
-        margin-right: auto !important;
+      .back {
+        margin-bottom: 35px;
+        font-size: 19px;
       }
 
-      .anime-poster img {
-        width: 100% !important;
-        max-height: 260px !important;
-        object-fit: cover !important;
+      .poster {
+        width: 100%;
+        max-width: 450px;
+        height: 255px;
+        margin-bottom: 30px;
       }
 
       .anime-title {
-        font-size: 32px !important;
+        font-size: 38px;
+        line-height: 1.25;
       }
 
-      .anime-description {
-        font-size: 20px !important;
+      .category {
+        font-size: 16px;
+        margin-bottom: 30px;
+      }
+
+      .description {
+        font-size: 21px;
+        line-height: 1.65;
+      }
+
+      .watch-heading {
+        font-size: 31px;
       }
 
       #animeVideo {
-        width: 100% !important;
-        min-height: 200px !important;
+        width: 100%;
+        min-height: 200px;
+      }
+
+      .episode-navigation {
+        gap: 15px;
+      }
+
+      .nav-btn {
+        padding: 14px 20px;
+        font-size: 16px;
+      }
+
+      .episodes-section h2 {
+        font-size: 30px;
       }
     }
   </style>
@@ -172,11 +243,88 @@
 <main class="watch-page">
 
   <a href="/" class="back">
-    ← Back
+    ← Home
   </a>
 
 
-  <div id="watch"></div>
+  <div id="watch">
+
+    <div class="anime-info">
+
+      <img
+        id="poster"
+        class="poster"
+        src=""
+        alt="Anime poster"
+      >
+
+      <h1
+        id="title"
+        class="anime-title"
+      >
+        Loading...
+      </h1>
+
+      <div
+        id="category"
+        class="category"
+      >
+        Anime
+      </div>
+
+      <p
+        id="description"
+        class="description"
+      >
+        Loading description...
+      </p>
+
+    </div>
+
+
+    <section class="video-section">
+
+      <h2 class="watch-heading">
+        ▶️ Watch Anime
+      </h2>
+
+      <div class="video-wrapper">
+
+        <video
+          id="animeVideo"
+          controls
+          playsinline
+          preload="metadata"
+        >
+          Your browser does not support video.
+        </video>
+
+      </div>
+
+
+      <div class="episode-navigation">
+
+        <a
+          id="previousBtn"
+          class="nav-btn disabled"
+          href="#"
+        >
+          ◀◀ Previous
+        </a>
+
+        <a
+          id="nextBtn"
+          class="nav-btn disabled"
+          href="#"
+        >
+          Next ▶▶
+        </a>
+
+      </div>
+
+    </section>
+
+  </div>
 
 
   <section class="episodes-section">
@@ -187,35 +335,77 @@
 
     <div id="episodes"></div>
 
+    <p
+      id="empty"
+      class="muted"
+      hidden
+    >
+      Episodes available nahi hain.
+    </p>
+
   </section>
 
 </main>
 
 
 <script>
+
 (async () => {
 
+  const params =
+    new URLSearchParams(
+      location.search
+    );
+
   const id =
-    new URLSearchParams(location.search).get("id");
+    params.get("id");
 
-  const watch =
-    document.getElementById("watch");
 
-  const episodes =
+  const title =
+    document.getElementById("title");
+
+  const category =
+    document.getElementById("category");
+
+  const description =
+    document.getElementById("description");
+
+  const poster =
+    document.getElementById("poster");
+
+  const videoPlayer =
+    document.getElementById("animeVideo");
+
+  const episodeList =
     document.getElementById("episodes");
+
+  const empty =
+    document.getElementById("empty");
+
+  const previousBtn =
+    document.getElementById("previousBtn");
+
+  const nextBtn =
+    document.getElementById("nextBtn");
 
   const adminLink =
     document.getElementById("adminLink");
 
 
-  // Admin status
+  /* =========================
+     ADMIN STATUS
+  ========================= */
+
   try {
 
     const adminResponse =
-      await fetch("/api/admin/status", {
-        credentials: "same-origin",
-        cache: "no-store"
-      });
+      await fetch(
+        "/api/admin/status",
+        {
+          credentials: "same-origin",
+          cache: "no-store"
+        }
+      );
 
     if (adminResponse.ok) {
 
@@ -224,324 +414,302 @@
 
       adminLink.hidden =
         !adminData.isAdmin;
+
     }
 
   } catch (error) {
 
-    console.error("ADMIN STATUS ERROR:", error);
+    console.error(
+      "ADMIN STATUS ERROR:",
+      error
+    );
 
     adminLink.hidden = true;
+
   }
 
 
-  // Anime load
+  /* =========================
+     CHECK ID
+  ========================= */
+
+  if (!id) {
+
+    title.textContent =
+      "Anime not found";
+
+    return;
+
+  }
+
+
+  /* =========================
+     LOAD ANIME
+  ========================= */
+
   try {
 
     const response =
-      await fetch("/api/anime", {
-        cache: "no-store"
-      });
+      await fetch(
+        "/api/anime",
+        {
+          cache: "no-store"
+        }
+      );
 
     if (!response.ok) {
-      throw new Error("Anime load failed");
+
+      throw new Error(
+        "Failed to load anime"
+      );
+
     }
 
-    const list =
+
+    const animeList =
       await response.json();
 
+
     const anime =
-      list.find(
+      animeList.find(
         item =>
-          String(item.id) === String(id)
+          String(item.id) ===
+          String(id)
       );
+
 
     if (!anime) {
 
-      watch.innerHTML =
-        "<h1>Anime नहीं मिला</h1>";
+      title.textContent =
+        "Anime not found";
 
       return;
+
     }
 
+
+    /* =========================
+       BASIC DETAILS
+    ========================= */
 
     document.title =
       (anime.title || "Anime") +
       " — AnimeVerse";
 
 
-    // Same title = episodes
-    const sameAnime =
-      list
-        .filter(item =>
-          String(item.title || "")
-            .trim()
-            .toLowerCase() ===
-          String(anime.title || "")
-            .trim()
-            .toLowerCase()
-        )
-        .sort((a, b) =>
-          Number(a.episode || 1) -
-          Number(b.episode || 1)
-        );
+    title.textContent =
+      anime.title ||
+      "Anime";
 
 
-    // Video URL
-    let videoUrl = "";
-
-    if (typeof anime.video === "string") {
-
-      videoUrl = anime.video;
-
-    } else if (
-      anime.video &&
-      anime.video.secure_url
-    ) {
-
-      videoUrl =
-        anime.video.secure_url;
-    }
+    category.textContent =
+      anime.category ||
+      "Anime";
 
 
-    // Poster URL
-    let posterUrl = "";
-
-    if (typeof anime.poster === "string") {
-
-      posterUrl = anime.poster;
-
-    } else if (
-      anime.poster &&
-      anime.poster.secure_url
-    ) {
-
-      posterUrl =
-        anime.poster.secure_url;
-    }
+    description.textContent =
+      anime.description ||
+      "No description available.";
 
 
-    watch.innerHTML = `
+    /* =========================
+       POSTER
+    ========================= */
 
-      <div class="anime-info">
+    if (anime.poster) {
 
-        ${
-          posterUrl
-            ? `
-              <img
-                class="anime-poster"
-                src="${escapeHtml(posterUrl)}"
-                alt="${escapeHtml(anime.title || "Anime poster")}"
-              >
-            `
-            : ""
-        }
+      poster.src =
+        anime.poster;
 
-        <div class="anime-content">
-
-          <h1>
-            ${escapeHtml(anime.title || "Anime")}
-          </h1>
-
-          <p class="muted">
-            ${escapeHtml(anime.category || "Anime")}
-          </p>
-
-          <div class="details">
-
-            <p>
-              ${escapeHtml(
-                anime.description ||
-                "No description available."
-              )}
-            </p>
-
-          </div>
-
-        </div>
-
-      </div>
-
-
-      <h2 class="watch-heading">
-        ▶️ Watch Anime
-      </h2>
-
-      <video
-        id="animeVideo"
-        class="player"
-        controls
-        playsinline
-        preload="metadata"
-      ></video>
-
-      <div class="video-buttons">
-
-        <button
-          id="previousBtn"
-          type="button"
-        >
-          ◀ Previous
-        </button>
-
-        <button
-          id="nextBtn"
-          type="button"
-        >
-          Next ▶
-        </button>
-
-      </div>
-
-    `;
-
-
-    const videoPlayer =
-      document.getElementById("animeVideo");
-
-    if (videoPlayer && videoUrl) {
-
-      videoPlayer.src = videoUrl;
-
-      videoPlayer.load();
-    }
-
-
-    // Previous / Next
-    const currentIndex =
-      sameAnime.findIndex(
-        item =>
-          String(item.id) === String(anime.id)
-      );
-
-
-    const previousBtn =
-      document.getElementById("previousBtn");
-
-    const nextBtn =
-      document.getElementById("nextBtn");
-
-
-    if (currentIndex <= 0) {
-
-      previousBtn.disabled = true;
+      poster.style.display =
+        "block";
 
     } else {
 
-      previousBtn.disabled = false;
+      poster.style.display =
+        "none";
 
-      previousBtn.onclick = () => {
+    }
 
-        const previous =
-          sameAnime[currentIndex - 1];
 
-        location.href =
-          "/watch.html?id=" +
-          encodeURIComponent(previous.id);
-      };
+    /* =========================
+       VIDEO
+    ========================= */
+
+    if (anime.video) {
+
+      videoPlayer.src =
+        anime.video;
+
+      videoPlayer.load();
+
+    } else {
+
+      console.error(
+        "Video URL missing"
+      );
+
+    }
+
+
+    /* =========================
+       FIND EPISODES
+    ========================= */
+
+    let episodeListData =
+      animeList
+        .filter(item => {
+
+          return String(item.title || "")
+            .trim()
+            .toLowerCase() ===
+            String(anime.title || "")
+              .trim()
+              .toLowerCase();
+
+        });
+
+
+    /* Sort episodes */
+
+    episodeListData.sort(
+      (a, b) => {
+
+        const epA =
+          Number(
+            a.episode || a.id || 0
+          );
+
+        const epB =
+          Number(
+            b.episode || b.id || 0
+          );
+
+        return epA - epB;
+
+      }
+    );
+
+
+    /* =========================
+       EPISODE BUTTONS
+    ========================= */
+
+    if (
+      episodeListData.length === 0
+    ) {
+
+      empty.hidden = false;
+
+    } else {
+
+      empty.hidden = true;
+
+
+      episodeList.innerHTML =
+        episodeListData
+          .map((ep, index) => {
+
+            const episodeNumber =
+              ep.episode ||
+              (index + 1);
+
+
+            const active =
+              String(ep.id) ===
+              String(anime.id);
+
+
+            return `
+              <a
+                class="episode-btn ${
+                  active ? "active" : ""
+                }"
+                href="/watch.html?id=${encodeURIComponent(ep.id)}"
+              >
+                ▶ Episode ${episodeNumber}
+              </a>
+            `;
+
+          })
+          .join("");
+
+    }
+
+
+    /* =========================
+       PREVIOUS / NEXT
+    ========================= */
+
+    const currentIndex =
+      episodeListData.findIndex(
+        ep =>
+          String(ep.id) ===
+          String(anime.id)
+      );
+
+
+    if (
+      currentIndex > 0
+    ) {
+
+      const previousEpisode =
+        episodeListData[
+          currentIndex - 1
+        ];
+
+      previousBtn.href =
+        "/watch.html?id=" +
+        encodeURIComponent(
+          previousEpisode.id
+        );
+
+      previousBtn.classList.remove(
+        "disabled"
+      );
+
     }
 
 
     if (
-      currentIndex === -1 ||
-      currentIndex >= sameAnime.length - 1
+      currentIndex >= 0 &&
+      currentIndex <
+        episodeListData.length - 1
     ) {
 
-      nextBtn.disabled = true;
+      const nextEpisode =
+        episodeListData[
+          currentIndex + 1
+        ];
 
-    } else {
+      nextBtn.href =
+        "/watch.html?id=" +
+        encodeURIComponent(
+          nextEpisode.id
+        );
 
-      nextBtn.disabled = false;
-
-      nextBtn.onclick = () => {
-
-        const next =
-          sameAnime[currentIndex + 1];
-
-        location.href =
-          "/watch.html?id=" +
-          encodeURIComponent(next.id);
-      };
-    }
-
-
-    // Episodes
-    episodes.innerHTML = "";
-
-    if (!sameAnime.length) {
-
-      episodes.innerHTML =
-        "<p class='muted'>No episodes available.</p>";
-
-    } else {
-
-      sameAnime.forEach(
-        (ep, index) => {
-
-          const button =
-            document.createElement("a");
-
-          button.className =
-            "episode-btn";
-
-          if (
-            String(ep.id) ===
-            String(anime.id)
-          ) {
-
-            button.classList.add("active");
-          }
-
-          button.href =
-            "/watch.html?id=" +
-            encodeURIComponent(ep.id);
-
-          button.textContent =
-            "▶ Episode " +
-            Number(
-              ep.episode || index + 1
-            );
-
-          episodes.appendChild(button);
-
-        }
+      nextBtn.classList.remove(
+        "disabled"
       );
+
     }
 
 
   } catch (error) {
 
     console.error(
-      "ANIME LOAD ERROR:",
+      "WATCH PAGE ERROR:",
       error
     );
 
-    watch.innerHTML =
-      "<h1>Anime load नहीं हो पाया।</h1>";
-  }
-
-
-  function escapeHtml(s) {
-
-    return String(s || "").replace(
-      /[&<>"']/g,
-      c => ({
-        "&": "&amp;",
-        "<": "&lt;",
-        ">": "&gt;",
-        '"': "&quot;",
-        "'": "&#039;"
-      }[c])
-    );
+    title.textContent =
+      "Anime load nahi ho paya.";
 
   }
 
 })();
+
 </script>
-
-  
-
- 
-                
 
 </body>
 </html>
