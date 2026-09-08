@@ -364,9 +364,150 @@ app.post(
     try {
 
       const title =
-        String(
-          req.body.title || ""
-        ).trim();
+        String(req.body.title || "").trim();
+
+      const video =
+        req.body.video;
+
+      if (!video || !video.secure_url || !video.public_id) {
+
+        return res.status(400).json({
+          error: "Video upload is required"
+        });
+      }
+
+      let episode =
+        Number(req.body.episode || 1);
+
+      if (
+        !Number.isInteger(episode) ||
+        episode < 1
+      ) {
+        episode = 1;
+      }
+
+      const poster =
+        req.body.poster || null;
+
+      const anime =
+        await loadAnime();
+
+
+      // =================================
+      // ADD EPISODE TO EXISTING ANIME
+      // =================================
+
+      const animeId =
+        req.body.animeId;
+
+      if (animeId) {
+
+        const existingAnime =
+          anime.find(
+            item =>
+              String(item.id) ===
+              String(animeId)
+          );
+
+        if (!existingAnime) {
+
+          return res.status(404).json({
+            error: "Anime not found"
+          });
+        }
+
+
+        if (!Array.isArray(existingAnime.episodes)) {
+
+          existingAnime.episodes = [];
+
+          if (
+            existingAnime.video &&
+            existingAnime.episode
+          ) {
+
+            existingAnime.episodes.push({
+              episode:
+                Number(existingAnime.episode),
+
+              video:
+                existingAnime.video,
+
+              video_public_id:
+                existingAnime.video_public_id || null
+            });
+          }
+        }
+
+
+        const alreadyExists =
+          existingAnime.episodes.some(
+            item =>
+              Number(item.episode) === episode
+          );
+
+        if (alreadyExists) {
+
+          return res.status(400).json({
+            error:
+              `Episode ${episode} already exists`
+          });
+        }
+
+
+        existingAnime.episodes.push({
+
+          episode,
+
+          video:
+            video.secure_url,
+
+          video_public_id:
+            video.public_id,
+
+          created_at:
+            new Date().toISOString()
+
+        });
+
+
+        existingAnime.episodes.sort(
+          (a, b) =>
+            Number(a.episode) -
+            Number(b.episode)
+        );
+
+
+        await saveAnime(anime);
+
+
+        console.log(
+          "Episode added:",
+          existingAnime.title,
+          "Episode:",
+          episode
+        );
+
+
+        return res.json({
+
+          ok: true,
+
+          id:
+            existingAnime.id,
+
+          episode,
+
+          message:
+            `Episode ${episode} added successfully`
+
+        });
+      }
+
+
+      // =================================
+      // CREATE NEW ANIME
+      // =================================
 
       if (!title) {
 
@@ -376,47 +517,10 @@ app.post(
       }
 
 
-      const video =
-        req.body.video;
-
-      if (
-        !video ||
-        !video.secure_url ||
-        !video.public_id
-      ) {
-
-        return res.status(400).json({
-          error:
-            "Video upload is required"
-        });
-      }
-
-
-      let episode =
-        Number(
-          req.body.episode || 1
-        );
-
-      if (
-        !Number.isInteger(episode) ||
-        episode < 1
-      ) {
-
-        episode = 1;
-      }
-
-
-      const poster =
-        req.body.poster || null;
-
-
-      const anime =
-        await loadAnime();
-
-
       const newAnime = {
 
-        id: Date.now(),
+        id:
+          Date.now(),
 
         title,
 
@@ -439,6 +543,25 @@ app.post(
 
         episode,
 
+        episodes: [
+
+          {
+
+            episode,
+
+            video:
+              video.secure_url,
+
+            video_public_id:
+              video.public_id,
+
+            created_at:
+              new Date().toISOString()
+
+          }
+
+        ],
+
         created_at:
           new Date().toISOString(),
 
@@ -447,6 +570,7 @@ app.post(
 
         poster_public_id:
           poster?.public_id || null
+
       };
 
 
@@ -464,10 +588,19 @@ app.post(
 
 
       res.json({
+
         ok: true,
-        id: newAnime.id,
-        episode
+
+        id:
+          newAnime.id,
+
+        episode,
+
+        message:
+          "Anime added successfully"
+
       });
+
 
     } catch (error) {
 
@@ -477,11 +610,15 @@ app.post(
       );
 
       res.status(500).json({
+
         error:
           error.message ||
           "Upload failed"
+
       });
+
     }
+
   }
 );
 
