@@ -193,42 +193,29 @@
 
 
 <script>
-
 (async () => {
 
   const id =
-    new URLSearchParams(
-      location.search
-    ).get("id");
-
+    new URLSearchParams(location.search).get("id");
 
   const watch =
     document.getElementById("watch");
 
-
   const episodes =
     document.getElementById("episodes");
-
 
   const adminLink =
     document.getElementById("adminLink");
 
 
-  /* ===============================
-     ADMIN STATUS
-     =============================== */
-
+  // Admin status
   try {
 
     const adminResponse =
-      await fetch(
-        "/api/admin/status",
-        {
-          credentials: "same-origin",
-          cache: "no-store"
-        }
-      );
-
+      await fetch("/api/admin/status", {
+        credentials: "same-origin",
+        cache: "no-store"
+      });
 
     if (adminResponse.ok) {
 
@@ -237,66 +224,36 @@
 
       adminLink.hidden =
         !adminData.isAdmin;
-
     }
 
   } catch (error) {
 
-    console.error(
-      "ADMIN STATUS ERROR:",
-      error
-    );
+    console.error("ADMIN STATUS ERROR:", error);
 
     adminLink.hidden = true;
-
   }
 
 
-  /* ===============================
-     LOAD ANIME
-     =============================== */
-
+  // Anime load
   try {
 
-    if (!id) {
-
-      watch.innerHTML =
-        "<h1>Anime नहीं मिला</h1>";
-
-      return;
-
-    }
-
-
     const response =
-      await fetch(
-        "/api/anime",
-        {
-          cache: "no-store"
-        }
-      );
-
+      await fetch("/api/anime", {
+        cache: "no-store"
+      });
 
     if (!response.ok) {
-
-      throw new Error(
-        "Anime load failed"
-      );
-
+      throw new Error("Anime load failed");
     }
-
 
     const list =
       await response.json();
 
-
     const anime =
       list.find(
-        x =>
-          String(x.id) ===
-          String(id)
+        item =>
+          String(item.id) === String(id)
       );
-
 
     if (!anime) {
 
@@ -304,7 +261,6 @@
         "<h1>Anime नहीं मिला</h1>";
 
       return;
-
     }
 
 
@@ -313,222 +269,260 @@
       " — AnimeVerse";
 
 
-    /* ===============================
-       SAME ANIME EPISODES
-       =============================== */
-
+    // Same title = episodes
     const sameAnime =
       list
-        .filter(x =>
-          String(x.title)
+        .filter(item =>
+          String(item.title || "")
             .trim()
             .toLowerCase() ===
-          String(anime.title)
+          String(anime.title || "")
             .trim()
             .toLowerCase()
         )
-        .sort((a, b) => {
-
-          const epA =
-            Number(
-              a.episode || a.id
-            );
-
-          const epB =
-            Number(
-              b.episode || b.id
-            );
-
-          return epA - epB;
-
-        });
+        .sort((a, b) =>
+          Number(a.episode || 1) -
+          Number(b.episode || 1)
+        );
 
 
-    /* ===============================
-       POSTER
-       =============================== */
+    // Video URL
+    let videoUrl = "";
 
-    const poster =
-      anime.poster ||
-      "";
+    if (typeof anime.video === "string") {
 
+      videoUrl = anime.video;
 
-    const posterHTML =
-      poster
-        ? `
-          <div class="anime-poster">
+    } else if (
+      anime.video &&
+      anime.video.secure_url
+    ) {
 
-            <img
-              src="${escapeHtml(poster)}"
-              alt="${escapeHtml(
-                anime.title || "Anime poster"
-              )}"
-              loading="eager"
-            >
-
-          </div>
-        `
-        : "";
+      videoUrl =
+        anime.video.secure_url;
+    }
 
 
-    /* ===============================
-       VIDEO
-       =============================== */
+    // Poster URL
+    let posterUrl = "";
 
-    const video =
-      anime.video || "";
+    if (typeof anime.poster === "string") {
 
+      posterUrl = anime.poster;
 
-    const videoHTML =
-      video
-        ? `
-          <video
-            id="animeVideo"
-            controls
-            playsinline
-            preload="metadata"
-          >
-            <source
-              src="${escapeHtml(video)}"
-              type="video/mp4"
-            >
+    } else if (
+      anime.poster &&
+      anime.poster.secure_url
+    ) {
 
-            Your browser does not support
-            HTML5 video.
-          </video>
-        `
-        : `
-          <p class="muted">
-            Video available नहीं है।
-          </p>
-        `;
+      posterUrl =
+        anime.poster.secure_url;
+    }
 
-
-    /* ===============================
-       PAGE CONTENT
-       =============================== */
 
     watch.innerHTML = `
 
-      ${posterHTML}
+      <div class="anime-info">
 
+        ${
+          posterUrl
+            ? `
+              <img
+                class="anime-poster"
+                src="${escapeHtml(posterUrl)}"
+                alt="${escapeHtml(anime.title || "Anime poster")}"
+              >
+            `
+            : ""
+        }
 
-      <h1 class="anime-title">
-        ${escapeHtml(
-          anime.title || "Anime"
-        )}
-      </h1>
+        <div class="anime-content">
 
+          <h1>
+            ${escapeHtml(anime.title || "Anime")}
+          </h1>
 
-      <div class="anime-category">
-        ${escapeHtml(
-          anime.category || "Anime"
-        )}
+          <p class="muted">
+            ${escapeHtml(anime.category || "Anime")}
+          </p>
+
+          <div class="details">
+
+            <p>
+              ${escapeHtml(
+                anime.description ||
+                "No description available."
+              )}
+            </p>
+
+          </div>
+
+        </div>
+
       </div>
-
-
-      <p class="anime-description">
-        ${escapeHtml(
-          anime.description ||
-          "No description available."
-        )}
-      </p>
 
 
       <h2 class="watch-heading">
         ▶️ Watch Anime
       </h2>
 
+      <video
+        id="animeVideo"
+        class="player"
+        controls
+        playsinline
+        preload="metadata"
+      ></video>
 
-      ${videoHTML}
+      <div class="video-buttons">
+
+        <button
+          id="previousBtn"
+          type="button"
+        >
+          ◀ Previous
+        </button>
+
+        <button
+          id="nextBtn"
+          type="button"
+        >
+          Next ▶
+        </button>
+
+      </div>
 
     `;
 
 
-    /* ===============================
-       EPISODES
-       =============================== */
+    const videoPlayer =
+      document.getElementById("animeVideo");
 
-    if (sameAnime.length) {
+    if (videoPlayer && videoUrl) {
 
-      episodes.innerHTML =
-        sameAnime
-          .map(
-            (ep, index) => {
+      videoPlayer.src = videoUrl;
 
-              const episodeNumber =
-                Number(
-                  ep.episode ||
-                  (index + 1)
-                );
+      videoPlayer.load();
+    }
 
 
-              const active =
-                String(ep.id) ===
-                String(anime.id);
+    // Previous / Next
+    const currentIndex =
+      sameAnime.findIndex(
+        item =>
+          String(item.id) === String(anime.id)
+      );
 
 
-              return `
+    const previousBtn =
+      document.getElementById("previousBtn");
 
-                <a
-                  class="episode-btn ${
-                    active
-                      ? "active"
-                      : ""
-                  }"
-                  href="/watch.html?id=${encodeURIComponent(
-                    ep.id
-                  )}"
-                >
-                  ▶ Episode ${episodeNumber}
-                </a>
+    const nextBtn =
+      document.getElementById("nextBtn");
 
-              `;
 
-            }
-          )
-          .join("");
+    if (currentIndex <= 0) {
 
+      previousBtn.disabled = true;
 
     } else {
 
-      episodes.innerHTML =
-        `
-          <p class="muted">
-            Episodes available नहीं हैं.
-          </p>
-        `;
+      previousBtn.disabled = false;
 
+      previousBtn.onclick = () => {
+
+        const previous =
+          sameAnime[currentIndex - 1];
+
+        location.href =
+          "/watch.html?id=" +
+          encodeURIComponent(previous.id);
+      };
+    }
+
+
+    if (
+      currentIndex === -1 ||
+      currentIndex >= sameAnime.length - 1
+    ) {
+
+      nextBtn.disabled = true;
+
+    } else {
+
+      nextBtn.disabled = false;
+
+      nextBtn.onclick = () => {
+
+        const next =
+          sameAnime[currentIndex + 1];
+
+        location.href =
+          "/watch.html?id=" +
+          encodeURIComponent(next.id);
+      };
+    }
+
+
+    // Episodes
+    episodes.innerHTML = "";
+
+    if (!sameAnime.length) {
+
+      episodes.innerHTML =
+        "<p class='muted'>No episodes available.</p>";
+
+    } else {
+
+      sameAnime.forEach(
+        (ep, index) => {
+
+          const button =
+            document.createElement("a");
+
+          button.className =
+            "episode-btn";
+
+          if (
+            String(ep.id) ===
+            String(anime.id)
+          ) {
+
+            button.classList.add("active");
+          }
+
+          button.href =
+            "/watch.html?id=" +
+            encodeURIComponent(ep.id);
+
+          button.textContent =
+            "▶ Episode " +
+            Number(
+              ep.episode || index + 1
+            );
+
+          episodes.appendChild(button);
+
+        }
+      );
     }
 
 
   } catch (error) {
 
     console.error(
-      "WATCH PAGE ERROR:",
+      "ANIME LOAD ERROR:",
       error
     );
 
-
     watch.innerHTML =
-      `
-        <h1>
-          Anime load नहीं हो पाया।
-        </h1>
-      `;
-
+      "<h1>Anime load नहीं हो पाया।</h1>";
   }
 
 
-  /* ===============================
-     ESCAPE HTML
-     =============================== */
-
   function escapeHtml(s) {
 
-    return String(
-      s || ""
-    ).replace(
+    return String(s || "").replace(
       /[&<>"']/g,
       c => ({
         "&": "&amp;",
@@ -542,9 +536,12 @@
   }
 
 })();
-
 </script>
 
+  
+
+ 
+                
 
 </body>
 </html>
