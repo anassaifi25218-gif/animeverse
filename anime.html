@@ -157,7 +157,21 @@
 
   </section>
 
+<section class="video-section">
 
+  <h2>▶️ Watch Episode</h2>
+
+  <video
+    id="videoPlayer"
+    controls
+    playsinline
+    preload="metadata"
+    style="width:100%; max-width:900px; border-radius:14px;"
+  >
+    Your browser does not support video playback.
+  </video>
+
+</section>
   <section class="episodes">
 
     <h2>
@@ -247,7 +261,12 @@ async function loadAnime() {
       .textContent =
         anime.description ||
         "No description available.";
+const videoPlayer =
+  document.getElementById("videoPlayer");
 
+if (videoPlayer && anime.video) {
+  videoPlayer.src = anime.video;
+        }
 
     const poster =
       document.getElementById("poster");
