@@ -225,10 +225,12 @@ app.post(
 // HTML FILES
 // ===============================
 
-app.get("/", (_req, res) => {
-  res.sendFile(
-    path.join(__dirname, "index.html")
-  );
+app.get("/logo.png", (_req, res) => {
+  res.sendFile(path.join(__dirname, "logo.png"), {
+    headers: {
+      "Content-Type": "image/png"
+    }
+  });
 });
 
 app.get("/index.html", (_req, res) => {
