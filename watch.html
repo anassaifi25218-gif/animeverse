@@ -273,311 +273,199 @@
 </main>
 
 
+
 <script>
+document.addEventListener("DOMContentLoaded", async () => {
 
-document.addEventListener(
-  "DOMContentLoaded",
-  async function () {
+  const id = new URLSearchParams(location.search).get("id");
 
-    const params =
-      new URLSearchParams(
-        window.location.search
-      );
+  const title = document.getElementById("title");
+  const category = document.getElementById("category");
+  const description = document.getElementById("description");
+  const poster = document.getElementById("poster");
+  const video = document.getElementById("animeVideo");
+  const episodeBox = document.getElementById("episodes");
+  const empty = document.getElementById("empty");
+  const previous = document.getElementById("previousBtn");
+  const next = document.getElementById("nextBtn");
 
-    const id =
-      params.get("id");
+  if (!id) {
+    title.textContent = "Anime not found";
+    return;
+  }
 
+  try {
 
-    const title =
-      document.getElementById("title");
+    const response = await fetch("/api/anime", {
+      cache: "no-store"
+    });
 
-    const category =
-      document.getElementById("category");
+    if (!response.ok) {
+      throw new Error("API Error: " + response.status);
+    }
 
-    const description =
-      document.getElementById("description");
+    const animeList = await response.json();
 
-    const poster =
-      document.getElementById("poster");
+    console.log("ANIME DATA:", animeList);
 
-    const video =
-      document.getElementById("animeVideo");
+    if (!Array.isArray(animeList)) {
+      throw new Error("Anime data is not an array");
+    }
 
-    const episodeBox =
-      document.getElementById("episodes");
+    const anime = animeList.find(
+      item => String(item.id) === String(id)
+    );
 
-    const empty =
-      document.getElementById("empty");
-
-    const previous =
-      document.getElementById("previousBtn");
-
-    const next =
-      document.getElementById("nextBtn");
-
-
-    if (!id) {
-
-      title.textContent =
-        "Anime not found";
-
+    if (!anime) {
+      title.textContent = "Anime not found";
+      description.textContent = "ID: " + id;
       return;
+    }
+
+    /* TITLE */
+    title.textContent = anime.title || "Anime";
+
+    document.title =
+      (anime.title || "Anime") + " — AnimeVerse";
+
+    /* CATEGORY */
+    category.textContent =
+      anime.category || "Anime";
+
+    /* DESCRIPTION */
+    description.textContent =
+      anime.description ||
+      "No description available.";
+
+    /* POSTER */
+    if (anime.poster) {
+      poster.src = anime.poster;
+      poster.alt = anime.title || "Anime poster";
+    } else {
+      poster.removeAttribute("src");
+    }
+
+    /* VIDEO */
+    if (anime.video) {
+      video.src = anime.video;
+      video.load();
+    }
+
+    /*
+      EPISODES
+      Existing anime ke nested episodes ko bhi support karega
+    */
+
+    let episodeData = [];
+
+    if (Array.isArray(anime.episodes) &&
+        anime.episodes.length > 0) {
+
+      episodeData = anime.episodes.map(ep => ({
+        id: anime.id,
+        title: anime.title,
+        episode: ep.episode,
+        video: ep.video
+      }));
+
+    } else {
+
+      episodeData = animeList.filter(item =>
+        String(item.title || "")
+          .trim()
+          .toLowerCase() ===
+        String(anime.title || "")
+          .trim()
+          .toLowerCase()
+      );
 
     }
 
+    episodeData.sort((a, b) =>
+      Number(a.episode || 0) -
+      Number(b.episode || 0)
+    );
 
-    try {
+    /* EPISODES */
+    if (episodeData.length > 0) {
 
-      const response =
-        await fetch(
-          "/api/anime?_" +
-          Date.now()
-        );
+      empty.hidden = true;
 
+      episodeBox.innerHTML =
+        episodeData.map((ep, index) => {
 
-      if (!response.ok) {
+          const number =
+            ep.episode || index + 1;
 
-        throw new Error(
-          "API error: " +
-          response.status
-        );
+          const active =
+            String(ep.id) === String(anime.id) &&
+            String(ep.episode || "") ===
+            String(anime.episode || "");
 
-      }
+          return `
+            <a
+              class="episode-btn ${active ? "active" : ""}"
+              href="/watch.html?id=${encodeURIComponent(ep.id)}"
+            >
+              ▶ Episode ${number}
+            </a>
+          `;
 
+        }).join("");
 
-      const animeList =
-        await response.json();
+    } else {
 
-
-      if (!Array.isArray(animeList)) {
-
-        throw new Error(
-          "Invalid anime data"
-        );
-
-      }
-
-
-      const anime =
-        animeList.find(
-          function (item) {
-
-            return String(item.id) ===
-              String(id);
-
-          }
-        );
-
-
-      if (!anime) {
-
-        title.textContent =
-          "Anime not found";
-
-        return;
-
-      }
-
-
-      /* TITLE */
-
-      title.textContent =
-        anime.title ||
-        "Anime";
-
-
-      document.title =
-        (anime.title || "Anime") +
-        " — AnimeVerse";
-
-
-      /* CATEGORY */
-
-      category.textContent =
-        anime.category ||
-        "Anime";
-
-
-      /* DESCRIPTION */
-
-      description.textContent =
-        anime.description ||
-        "No description available.";
-
-
-      /* POSTER */
-
-      if (anime.poster) {
-
-        poster.src =
-          anime.poster;
-
-        poster.alt =
-          anime.title ||
-          "Anime poster";
-
-      }
-
-
-      /* VIDEO */
-
-      if (anime.video) {
-
-        video.src =
-          anime.video;
-
-        video.load();
-
-      }
-
-
-      /* EPISODES */
-
-      let episodeData =
-        animeList.filter(
-          function (item) {
-
-            return String(
-              item.title || ""
-            )
-              .trim()
-              .toLowerCase() ===
-            String(
-              anime.title || ""
-            )
-              .trim()
-              .toLowerCase();
-
-          }
-        );
-
-
-      episodeData.sort(
-        function (a, b) {
-
-          return Number(
-            a.episode || a.id || 0
-          ) -
-          Number(
-            b.episode || b.id || 0
-          );
-
-        }
-      );
-
-
-      if (episodeData.length) {
-
-        empty.hidden = true;
-
-
-        episodeBox.innerHTML =
-          episodeData
-            .map(
-              function (ep, index) {
-
-                const number =
-                  ep.episode ||
-                  index + 1;
-
-
-                const active =
-                  String(ep.id) ===
-                  String(anime.id);
-
-
-                return `
-                  <a
-                    class="episode-btn ${
-                      active
-                        ? "active"
-                        : ""
-                    }"
-                    href="/watch.html?id=${
-                      encodeURIComponent(ep.id)
-                    }"
-                  >
-                    ▶ Episode ${number}
-                  </a>
-                `;
-
-              }
-            )
-            .join("");
-
-      } else {
-
-        empty.hidden = false;
-
-      }
-
-
-      /* PREVIOUS */
-
-      const current =
-        episodeData.findIndex(
-          function (ep) {
-
-            return String(ep.id) ===
-              String(anime.id);
-
-          }
-        );
-
-
-      if (current > 0) {
-
-        previous.href =
-          "/watch.html?id=" +
-          encodeURIComponent(
-            episodeData[current - 1].id
-          );
-
-        previous.classList.remove(
-          "disabled"
-        );
-
-      }
-
-
-      /* NEXT */
-
-      if (
-        current >= 0 &&
-        current <
-          episodeData.length - 1
-      ) {
-
-        next.href =
-          "/watch.html?id=" +
-          encodeURIComponent(
-            episodeData[current + 1].id
-          );
-
-        next.classList.remove(
-          "disabled"
-        );
-
-      }
-
-    } catch (error) {
-
-      console.error(
-        "WATCH ERROR:",
-        error
-      );
-
-      title.textContent =
-        "Anime load nahi ho paya.";
-
-      description.textContent =
-        "Data load karne me problem aa rahi hai.";
+      empty.hidden = false;
+      episodeBox.innerHTML = "";
 
     }
+
+    /* PREVIOUS */
+    const current = episodeData.findIndex(ep =>
+      String(ep.id) === String(anime.id) &&
+      String(ep.episode || "") ===
+      String(anime.episode || "")
+    );
+
+    if (current > 0) {
+
+      previous.href =
+        "/watch.html?id=" +
+        encodeURIComponent(
+          episodeData[current - 1].id
+        );
+
+      previous.classList.remove("disabled");
+    }
+
+    /* NEXT */
+    if (
+      current >= 0 &&
+      current < episodeData.length - 1
+    ) {
+
+      next.href =
+        "/watch.html?id=" +
+        encodeURIComponent(
+          episodeData[current + 1].id
+        );
+
+      next.classList.remove("disabled");
+    }
+
+  } catch (error) {
+
+    console.error("WATCH ERROR:", error);
+
+    title.textContent =
+      "Anime load nahi ho paya.";
+
+    description.textContent =
+      "Data load karne me problem aa rahi hai.";
 
   }
-);
 
+});
 </script>
 
 </body>
