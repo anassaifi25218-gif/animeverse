@@ -283,24 +283,85 @@ if (videoPlayer && anime.video) {
         "episodeList"
       );
 
-    const episode =
-      Number(anime.episode || 1);
+    const episodes =
+  Array.isArray(anime.episodes) &&
+  anime.episodes.length
+    ? anime.episodes
+    : [
+        {
+          episode:
+            Number(anime.episode || 1),
 
+          video:
+            anime.video
+        }
+      ];
+
+
+episodes.sort(
+  (a, b) =>
+    Number(a.episode || 0) -
+    Number(b.episode || 0)
+);
+
+
+episodes.forEach(
+  (ep, index) => {
 
     const button =
-      document.createElement("a");
+      document.createElement("button");
+
+    button.type = "button";
 
     button.className =
       "episode-btn";
 
-    button.href =
-      "/watch.html?id=" +
-      encodeURIComponent(anime.id);
-
     button.textContent =
-      "Episode " + episode;
+      "Episode " +
+      Number(
+        ep.episode || index + 1
+      );
 
-    episodeList.appendChild(button);
+
+    button.addEventListener(
+      "click",
+      () => {
+
+        const videoPlayer =
+          document.getElementById(
+            "videoPlayer"
+          );
+
+        if (
+          videoPlayer &&
+          ep.video
+        ) {
+
+          videoPlayer.src =
+            ep.video;
+
+          videoPlayer.load();
+
+          videoPlayer.play()
+            .catch(() => {});
+
+          videoPlayer.scrollIntoView({
+            behavior: "smooth",
+            block: "center"
+          });
+
+        }
+
+      }
+    );
+
+
+    episodeList.appendChild(
+      button
+    );
+
+  }
+);
 
 
   } catch (error) {
