@@ -268,14 +268,8 @@
       Episodes available nahi hain.
     </p>
 
-  </section>
-
-</main>
-
-
-
-<script>
-document.addEventListener("DOMContentLoaded", async () => {
+  <script>
+(async function () {
 
   const id = new URLSearchParams(location.search).get("id");
 
@@ -286,8 +280,6 @@ document.addEventListener("DOMContentLoaded", async () => {
   const video = document.getElementById("animeVideo");
   const episodeBox = document.getElementById("episodes");
   const empty = document.getElementById("empty");
-  const previous = document.getElementById("previousBtn");
-  const next = document.getElementById("nextBtn");
 
   if (!id) {
     title.textContent = "Anime not found";
@@ -296,29 +288,26 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   try {
 
-    const response = await fetch("/api/anime", {
-      cache: "no-store"
-    });
+    const response = await fetch(
+      "/api/anime?t=" + Date.now(),
+      {
+        cache: "no-store"
+      }
+    );
 
     if (!response.ok) {
-      throw new Error("API Error: " + response.status);
+      throw new Error("API error " + response.status);
     }
 
-    const animeList = await response.json();
+    const list = await response.json();
 
-    console.log("ANIME DATA:", animeList);
-
-    if (!Array.isArray(animeList)) {
-      throw new Error("Anime data is not an array");
-    }
-
-    const anime = animeList.find(
+    const anime = list.find(
       item => String(item.id) === String(id)
     );
 
     if (!anime) {
       title.textContent = "Anime not found";
-      description.textContent = "ID: " + id;
+      description.textContent = "Anime ID: " + id;
       return;
     }
 
@@ -341,8 +330,6 @@ document.addEventListener("DOMContentLoaded", async () => {
     if (anime.poster) {
       poster.src = anime.poster;
       poster.alt = anime.title || "Anime poster";
-    } else {
-      poster.removeAttribute("src");
     }
 
     /* VIDEO */
@@ -351,106 +338,63 @@ document.addEventListener("DOMContentLoaded", async () => {
       video.load();
     }
 
-    /*
-      EPISODES
-      Existing anime ke nested episodes ko bhi support karega
-    */
+    /* EPISODES */
+    let episodes = [];
 
-    let episodeData = [];
+    if (
+      Array.isArray(anime.episodes) &&
+      anime.episodes.length
+    ) {
 
-    if (Array.isArray(anime.episodes) &&
-        anime.episodes.length > 0) {
-
-      episodeData = anime.episodes.map(ep => ({
+      episodes = anime.episodes.map(ep => ({
         id: anime.id,
-        title: anime.title,
         episode: ep.episode,
         video: ep.video
       }));
 
     } else {
 
-      episodeData = animeList.filter(item =>
-        String(item.title || "")
-          .trim()
-          .toLowerCase() ===
-        String(anime.title || "")
-          .trim()
-          .toLowerCase()
+      episodes = list.filter(item =>
+        String(item.title || "").trim().toLowerCase() ===
+        String(anime.title || "").trim().toLowerCase()
       );
 
     }
 
-    episodeData.sort((a, b) =>
-      Number(a.episode || 0) -
-      Number(b.episode || 0)
+    episodes.sort(
+      (a, b) =>
+        Number(a.episode || 0) -
+        Number(b.episode || 0)
     );
 
-    /* EPISODES */
-    if (episodeData.length > 0) {
+    episodeBox.innerHTML = "";
+
+    if (episodes.length) {
 
       empty.hidden = true;
 
-      episodeBox.innerHTML =
-        episodeData.map((ep, index) => {
+      episodes.forEach((ep, index) => {
 
-          const number =
-            ep.episode || index + 1;
+        const btn = document.createElement("a");
 
-          const active =
-            String(ep.id) === String(anime.id) &&
-            String(ep.episode || "") ===
-            String(anime.episode || "");
+        btn.className = "episode-btn";
 
-          return `
-            <a
-              class="episode-btn ${active ? "active" : ""}"
-              href="/watch.html?id=${encodeURIComponent(ep.id)}"
-            >
-              ▶ Episode ${number}
-            </a>
-          `;
+        btn.href =
+          "/watch.html?id=" +
+          encodeURIComponent(ep.id);
 
-        }).join("");
+        btn.textContent =
+          "▶ Episode " +
+          (ep.episode || index + 1);
+
+        episodeBox.appendChild(btn);
+
+      });
 
     } else {
 
       empty.hidden = false;
-      episodeBox.innerHTML = "";
 
-    }
-
-    /* PREVIOUS */
-    const current = episodeData.findIndex(ep =>
-      String(ep.id) === String(anime.id) &&
-      String(ep.episode || "") ===
-      String(anime.episode || "")
-    );
-
-    if (current > 0) {
-
-      previous.href =
-        "/watch.html?id=" +
-        encodeURIComponent(
-          episodeData[current - 1].id
-        );
-
-      previous.classList.remove("disabled");
-    }
-
-    /* NEXT */
-    if (
-      current >= 0 &&
-      current < episodeData.length - 1
-    ) {
-
-      next.href =
-        "/watch.html?id=" +
-        encodeURIComponent(
-          episodeData[current + 1].id
-        );
-
-      next.classList.remove("disabled");
     }
 
   } catch (error) {
@@ -461,12 +405,14 @@ document.addEventListener("DOMContentLoaded", async () => {
       "Anime load nahi ho paya.";
 
     description.textContent =
-      "Data load karne me problem aa rahi hai.";
+      "API se data load nahi ho raha.";
 
   }
 
-});
-</script>
+})();
+  </script>
+
+
 
 </body>
 </html>
