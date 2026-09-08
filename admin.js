@@ -568,7 +568,7 @@ uploadForm.addEventListener(
         formData.get("episode") ||
         1,
   animeId:
-    selectedAnimeId || null,
+    selectedAnimeId,
       video: {
 
         secure_url:
