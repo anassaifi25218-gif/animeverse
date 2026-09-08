@@ -1,209 +1,303 @@
 <!doctype html>
 <html lang="hi">
+
 <head>
+
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1">
 
-  <meta name="description" content="AnimeVerse anime details and episodes">
+  <meta
+    name="viewport"
+    content="width=device-width,initial-scale=1"
+  >
 
-  <title>Anime Details - AnimeVerse</title>
+  <meta
+    name="description"
+    content="AnimeVerse - Anime details aur episodes."
+  >
 
-  <link rel="stylesheet" href="/style.css">
+  <title>AnimeVerse</title>
+
+  <link
+    rel="stylesheet"
+    href="/style.css"
+  >
 
   <style>
+
     .anime-details {
-      max-width: 1000px;
-      margin: 40px auto;
-      padding: 20px;
+      width: 100%;
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 30px 18px 60px;
     }
 
-    .anime-info {
-      display: flex;
-      gap: 30px;
-      align-items: flex-start;
+    .details-box {
+      display: grid;
+      grid-template-columns: 280px 1fr;
+      gap: 28px;
+      margin-bottom: 35px;
     }
 
-    .anime-poster {
-      width: 260px;
-      max-height: 370px;
+    .details-poster {
+      width: 100%;
+    }
+
+    .details-poster img {
+      display: block;
+      width: 100%;
+      aspect-ratio: 2 / 3;
       object-fit: cover;
-      border-radius: 14px;
+      border-radius: 16px;
     }
 
-    .anime-content {
-      flex: 1;
-    }
-
-    .anime-content h1 {
-      margin-top: 0;
+    .details-info h1 {
+      margin: 0 0 10px;
       font-size: 32px;
     }
 
-    .anime-category {
+    .details-category {
       display: inline-block;
-      margin: 8px 0 15px;
-      padding: 6px 12px;
-      border-radius: 20px;
-      background: rgba(255,255,255,.1);
+      margin-bottom: 18px;
+      opacity: .8;
     }
 
-    .anime-description {
+    .details-description {
       line-height: 1.7;
+      opacity: .85;
     }
 
-    .episodes {
-      margin-top: 40px;
+    .video-section {
+      margin-top: 25px;
+      margin-bottom: 35px;
+    }
+
+    .video-section h2,
+    .episodes h2 {
+      margin-bottom: 15px;
+    }
+
+    #videoPlayer {
+      display: block;
+      width: 100%;
+      max-width: 900px;
+      background: #000;
+      border-radius: 14px;
+    }
+
+    .episode-navigation {
+      display: flex;
+      gap: 12px;
+      margin-top: 15px;
+      flex-wrap: wrap;
+    }
+
+    .episode-navigation button,
+    .episode-btn {
+      border: 0;
+      border-radius: 10px;
+      padding: 11px 16px;
+      cursor: pointer;
+      font-size: 15px;
+    }
+
+    .episode-navigation button:disabled {
+      opacity: .4;
+      cursor: not-allowed;
     }
 
     .episode-list {
-      display: grid;
-      grid-template-columns: repeat(auto-fill,minmax(140px,1fr));
-      gap: 12px;
-      margin-top: 20px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
     }
 
-    .episode-btn {
-      display: block;
-      padding: 14px;
-      border-radius: 10px;
-      text-align: center;
-      text-decoration: none;
-      background: rgba(255,255,255,.08);
-      color: inherit;
+    .episode-btn.active {
+      transform: translateY(-1px);
+      font-weight: 700;
     }
 
-    .episode-btn:hover {
-      transform: translateY(-2px);
+    .empty {
+      opacity: .7;
     }
 
-    .back-btn {
-      display: inline-block;
-      margin-bottom: 25px;
-      text-decoration: none;
-    }
+    @media (max-width: 700px) {
 
-    @media (max-width: 600px) {
-      .anime-info {
-        flex-direction: column;
+      .details-box {
+        grid-template-columns: 1fr;
+        gap: 20px;
       }
 
-      .anime-poster {
-        width: 100%;
-        max-width: 260px;
+      .details-poster {
+        max-width: 220px;
+        margin: 0 auto;
       }
 
-      .anime-content h1 {
-        font-size: 25px;
+      .details-info h1 {
+        font-size: 26px;
       }
+
+      .anime-details {
+        padding-top: 20px;
+      }
+
     }
+
   </style>
+
 </head>
 
+
 <body>
-
-<header class="nav">
-
-  <button
-    class="menu-btn"
-    onclick="history.back()"
-    aria-label="Back"
-  >
-    ←
-  </button>
-
-  <a class="logo" href="/" aria-label="AnimeVerse Home">
-    <img
-      src="/logo.png"
-      alt="AnimeVerse"
-      class="logo-img"
-    >
-  </a>
-
-</header>
 
 
 <main class="anime-details">
 
-  <a href="/" class="back-btn">
-    ← Home
-  </a>
 
-  <section class="anime-info">
+  <!-- =========================
+       ANIME INFORMATION
+  ========================= -->
 
-    <img
-      id="poster"
-      class="anime-poster"
-      src="/logo.png"
-      alt="Anime Poster"
-    >
+  <section class="details-box">
 
-    <div class="anime-content">
+
+    <div class="details-poster">
+
+      <img
+        id="poster"
+        src="https://via.placeholder.com/300x450?text=Anime"
+        alt="Anime poster"
+      >
+
+    </div>
+
+
+    <div class="details-info">
 
       <h1 id="title">
         Loading...
       </h1>
 
+
       <div
         id="category"
-        class="anime-category"
-      ></div>
+        class="details-category"
+      >
+        Anime
+      </div>
+
 
       <p
         id="description"
-        class="anime-description"
-      ></p>
+        class="details-description"
+      >
+        Loading description...
+      </p>
 
     </div>
 
   </section>
 
-<section class="video-section">
 
-  <h2>▶️ Watch Episode</h2>
 
-  <video
-    id="videoPlayer"
-    controls
-    playsinline
-    preload="metadata"
-    style="width:100%; max-width:900px; border-radius:14px;"
-  >
-    Your browser does not support video playback.
-  </video>
+  <!-- =========================
+       VIDEO PLAYER
+  ========================= -->
 
-<div class="episode-navigation">
+  <section class="video-section">
 
-  <button
-    id="prevEpisode"
-    type="button"
-  >
-    ⏮ Previous
-  </button>
+    <h2>
+      ▶️ Watch Anime
+    </h2>
 
-  <button
-    id="nextEpisode"
-    type="button"
-  >
-    Next ⏭
-  </button>
 
-</div>
+    <video
+      id="videoPlayer"
+      controls
+      playsinline
+      preload="metadata"
+    >
+      Your browser does not support video playback.
+    </video>
 
-</section>
+
+    <div class="episode-navigation">
+
+      <button
+        id="prevEpisode"
+        type="button"
+      >
+        ⏮ Previous
+      </button>
+
+
+      <button
+        id="nextEpisode"
+        type="button"
+      >
+        Next ⏭
+      </button>
+
+    </div>
+
+  </section>
+
+
+
+  <!-- =========================
+       EPISODES
+  ========================= -->
+
+  <section class="episodes">
+
+    <h2>
+      📺 Episodes
+    </h2>
+
+
+    <div
+      id="episodeList"
+      class="episode-list"
+    ></div>
+
+
+    <p
+      id="empty"
+      class="empty"
+      hidden
+    >
+      Episodes available nahi hain.
+    </p>
+
+  </section>
+
 
 </main>
 
 
-const id =
+
+<script>
+
+async function loadAnime() {
+
+  const params =
+    new URLSearchParams(
+      window.location.search
+    );
+
+
+  const id =
     params.get("id");
+
 
   if (!id) {
 
     document.getElementById("title")
-      .textContent = "Anime not found";
+      .textContent =
+        "Anime not found";
 
     return;
   }
+
 
   try {
 
@@ -215,90 +309,464 @@ const id =
         }
       );
 
+
     if (!response.ok) {
-      throw new Error("Failed to load anime");
+
+      throw new Error(
+        "Failed to load anime"
+      );
+
     }
+
 
     const animeList =
       await response.json();
 
+
     const anime =
       animeList.find(
         item =>
-          String(item.id) === String(id)
+          String(item.id) ===
+          String(id)
       );
+
 
     if (!anime) {
 
       document.getElementById("title")
-        .textContent = "Anime not found";
+        .textContent =
+          "Anime not found";
 
       return;
     }
 
 
-    document.getElementById("title")
-      .textContent =
-        anime.title || "Anime";
+
+    // ===============================
+    // BASIC INFORMATION
+    // ===============================
+
+    const title =
+      document.getElementById("title");
 
 
-    document.getElementById("category")
-      .textContent =
-        anime.category || "Anime";
+    const category =
+      document.getElementById("category");
 
 
-    document.getElementById("description")
-      .textContent =
-        anime.description ||
-        "No description available.";
-const videoPlayer =
-  document.getElementById("videoPlayer");
+    const description =
+      document.getElementById(
+        "description"
+      );
 
-if (videoPlayer && anime.video) {
-  videoPlayer.src = anime.video;
-        }
+
+    title.textContent =
+      anime.title ||
+      "Anime";
+
+
+    category.textContent =
+      anime.category ||
+      "Anime";
+
+
+    description.textContent =
+      anime.description ||
+      "No description available.";
+
+
+
+    // ===============================
+    // POSTER
+    // ===============================
 
     const poster =
-      document.getElementById("poster");
+      document.getElementById(
+        "poster"
+      );
 
-    if (anime.poster) {
 
-      poster.src = anime.poster;
+    if (
+      poster &&
+      anime.poster
+    ) {
+
+      poster.src =
+        anime.poster;
+
+      poster.alt =
+        anime.title ||
+        "Anime poster";
 
     }
 
+
+
+    // ===============================
+    // VIDEO PLAYER
+    // ===============================
+
+    const videoPlayer =
+      document.getElementById(
+        "videoPlayer"
+      );
+
+
+
+    // ===============================
+    // EPISODE LIST
+    // ===============================
 
     const episodeList =
       document.getElementById(
         "episodeList"
       );
 
-    const episodes =
-  Array.isArray(anime.episodes) &&
-  anime.episodes.length
-    ? anime.episodes
-    : [
+
+    const empty =
+      document.getElementById(
+        "empty"
+      );
+
+
+    const prevEpisode =
+      document.getElementById(
+        "prevEpisode"
+      );
+
+
+    const nextEpisode =
+      document.getElementById(
+        "nextEpisode"
+      );
+
+
+    episodeList.innerHTML =
+      "";
+
+
+
+    // ===============================
+    // GET EPISODES
+    // ===============================
+
+    let episodes = [];
+
+
+    if (
+      Array.isArray(
+        anime.episodes
+      ) &&
+      anime.episodes.length
+    ) {
+
+      episodes =
+        anime.episodes.map(
+          ep => ({
+
+            episode:
+              Number(
+                ep.episode || 1
+              ),
+
+            video:
+              ep.video || ""
+
+          })
+        );
+
+    }
+
+
+    // Old anime data support
+    else if (
+      anime.video
+    ) {
+
+      episodes = [
+
         {
+
           episode:
-            Number(anime.episode || 1),
+            Number(
+              anime.episode || 1
+            ),
 
           video:
             anime.video
+
         }
+
       ];
 
-
-episodes.sort(
-  (a, b) =>
-    Number(a.episode || 0) -
-    Number(b.episode || 0)
-);
+    }
 
 
-episodes.forEach(
-  (ep, index) => {
 
-    const button =
+    // ===============================
+    // NO EPISODES
+    // ===============================
+
+    if (
+      !episodes.length
+    ) {
+
+      empty.hidden =
+        false;
+
+
+      prevEpisode.hidden =
+        true;
+
+
+      nextEpisode.hidden =
+        true;
+
+
+      return;
+    }
+
+
+    empty.hidden =
+      true;
+
+
+
+    // ===============================
+    // SORT EPISODES
+    // ===============================
+
+    episodes.sort(
+      (a, b) =>
+        a.episode -
+        b.episode
+    );
+
+
+
+    let currentEpisodeIndex =
+      0;
+
+
+
+    // ===============================
+    // PLAY EPISODE
+    // ===============================
+
+    function playEpisode(
+      index
+    ) {
+
+      if (
+        index < 0 ||
+        index >= episodes.length
+      ) {
+
+        return;
+      }
+
+
+      currentEpisodeIndex =
+        index;
+
+
+      const ep =
+        episodes[
+          currentEpisodeIndex
+        ];
+
+
+      if (
+        videoPlayer &&
+        ep.video
+      ) {
+
+        videoPlayer.src =
+          ep.video;
+
+        videoPlayer.load();
+
+      }
+
+
+
+      // Active episode
+      document
+        .querySelectorAll(
+          ".episode-btn"
+        )
+        .forEach(
+          (button, i) => {
+
+            button.classList.toggle(
+              "active",
+              i ===
+                currentEpisodeIndex
+            );
+
+          }
+        );
+
+
+
+      // Previous button
+      if (
+        prevEpisode
+      ) {
+
+        prevEpisode.disabled =
+          currentEpisodeIndex === 0;
+
+      }
+
+
+
+      // Next button
+      if (
+        nextEpisode
+      ) {
+
+        nextEpisode.disabled =
+          currentEpisodeIndex ===
+          episodes.length - 1;
+
+      }
+
+    }
+
+
+
+    // ===============================
+    // CREATE EPISODE BUTTONS
+    // ===============================
+
+    episodes.forEach(
+      (ep, index) => {
+
+        const button =
+          document.createElement(
+            "button"
+          );
+
+
+        button.type =
+          "button";
+
+
+        button.className =
+          "episode-btn";
+
+
+        button.textContent =
+          "Episode " +
+          ep.episode;
+
+
+
+        button.addEventListener(
+          "click",
+          () => {
+
+            playEpisode(
+              index
+            );
+
+
+            if (
+              videoPlayer
+            ) {
+
+              videoPlayer.scrollIntoView({
+                behavior:
+                  "smooth",
+
+                block:
+                  "center"
+
+              });
+
+            }
+
+          }
+        );
+
+
+        episodeList.appendChild(
+          button
+        );
+
+      }
+    );
+
+
+
+    // ===============================
+    // PREVIOUS
+    // ===============================
+
+    prevEpisode.addEventListener(
+      "click",
+      () => {
+
+        playEpisode(
+          currentEpisodeIndex - 1
+        );
+
+      }
+    );
+
+
+
+    // ===============================
+    // NEXT
+    // ===============================
+
+    nextEpisode.addEventListener(
+      "click",
+      () => {
+
+        playEpisode(
+          currentEpisodeIndex + 1
+        );
+
+      }
+    );
+
+
+
+    // ===============================
+    // START FIRST EPISODE
+    // ===============================
+
+    playEpisode(0);
+
+  }
+
+
+  catch (error) {
+
+    console.error(
+      "ANIME LOAD ERROR:",
+      error
+    );
+
+
+    document.getElementById(
+      "title"
+    ).textContent =
+      "Anime load nahi ho pa raha.";
+
+  }
+
+}
+
+
+
+loadAnime();
+
+</script>
+
 
 </body>
+
 </html>
