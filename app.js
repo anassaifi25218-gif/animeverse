@@ -130,7 +130,7 @@ function displayAnime(list) {
       "anime-card";
 
     card.href =
-      `/watch.html?id=${encodeURIComponent(anime.id)}`;
+  `/anime.html?id=${encodeURIComponent(anime.id)}`;
 
 
     const poster =
