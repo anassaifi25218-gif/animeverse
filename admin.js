@@ -52,7 +52,7 @@ let uploadedVideo = null;
 let uploadedPoster = null;
 
 let allAnime = [];
-
+let selectedAnimeId = null;
 
 // ===============================
 // LOGIN STATUS
@@ -567,7 +567,8 @@ uploadForm.addEventListener(
       episode:
         formData.get("episode") ||
         1,
-
+  animeId:
+    selectedAnimeId || null,
       video: {
 
         secure_url:
@@ -648,6 +649,7 @@ uploadForm.addEventListener(
 
       uploadedVideo = null;
       uploadedPoster = null;
+      selectedAnimeId = null;
 
 
       videoStatus.textContent =
@@ -1065,35 +1067,45 @@ async function editAnime(
 // NEW EPISODE
 // ===============================
 
-function prepareNewEpisode(
-  anime
-) {
+function prepareNewEpisode(anime) {
 
-  document.getElementById(
-    "title"
-  ).value =
+  selectedAnimeId = anime.id;
+
+  document.getElementById("title").value =
     anime.title || "";
 
-  document.getElementById(
-    "description"
-  ).value =
+  document.getElementById("description").value =
     anime.description || "";
 
-  document.getElementById(
-    "category"
-  ).value =
+  document.getElementById("category").value =
     anime.category || "Anime";
 
-  document.getElementById(
-    "episode"
-  ).value =
-    Number(anime.episode || 1) + 1;
+
+  let nextEpisode =
+    Number(anime.episode || 0) + 1;
+
+
+  if (Array.isArray(anime.episodes)) {
+
+    const numbers =
+      anime.episodes
+        .map(item => Number(item.episode))
+        .filter(Number.isFinite);
+
+    if (numbers.length) {
+      nextEpisode =
+        Math.max(...numbers) + 1;
+    }
+  }
+
+
+  document.getElementById("episode").value =
+    nextEpisode;
 
 
   uploadMsg.textContent =
-    `Episode ${
-      Number(anime.episode || 1) + 1
-    } ke liye video upload karo.`;
+    `Episode ${nextEpisode} ke liye video upload karo.`;
+
 
   window.scrollTo({
     top: 0,
