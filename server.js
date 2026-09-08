@@ -29,12 +29,11 @@ fs.mkdirSync(tempDir, { recursive: true });
 
 app.use(express.json({ limit: "10mb" }));
 
-app.use(
-  express.urlencoded({
-    extended: true,
-    limit: "10mb"
-  })
-);
+app.use(express.static(__dirname));
+
+app.get("/", (_req, res) => {
+  res.sendFile(path.join(__dirname, "index.html"));
+});
 
 app.use(
   session({
