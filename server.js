@@ -254,7 +254,11 @@ app.get("/style.css", (_req, res) => {
     path.join(__dirname, "style.css")
   );
 });
-
+app.get("/logo.png", (_req, res) => {
+  res.sendFile(
+    path.join(__dirname, "logo.png")
+  );
+});
 app.get("/admin.js", (_req, res) => {
   res.sendFile(
     path.join(__dirname, "admin.js")
