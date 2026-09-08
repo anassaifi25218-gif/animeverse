@@ -1,0 +1,305 @@
+<!doctype html>
+<html lang="hi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+
+  <meta name="description" content="AnimeVerse anime details and episodes">
+
+  <title>Anime Details - AnimeVerse</title>
+
+  <link rel="stylesheet" href="/style.css">
+
+  <style>
+    .anime-details {
+      max-width: 1000px;
+      margin: 40px auto;
+      padding: 20px;
+    }
+
+    .anime-info {
+      display: flex;
+      gap: 30px;
+      align-items: flex-start;
+    }
+
+    .anime-poster {
+      width: 260px;
+      max-height: 370px;
+      object-fit: cover;
+      border-radius: 14px;
+    }
+
+    .anime-content {
+      flex: 1;
+    }
+
+    .anime-content h1 {
+      margin-top: 0;
+      font-size: 32px;
+    }
+
+    .anime-category {
+      display: inline-block;
+      margin: 8px 0 15px;
+      padding: 6px 12px;
+      border-radius: 20px;
+      background: rgba(255,255,255,.1);
+    }
+
+    .anime-description {
+      line-height: 1.7;
+    }
+
+    .episodes {
+      margin-top: 40px;
+    }
+
+    .episode-list {
+      display: grid;
+      grid-template-columns: repeat(auto-fill,minmax(140px,1fr));
+      gap: 12px;
+      margin-top: 20px;
+    }
+
+    .episode-btn {
+      display: block;
+      padding: 14px;
+      border-radius: 10px;
+      text-align: center;
+      text-decoration: none;
+      background: rgba(255,255,255,.08);
+      color: inherit;
+    }
+
+    .episode-btn:hover {
+      transform: translateY(-2px);
+    }
+
+    .back-btn {
+      display: inline-block;
+      margin-bottom: 25px;
+      text-decoration: none;
+    }
+
+    @media (max-width: 600px) {
+      .anime-info {
+        flex-direction: column;
+      }
+
+      .anime-poster {
+        width: 100%;
+        max-width: 260px;
+      }
+
+      .anime-content h1 {
+        font-size: 25px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+<header class="nav">
+
+  <button
+    class="menu-btn"
+    onclick="history.back()"
+    aria-label="Back"
+  >
+    ←
+  </button>
+
+  <a class="logo" href="/" aria-label="AnimeVerse Home">
+    <img
+      src="/logo.png"
+      alt="AnimeVerse"
+      class="logo-img"
+    >
+  </a>
+
+</header>
+
+
+<main class="anime-details">
+
+  <a href="/" class="back-btn">
+    ← Home
+  </a>
+
+  <section class="anime-info">
+
+    <img
+      id="poster"
+      class="anime-poster"
+      src="/logo.png"
+      alt="Anime Poster"
+    >
+
+    <div class="anime-content">
+
+      <h1 id="title">
+        Loading...
+      </h1>
+
+      <div
+        id="category"
+        class="anime-category"
+      ></div>
+
+      <p
+        id="description"
+        class="anime-description"
+      ></p>
+
+    </div>
+
+  </section>
+
+
+  <section class="episodes">
+
+    <h2>
+      📺 Episodes
+    </h2>
+
+    <div
+      id="episodeList"
+      class="episode-list"
+    ></div>
+
+    <p
+      id="empty"
+      hidden
+    >
+      Episodes available nahi hain.
+    </p>
+
+  </section>
+
+</main>
+
+
+<script>
+
+async function loadAnime() {
+
+  const params =
+    new URLSearchParams(
+      window.location.search
+    );
+
+  const id =
+    params.get("id");
+
+  if (!id) {
+
+    document.getElementById("title")
+      .textContent = "Anime not found";
+
+    return;
+  }
+
+  try {
+
+    const response =
+      await fetch(
+        "/api/anime",
+        {
+          cache: "no-store"
+        }
+      );
+
+    if (!response.ok) {
+      throw new Error("Failed to load anime");
+    }
+
+    const animeList =
+      await response.json();
+
+    const anime =
+      animeList.find(
+        item =>
+          String(item.id) === String(id)
+      );
+
+    if (!anime) {
+
+      document.getElementById("title")
+        .textContent = "Anime not found";
+
+      return;
+    }
+
+
+    document.getElementById("title")
+      .textContent =
+        anime.title || "Anime";
+
+
+    document.getElementById("category")
+      .textContent =
+        anime.category || "Anime";
+
+
+    document.getElementById("description")
+      .textContent =
+        anime.description ||
+        "No description available.";
+
+
+    const poster =
+      document.getElementById("poster");
+
+    if (anime.poster) {
+
+      poster.src = anime.poster;
+
+    }
+
+
+    const episodeList =
+      document.getElementById(
+        "episodeList"
+      );
+
+    const episode =
+      Number(anime.episode || 1);
+
+
+    const button =
+      document.createElement("a");
+
+    button.className =
+      "episode-btn";
+
+    button.href =
+      "/watch.html?id=" +
+      encodeURIComponent(anime.id);
+
+    button.textContent =
+      "Episode " + episode;
+
+    episodeList.appendChild(button);
+
+
+  } catch (error) {
+
+    console.error(error);
+
+    document.getElementById("title")
+      .textContent =
+        "Anime load nahi ho pa raha.";
+
+  }
+
+}
+
+
+loadAnime();
+
+</script>
+
+</body>
+</html>
