@@ -194,16 +194,7 @@
 </main>
 
 
-<script>
-
-async function loadAnime() {
-
-  const params =
-    new URLSearchParams(
-      window.location.search
-    );
-
-  const id =
+const id =
     params.get("id");
 
   if (!id) {
@@ -308,77 +299,6 @@ episodes.forEach(
   (ep, index) => {
 
     const button =
-      document.createElement("button");
-
-    button.type = "button";
-
-    button.className =
-      "episode-btn";
-
-    button.textContent =
-      "Episode " +
-      Number(
-        ep.episode || index + 1
-      );
-
-
-    button.addEventListener(
-      "click",
-      () => {
-
-        const videoPlayer =
-          document.getElementById(
-            "videoPlayer"
-          );
-
-        if (
-          videoPlayer &&
-          ep.video
-        ) {
-
-          videoPlayer.src =
-            ep.video;
-
-          videoPlayer.load();
-
-          videoPlayer.play()
-            .catch(() => {});
-
-          videoPlayer.scrollIntoView({
-            behavior: "smooth",
-            block: "center"
-          });
-
-        }
-
-      }
-    );
-
-
-    episodeList.appendChild(
-      button
-    );
-
-  }
-);
-
-
-  } catch (error) {
-
-    console.error(error);
-
-    document.getElementById("title")
-      .textContent =
-        "Anime load nahi ho pa raha.";
-
-  }
-
-}
-
-
-loadAnime();
-
-</script>
 
 </body>
 </html>
