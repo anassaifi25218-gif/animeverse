@@ -182,7 +182,7 @@ function displayAnime(list) {
 
 
       card.href =
-        "/anime.html?id=" +
+        "/watch.html?id=" +
         encodeURIComponent(
           anime.id
         );
