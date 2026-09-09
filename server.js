@@ -56,20 +56,16 @@ app.set("trust proxy", 1);
 app.use(
   session({
     secret: SESSION_SECRET,
-
     resave: false,
-
     saveUninitialized: false,
+
+    proxy: true,
 
     cookie: {
       httpOnly: true,
-
-      sameSite: "lax",
-
       secure: true,
-
-      maxAge:
-        1000 * 60 * 60 * 8
+      sameSite: "lax",
+      maxAge: 1000 * 60 * 60 * 8
     }
   })
 );
@@ -487,96 +483,76 @@ app.get(
 // ADMIN LOGIN
 // ===============================
 
-app.post(
-  "/api/admin/login",
-  (req, res) => {
+app.post("/api/admin/login", (req, res) => {
+  try {
+    const password = String(req.body?.password || "");
 
-    try {
+    if (password !== String(ADMIN_PASSWORD)) {
+      console.log("ADMIN LOGIN FAILED");
 
-      const password =
-        String(
-          req.body?.password || ""
-        );
+      return res.status(401).json({
+        ok: false,
+        error: "Wrong password"
+      });
+    }
 
-      if (
-        password !==
-        String(ADMIN_PASSWORD)
-      ) {
+    req.session.isAdmin = true;
 
-        console.log(
-          "ADMIN LOGIN FAILED"
-        );
+    req.session.save((error) => {
+      if (error) {
+        console.error("SESSION SAVE ERROR:", error);
 
-        return res.status(401).json({
-          error: "Wrong password"
+        return res.status(500).json({
+          ok: false,
+          error: "Session save failed"
         });
       }
 
-      req.session.isAdmin = true;
-
-      req.session.save(
-        (error) => {
-
-          if (error) {
-
-            console.error(
-              "SESSION SAVE ERROR:",
-              error
-            );
-
-            return res.status(500).json({
-              error:
-                "Session save failed"
-            });
-          }
-
-          console.log(
-            "ADMIN LOGIN SUCCESS"
-          );
-
-          return res.json({
-            ok: true,
-            isAdmin: true
-          });
-        }
+      console.log(
+        "ADMIN LOGIN SUCCESS - Session ID:",
+        req.sessionID
       );
 
-    } catch (error) {
-
-      console.error(
-        "LOGIN ERROR:",
-        error
-      );
-
-      return res.status(500).json({
-        error:
-          error.message ||
-          "Login failed"
+      return res.json({
+        ok: true,
+        isAdmin: true
       });
-    }
+    });
+
+  } catch (error) {
+    console.error("LOGIN ERROR:", error);
+
+    return res.status(500).json({
+      ok: false,
+      error: error.message || "Login failed"
+    });
   }
-);
+});
 
 
 // ===============================
 // ADMIN STATUS
 // ===============================
 
-app.get(
-  "/api/admin/status",
-  (req, res) => {
+app.get("/api/admin/status", (req, res) => {
+  res.set({
+    "Cache-Control":
+      "no-store, no-cache, must-revalidate, proxy-revalidate",
+    "Pragma": "no-cache",
+    "Expires": "0"
+  });
 
-    res.set(
-      "Cache-Control",
-      "no-store, no-cache, must-revalidate"
-    );
+  console.log(
+    "ADMIN STATUS:",
+    req.session?.isAdmin === true,
+    "Session:",
+    req.sessionID
+  );
 
-    res.json({
-      isAdmin:
-        req.session?.isAdmin === true
-    });
-  }
-);
+  res.json({
+    isAdmin: req.session?.isAdmin === true
+  });
+});
 
 
 // ===============================
