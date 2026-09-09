@@ -8,8 +8,8 @@ html {
 
 body {
   margin: 0;
-  background: #171923;
-  color: #f5f5f7;
+  background: #07101a;
+  color: #f5f7fb;
   font-family: system-ui, -apple-system, "Segoe UI", Arial, sans-serif;
 }
 
@@ -23,8 +23,8 @@ body {
   display: flex;
   align-items: center;
   gap: 18px;
-  background: #242630;
-  border-bottom: 1px solid #343641;
+  background: #0b1622;
+  border-bottom: 1px solid #1b3044;
   position: sticky;
   top: 0;
   z-index: 100;
@@ -33,9 +33,9 @@ body {
 .menu-btn {
   width: 46px;
   height: 46px;
-  border: 0;
-  border-radius: 8px;
-  background: #168ff0;
+  border: 1px solid #1e405d;
+  border-radius: 10px;
+  background: #0e2435;
   color: white;
   font-size: 25px;
   cursor: pointer;
@@ -43,24 +43,26 @@ body {
 }
 
 .menu-btn:hover {
-  transform: scale(1.05);
+  background: #087ff5;
+  transform: scale(1.04);
 }
 
 .logo {
-  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   text-decoration: none;
-  font-size: 23px;
-  font-weight: 900;
-  letter-spacing: 1px;
+  color: white;
 }
 
-.logo span {
-  color: #b35cff;
+.logo-img {
+  display: block;
+  width: 170px;
+  height: 48px;
+  max-width: 170px;
+  object-fit: contain;
+  object-position: center;
 }
-
-/* =========================
-   SEARCH
-========================= */
 
 .search-box {
   margin-left: auto;
@@ -68,41 +70,39 @@ body {
 }
 
 .search {
-  width: 280px;
+  width: 300px;
   height: 40px;
   padding: 0 42px 0 15px;
-  border: 1px solid #3a3c48;
+  border: 1px solid #203b52;
   border-radius: 22px;
-  background: #181a22;
+  background: #0d1b29;
   color: white;
   outline: none;
   font-size: 14px;
-  transition: .2s ease;
 }
 
 .search:focus {
-  border-color: #168ff0;
-  box-shadow: 0 0 0 3px rgba(22,143,240,.12);
+  border-color: #128cff;
+  box-shadow: 0 0 0 3px rgba(18,140,255,.12);
 }
 
 .search::placeholder {
-  color: #888b98;
+  color: #778697;
 }
 
 .search-icon {
   position: absolute;
-  right: 15px;
-  top: 7px;
-  color: #00cfff;
+  right: 14px;
+  top: 6px;
+  color: #63baff;
   font-size: 25px;
   pointer-events: none;
 }
 
 .admin-link {
-  color: #cdb5ff;
+  color: #b9d9ff;
   text-decoration: none;
   font-size: 14px;
-  margin-left: 4px;
 }
 
 /* =========================
@@ -115,11 +115,11 @@ body {
   left: -280px;
   width: 270px;
   height: 100vh;
-  background: #20222c;
+  background: #0c1723;
   z-index: 200;
   padding: 30px 18px;
   transition: left .25s ease;
-  box-shadow: 5px 0 25px rgba(0,0,0,.35);
+  box-shadow: 5px 0 25px rgba(0,0,0,.45);
 }
 
 .side-menu.open {
@@ -136,22 +136,22 @@ body {
 .side-menu a {
   display: block;
   padding: 14px 12px;
-  color: #e8e8ed;
+  color: #e8edf3;
   text-decoration: none;
-  border-radius: 8px;
+  border-radius: 9px;
   margin-bottom: 5px;
   transition: .2s ease;
 }
 
 .side-menu a:hover {
-  background: #30323d;
+  background: #122b40;
   transform: translateX(3px);
 }
 
 .menu-overlay {
   position: fixed;
   inset: 0;
-  background: rgba(0,0,0,.55);
+  background: rgba(0,0,0,.65);
   z-index: 150;
   display: none;
 }
@@ -165,9 +165,9 @@ body {
 ========================= */
 
 main {
-  max-width: 1200px;
+  max-width: 1250px;
   margin: auto;
-  padding: 30px 24px 70px;
+  padding: 18px 24px 70px;
 }
 
 /* =========================
@@ -175,42 +175,55 @@ main {
 ========================= */
 
 .hero {
-  min-height: 300px;
+  min-height: 315px;
   display: flex;
   align-items: center;
-  padding: 42px;
-  border-radius: 15px;
+  padding: 48px;
+  border-radius: 13px;
   overflow: hidden;
   background:
     radial-gradient(
-      circle at 85% 20%,
-      rgba(35, 176, 207, .35),
+      circle at 82% 20%,
+      rgba(0,143,255,.30),
       transparent 35%
     ),
     radial-gradient(
-      circle at 10% 90%,
-      rgba(127, 63, 190, .3),
+      circle at 90% 90%,
+      rgba(0,208,255,.12),
       transparent 40%
     ),
     linear-gradient(
-      120deg,
-      #102c34,
-      #171a29
+      110deg,
+      #081a2b,
+      #101722 65%,
+      #10293a
     );
-  border: 1px solid #343743;
+  border: 1px solid #1b3a53;
   position: relative;
+}
+
+.hero::before {
+  content: "";
+  position: absolute;
+  width: 360px;
+  height: 360px;
+  right: -120px;
+  top: -80px;
+  border-radius: 50%;
+  background: rgba(0,151,255,.10);
+  filter: blur(35px);
 }
 
 .hero::after {
   content: "";
   position: absolute;
-  width: 220px;
-  height: 220px;
-  right: -80px;
-  bottom: -100px;
+  width: 240px;
+  height: 240px;
+  left: -100px;
+  bottom: -120px;
   border-radius: 50%;
-  background: rgba(179,92,255,.16);
-  filter: blur(20px);
+  background: rgba(0,211,255,.08);
+  filter: blur(30px);
 }
 
 .hero-content {
@@ -220,66 +233,68 @@ main {
 }
 
 .eyebrow {
-  margin: 0 0 10px;
-  color: #63dfff;
+  margin: 0 0 9px;
+  color: #82cfff;
   font-size: 11px;
-  letter-spacing: 2px;
-  font-weight: 700;
+  letter-spacing: 3px;
+  font-weight: 800;
 }
 
 .hero h1 {
   margin: 0;
-  font-size: clamp(30px, 5vw, 52px);
-  line-height: 1.15;
+  font-size: clamp(32px, 5vw, 55px);
+  line-height: 1.1;
+  font-weight: 900;
 }
 
 .hero h1 span {
-  color: #d16cff;
+  color: #168ff0;
 }
 
 .muted {
   max-width: 650px;
-  margin: 16px 0 20px;
-  color: #b1b3bd;
+  margin: 16px 0 22px;
+  color: #aab7c5;
   font-size: 14px;
   line-height: 1.6;
 }
 
 .hero-buttons {
   display: flex;
-  gap: 10px;
+  gap: 12px;
   flex-wrap: wrap;
 }
 
 .watch-btn,
 .secondary-btn {
   display: inline-block;
-  padding: 11px 20px;
-  border-radius: 7px;
+  padding: 12px 21px;
+  border-radius: 8px;
   text-decoration: none;
-  font-weight: 700;
+  font-weight: 800;
   font-size: 14px;
   transition: .2s ease;
 }
 
 .watch-btn {
-  background: #168ff0;
+  background: #0987ff;
   color: white;
+  box-shadow: 0 7px 22px rgba(9,135,255,.20);
 }
 
 .watch-btn:hover {
-  background: #087bd8;
+  background: #0078e8;
   transform: translateY(-2px);
 }
 
 .secondary-btn {
-  background: rgba(255,255,255,.08);
-  border: 1px solid #555866;
+  background: rgba(255,255,255,.04);
+  border: 1px solid #198bd5;
   color: white;
 }
 
 .secondary-btn:hover {
-  background: rgba(255,255,255,.14);
+  background: rgba(15,142,255,.12);
 }
 
 /* =========================
@@ -290,16 +305,16 @@ main {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 12px;
-  margin-top: 20px;
+  margin-top: 18px;
 }
 
 .info-box {
   display: flex;
   align-items: center;
   gap: 12px;
-  padding: 14px;
-  background: #20222c;
-  border: 1px solid #343641;
+  padding: 15px;
+  background: #0c1825;
+  border: 1px solid #1b3044;
   border-radius: 10px;
 }
 
@@ -315,7 +330,7 @@ main {
 .info-box small {
   display: block;
   margin-top: 3px;
-  color: #888b98;
+  color: #718091;
   font-size: 11px;
 }
 
@@ -332,14 +347,15 @@ main {
   align-items: center;
   justify-content: space-between;
   gap: 15px;
-  margin-bottom: 20px;
+  margin-bottom: 18px;
 }
 
 .small-title {
   margin: 0 0 3px;
-  color: #858894;
+  color: #66798b;
   font-size: 10px;
-  letter-spacing: 1.5px;
+  letter-spacing: 1.8px;
+  font-weight: 700;
 }
 
 .section-head h2 {
@@ -348,16 +364,20 @@ main {
 }
 
 /* =========================
-   CATEGORY
+   CATEGORY SELECT
 ========================= */
 
 #category {
-  background: #242630;
-  color: #eee;
-  border: 1px solid #3a3c48;
-  border-radius: 7px;
+  background: #0d1926;
+  color: #e8edf3;
+  border: 1px solid #284257;
+  border-radius: 8px;
   padding: 9px 13px;
   outline: none;
+}
+
+#category:focus {
+  border-color: #168ff0;
 }
 
 /* =========================
@@ -366,8 +386,8 @@ main {
 
 .grid {
   display: grid;
-  grid-template-columns: 1fr;
-  gap: 18px;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 14px;
 }
 
 /* =========================
@@ -378,9 +398,9 @@ main {
   min-width: 0;
   overflow: hidden;
   display: block;
-  background: #22242e;
-  border: 1px solid #343641;
-  border-radius: 12px;
+  background: #0c1825;
+  border: 1px solid #1c3449;
+  border-radius: 9px;
   transition:
     transform .2s ease,
     border-color .2s ease,
@@ -393,11 +413,11 @@ main {
 .anime-card:hover {
   transform: translateY(-4px);
   border-color: #168ff0;
-  box-shadow: 0 12px 30px rgba(0,0,0,.25);
+  box-shadow: 0 12px 28px rgba(0,0,0,.35);
 }
 
 /* =========================
-   POSTER
+   POSTER 16:9
 ========================= */
 
 .anime-poster {
@@ -405,7 +425,7 @@ main {
   aspect-ratio: 16 / 9;
   position: relative;
   overflow: hidden;
-  background: #090a0f;
+  background: #05090e;
 }
 
 .anime-card img {
@@ -418,7 +438,7 @@ main {
 }
 
 .anime-card:hover img {
-  transform: scale(1.025);
+  transform: scale(1.035);
 }
 
 /* =========================
@@ -427,15 +447,14 @@ main {
 
 .episode-badge {
   position: absolute;
-  left: 10px;
-  bottom: 10px;
-  padding: 5px 9px;
-  border-radius: 6px;
+  left: 7px;
+  bottom: 7px;
+  padding: 4px 7px;
+  border-radius: 5px;
   background: rgba(0,0,0,.82);
   color: white;
-  font-size: 11px;
+  font-size: 10px;
   font-weight: 800;
-  backdrop-filter: blur(5px);
 }
 
 /* =========================
@@ -443,43 +462,42 @@ main {
 ========================= */
 
 .anime-info {
-  padding: 12px 12px 13px;
+  padding: 10px 10px 12px;
 }
 
 .anime-card h3 {
   margin: 0 0 5px;
-  font-size: 15px;
-  line-height: 1.4;
+  font-size: 14px;
+  line-height: 1.35;
 }
 
 .anime-card p {
   margin: 0;
-  color: #999ca8;
-  font-size: 12px;
+  color: #778899;
+  font-size: 11px;
   line-height: 1.4;
 }
 
 .empty {
-  color: #999;
+  color: #84909c;
   padding: 25px 0;
   text-align: center;
 }
 
 /* =========================
-   PINNED BADGE
+   PINNED
 ========================= */
 
 .pinned {
   position: absolute;
-  top: 12px;
-  right: 12px;
-  padding: 7px 12px;
-  background: #159eea;
+  top: 10px;
+  right: 10px;
+  padding: 6px 10px;
+  background: #0987ff;
   color: white;
   border-radius: 20px;
-  font-size: 13px;
+  font-size: 11px;
   font-weight: 700;
-  box-shadow: 0 3px 10px rgba(0,0,0,.25);
 }
 
 /* =========================
@@ -487,25 +505,28 @@ main {
 ========================= */
 
 .category-buttons {
-  display: flex;
-  gap: 8px;
-  flex-wrap: wrap;
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 9px;
 }
 
 .category-buttons button {
-  border: 1px solid #3a3c48;
-  background: #22242e;
-  color: #ddd;
-  border-radius: 20px;
-  padding: 9px 14px;
+  min-height: 65px;
+  border: 1px solid #1d374d;
+  background: #0c1825;
+  color: #ccd6e0;
+  border-radius: 8px;
+  padding: 9px 12px;
   cursor: pointer;
   transition: .2s ease;
+  font-weight: 600;
 }
 
 .category-buttons button:hover {
-  background: #168ff0;
-  border-color: #168ff0;
+  background: #087ff0;
+  border-color: #087ff0;
   color: white;
+  transform: translateY(-2px);
 }
 
 /* =========================
@@ -514,8 +535,8 @@ main {
 
 .about-box {
   padding: 25px;
-  background: #20222c;
-  border: 1px solid #343641;
+  background: #0c1825;
+  border: 1px solid #1b3044;
   border-radius: 12px;
 }
 
@@ -525,7 +546,7 @@ main {
 
 .about-box p:last-child {
   margin: 0;
-  color: #999ca8;
+  color: #82909e;
   line-height: 1.6;
 }
 
@@ -537,16 +558,16 @@ main {
   position: fixed;
   right: 18px;
   bottom: 18px;
-  width: 58px;
-  height: 58px;
-  border: 0;
-  border-radius: 17px;
-  background: #f1f1f4;
-  color: #8855ee;
-  font-size: 29px;
+  width: 54px;
+  height: 54px;
+  border: 1px solid #29435a;
+  border-radius: 50%;
+  background: #102131;
+  color: #dbe8f5;
+  font-size: 27px;
   cursor: pointer;
   z-index: 90;
-  box-shadow: 0 4px 18px rgba(0,0,0,.3);
+  box-shadow: 0 4px 18px rgba(0,0,0,.35);
 }
 
 /* =========================
@@ -554,32 +575,32 @@ main {
 ========================= */
 
 body.light-mode {
-  background: #f1f2f6;
-  color: #171820;
+  background: #f1f4f8;
+  color: #151a20;
 }
 
 body.light-mode .nav {
   background: white;
-  border-color: #ddd;
+  border-color: #dce1e7;
 }
 
 body.light-mode .logo {
-  color: #171820;
+  color: #151a20;
 }
 
 body.light-mode .search {
-  background: #f3f4f7;
+  background: #f5f7fa;
   color: #111;
-  border-color: #d4d5dc;
+  border-color: #d4dae1;
 }
 
 body.light-mode .hero {
-  background: linear-gradient(120deg, #e8f7fb, #f4eafa);
-  border-color: #ddd;
+  background: linear-gradient(120deg, #e8f7ff, #f3f7fb);
+  border-color: #d5dce4;
 }
 
 body.light-mode .muted {
-  color: #60636e;
+  color: #606b76;
 }
 
 body.light-mode .anime-card,
@@ -587,17 +608,55 @@ body.light-mode .info-box,
 body.light-mode .about-box,
 body.light-mode .category-buttons button {
   background: white;
-  border-color: #ddd;
+  border-color: #dce1e7;
 }
 
 body.light-mode #category {
   background: white;
   color: #222;
+  border-color: #d4dae1;
+}
+
+body.light-mode .side-menu {
+  background: white;
+}
+
+body.light-mode .side-menu a {
+  color: #202832;
+}
+
+body.light-mode .menu-title {
+  color: #202832;
+}
+
+/* =========================
+   VIDEO PLAYER
+   16:9
+========================= */
+
+.player {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  height: auto !important;
+  object-fit: contain;
+  display: block;
+  background: #000;
 }
 
 /* =========================
    MOBILE
 ========================= */
+
+@media (max-width: 900px) {
+
+  .grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .category-buttons {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
 
 @media (max-width: 600px) {
 
@@ -613,9 +672,10 @@ body.light-mode #category {
     font-size: 23px;
   }
 
-  .logo {
-    font-size: 16px;
-    letter-spacing: .5px;
+  .logo-img {
+    width: 110px;
+    height: 42px;
+    max-width: 110px;
   }
 
   .search-box {
@@ -641,13 +701,13 @@ body.light-mode #category {
   }
 
   main {
-    padding: 18px 10px 50px;
+    padding: 14px 10px 50px;
   }
 
   .hero {
-    min-height: 220px;
-    padding: 24px 17px;
-    border-radius: 12px;
+    min-height: 235px;
+    padding: 25px 17px;
+    border-radius: 11px;
   }
 
   .hero h1 {
@@ -656,6 +716,7 @@ body.light-mode #category {
 
   .eyebrow {
     font-size: 9px;
+    letter-spacing: 2px;
   }
 
   .muted {
@@ -683,7 +744,6 @@ body.light-mode #category {
 
   .section-head {
     align-items: flex-start;
-    flex-direction: row;
   }
 
   .section-head h2 {
@@ -697,81 +757,50 @@ body.light-mode #category {
   }
 
   .grid {
-    grid-template-columns: 1fr;
-    gap: 10px;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 9px;
   }
 
   .anime-card {
-    border-radius: 9px;
+    border-radius: 8px;
   }
 
   .anime-poster {
     aspect-ratio: 16 / 9;
   }
 
+  .anime-info {
+    padding: 8px 9px 10px;
+  }
+
   .anime-card h3 {
-    font-size: 13px;
+    font-size: 12px;
   }
 
   .anime-card p {
-    font-size: 10px;
+    font-size: 9px;
   }
 
   .episode-badge {
-    font-size: 10px;
-    padding: 4px 7px;
+    font-size: 9px;
+    padding: 3px 6px;
   }
 
   .category-buttons {
-    gap: 6px;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 7px;
   }
 
   .category-buttons button {
-    padding: 7px 11px;
+    min-height: 52px;
+    padding: 7px 9px;
     font-size: 11px;
   }
 
   .theme-btn {
-    width: 52px;
-    height: 52px;
+    width: 50px;
+    height: 50px;
     right: 13px;
     bottom: 13px;
-    border-radius: 16px;
   }
-}
-
-/* =========================
-   VIDEO PLAYER
-========================= */
-
-.player {
-  width: 100%;
-  aspect-ratio: 16 / 9;
-  height: auto !important;
-  object-fit: contain;
-  display: block;
-  background: #000;
-}
-.logo {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  text-decoration: none;
-}
-
-.logo-img {
-  display: block;
-  width: 140px;
-  height: 48px;
-  max-width: 140px;
-  object-fit: contain;
-  object-position: center;
-}
-
-@media (max-width: 600px) {
-  .logo-img {
-    width: 110px;
-    height: 42px;
-    max-width: 110px;
   }
-}
