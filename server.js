@@ -340,7 +340,34 @@ app.post(
 // ===============================
 // ADMIN STATUS
 // ===============================
+// ===============================
+// ADMIN LOGOUT
+// ===============================
 
+app.post(
+  "/api/admin/logout",
+  (req, res) => {
+    req.session.destroy((error) => {
+
+      if (error) {
+        console.error(
+          "LOGOUT ERROR:",
+          error
+        );
+
+        return res.status(500).json({
+          error: "Logout failed"
+        });
+      }
+
+      res.clearCookie("connect.sid");
+
+      res.json({
+        ok: true
+      });
+    });
+  }
+);
 app.get(
   "/api/admin/status",
   (req, res) => {
