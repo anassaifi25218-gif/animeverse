@@ -11,28 +11,42 @@ let animeList = [];
 =============================== */
 
 async function loadAnime() {
+
   try {
-    const response = await fetch("/api/anime", {
-      cache: "no-store"
-    });
+
+    const response = await fetch(
+      "/api/anime?_=" + Date.now(),
+      {
+        cache: "no-store"
+      }
+    );
 
     if (!response.ok) {
-      throw new Error("Anime load failed");
+      throw new Error(
+        "Anime load failed: " +
+        response.status
+      );
     }
 
-    const data = await response.json();
+    const data =
+      await response.json();
 
     if (!Array.isArray(data)) {
-      throw new Error("Invalid anime data");
+      throw new Error(
+        "Invalid anime data"
+      );
     }
 
     animeList = data;
 
-    console.log("Anime loaded:", animeList);
+    console.log(
+      "Anime loaded:",
+      animeList
+    );
 
     setupCategories();
 
-    displayAnime(animeList);
+    filterAnime();
 
   } catch (error) {
 
@@ -42,52 +56,82 @@ async function loadAnime() {
     );
 
     if (grid) {
+
       grid.innerHTML =
-        "<p class='empty'>Anime load नहीं हो पाया।</p>";
+        "<p class='empty'>" +
+        "Anime load नहीं हो पाया।" +
+        "</p>";
+
     }
 
   }
+
 }
 
 
 /* ===============================
-   CATEGORIES
+   SETUP CATEGORIES
 =============================== */
 
 function setupCategories() {
 
-  if (!category) return;
+  if (!category) {
+    return;
+  }
 
-  const categories = new Set();
+  const categories =
+    new Set();
 
-  animeList.forEach(anime => {
 
-    if (!anime.category) return;
+  animeList.forEach(
+    function (anime) {
 
-    anime.category
-      .split("|")
-      .map(c => c.trim())
-      .filter(Boolean)
-      .forEach(c => categories.add(c));
+      if (!anime.category) {
+        return;
+      }
 
-  });
+      String(anime.category)
+        .split("|")
+        .map(
+          function (c) {
+            return c.trim();
+          }
+        )
+        .filter(Boolean)
+        .forEach(
+          function (c) {
+            categories.add(c);
+          }
+        );
+
+    }
+  );
+
 
   category.innerHTML =
     '<option value="">All categories</option>';
 
-  [...categories]
+
+  Array.from(categories)
     .sort()
-    .forEach(cat => {
+    .forEach(
+      function (cat) {
 
-      const option =
-        document.createElement("option");
+        const option =
+          document.createElement(
+            "option"
+          );
 
-      option.value = cat;
-      option.textContent = cat;
+        option.value = cat;
 
-      category.appendChild(option);
+        option.textContent = cat;
 
-    });
+        category.appendChild(
+          option
+        );
+
+      }
+    );
 
 }
 
@@ -99,13 +143,17 @@ function setupCategories() {
 function displayAnime(list) {
 
   if (!grid) {
+
     console.error(
       "ERROR: #grid element नहीं मिला"
     );
+
     return;
   }
 
+
   grid.innerHTML = "";
+
 
   if (!list.length) {
 
@@ -116,84 +164,122 @@ function displayAnime(list) {
     return;
   }
 
+
   if (empty) {
     empty.hidden = true;
   }
 
 
-  list.forEach(anime => {
+  list.forEach(
+    function (anime) {
 
-    const card =
-      document.createElement("a");
-
-    card.className =
-      "anime-card";
-
-    card.href =
-  `/watch.html?id=${encodeURIComponent(anime.id)}`;
+      const card =
+        document.createElement("a");
 
 
-    const poster =
-      anime.poster ||
-      "https://via.placeholder.com/300x420?text=No+Poster";
+      card.className =
+        "anime-card";
 
 
-    const title =
-      anime.title ||
-      "Untitled Anime";
+      card.href =
+        "/anime.html?id=" +
+        encodeURIComponent(
+          anime.id
+        );
 
 
-    const animeCategory =
-      anime.category ||
-      "Anime";
+      const poster =
+        anime.poster ||
+        "https://via.placeholder.com/300x169?text=No+Poster";
 
 
-    const episode =
-      anime.episode ||
-      anime.episodes ||
-      "";
+      const title =
+        anime.title ||
+        "Untitled Anime";
 
 
-    card.innerHTML = `
-
-      <div class="anime-poster">
-
-        <img
-          src="${escapeHTML(poster)}"
-          alt="${escapeHTML(title)}"
-          loading="lazy"
-        >
-
-        ${
-          episode
-            ? `
-              <span class="episode-badge">
-                EP ${escapeHTML(String(episode))}
-              </span>
-            `
-            : ""
-        }
-
-      </div>
-
-      <div class="anime-info">
-
-        <h3>
-          ${escapeHTML(title)}
-        </h3>
-
-        <p>
-          ${escapeHTML(animeCategory)}
-        </p>
-
-      </div>
-
-    `;
+      const animeCategory =
+        anime.category ||
+        "Anime";
 
 
-    grid.appendChild(card);
+      /*
+        Episode count
+      */
 
-  });
+      let episodeText = "";
+
+
+      if (
+        Array.isArray(
+          anime.episodes
+        ) &&
+        anime.episodes.length > 0
+      ) {
+
+        episodeText =
+          anime.episodes.length +
+          " EP";
+
+      } else if (
+        anime.episode
+      ) {
+
+        episodeText =
+          "EP " +
+          anime.episode;
+
+      }
+
+
+      card.innerHTML = `
+
+        <div class="anime-poster">
+
+          <img
+            src="${escapeHTML(poster)}"
+            alt="${escapeHTML(title)}"
+            loading="lazy"
+          >
+
+          ${
+            episodeText
+              ? `
+                <span class="episode-badge">
+                  ${escapeHTML(
+                    episodeText
+                  )}
+                </span>
+              `
+              : ""
+          }
+
+        </div>
+
+
+        <div class="anime-info">
+
+          <h3>
+            ${escapeHTML(title)}
+          </h3>
+
+          <p>
+            ${escapeHTML(
+              animeCategory
+            )}
+          </p>
+
+        </div>
+
+      `;
+
+
+      grid.appendChild(
+        card
+      );
+
+    }
+  );
 
 }
 
@@ -205,7 +291,9 @@ function displayAnime(list) {
 function escapeHTML(text) {
 
   const div =
-    document.createElement("div");
+    document.createElement(
+      "div"
+    );
 
   div.textContent =
     text || "";
@@ -216,14 +304,16 @@ function escapeHTML(text) {
 
 
 /* ===============================
-   FILTER
+   FILTER ANIME
 =============================== */
 
 function filterAnime() {
 
   const searchText =
     search
-      ? search.value.toLowerCase().trim()
+      ? search.value
+          .toLowerCase()
+          .trim()
       : "";
 
 
@@ -234,40 +324,53 @@ function filterAnime() {
 
 
   const filtered =
-    animeList.filter(anime => {
+    animeList.filter(
+      function (anime) {
 
-      const title =
-        (anime.title || "")
-          .toLowerCase();
-
-
-      const categories =
-        (anime.category || "")
-          .split("|")
-          .map(c => c.trim());
+        const title =
+          String(
+            anime.title || ""
+          ).toLowerCase();
 
 
-      const matchesSearch =
-        !searchText ||
-        title.includes(searchText);
+        const categories =
+          String(
+            anime.category || ""
+          )
+            .split("|")
+            .map(
+              function (c) {
+                return c.trim();
+              }
+            );
 
 
-      const matchesCategory =
-        !selectedCategory ||
-        categories.includes(
-          selectedCategory
+        const matchesSearch =
+          !searchText ||
+          title.includes(
+            searchText
+          );
+
+
+        const matchesCategory =
+          !selectedCategory ||
+          categories.includes(
+            selectedCategory
+          );
+
+
+        return (
+          matchesSearch &&
+          matchesCategory
         );
 
-
-      return (
-        matchesSearch &&
-        matchesCategory
-      );
-
-    });
+      }
+    );
 
 
-  displayAnime(filtered);
+  displayAnime(
+    filtered
+  );
 
 }
 
@@ -280,7 +383,11 @@ if (search) {
 
   search.addEventListener(
     "input",
-    filterAnime
+    function () {
+
+      filterAnime();
+
+    }
   );
 
 }
@@ -294,7 +401,11 @@ if (category) {
 
   category.addEventListener(
     "change",
-    filterAnime
+    function () {
+
+      filterAnime();
+
+    }
   );
 
 }
@@ -305,11 +416,14 @@ if (category) {
    New uploads appear automatically
 =============================== */
 
-setInterval(() => {
+setInterval(
+  function () {
 
-  loadAnime();
+    loadAnime();
 
-}, 30000);
+  },
+  30000
+);
 
 
 /* ===============================
