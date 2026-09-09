@@ -25,16 +25,75 @@ cloudinary.config({
 const DATA_PUBLIC_ID = "animeverse/anime-data";
 
 const tempDir = path.join(__dirname, "temp-uploads");
-fs.mkdirSync(tempDir, { recursive: true });
 
-app.use(express.json({ limit: "10mb" }));
-app.set("trust proxy", 1);
-app.use(express.static(__dirname));
-
-app.get("/", (_req, res) => {
-  res.sendFile(path.join(__dirname, "index.html"));
+fs.mkdirSync(tempDir, {
+  recursive: true
 });
 
+
+// ===============================
+// BASIC MIDDLEWARE
+// ===============================
+
+app.use(
+  express.json({
+    limit: "10mb"
+  })
+);
+
+
+// ===============================
+// RENDER / HTTPS PROXY
+// ===============================
+
+app.set("trust proxy", 1);
+
+
+// ===============================
+// SESSION
+// ===============================
+
+app.use(
+  session({
+    secret: SESSION_SECRET,
+
+    resave: false,
+
+    saveUninitialized: false,
+
+    cookie: {
+      httpOnly: true,
+
+      sameSite: "lax",
+
+      secure: true,
+
+      maxAge:
+        1000 * 60 * 60 * 8
+    }
+  })
+);
+
+
+// ===============================
+// STATIC FILES
+// ===============================
+
+app.use(express.static(__dirname));
+
+
+// ===============================
+// HOME
+// ===============================
+
+app.get("/", (_req, res) => {
+  res.sendFile(
+    path.join(
+      __dirname,
+      "index.html"
+    )
+  );
+});
 
 
 // ===============================
@@ -42,21 +101,8 @@ app.get("/", (_req, res) => {
 // ===============================
 
 function adminOnly(req, res, next) {
-  if (req.seapp.set("trust proxy", 1);
 
-app.use(
-  session({
-    secret: SESSION_SECRET,
-    resave: false,
-    saveUninitialized: false,
-    cookie: {
-      httpOnly: true,
-      sameSite: "lax",
-      secure: true,
-      maxAge: 1000 * 60 * 60 * 8
-    }
-  })
-);ssion?.isAdmin) {
+  if (req.session && req.session.isAdmin === true) {
     return next();
   }
 
@@ -65,48 +111,63 @@ app.use(
   });
 }
 
+
 // ===============================
 // CLOUDINARY DATABASE
 // ===============================
 
 async function loadAnime() {
+
   const databaseIds = [
     "animeverse/anime-data",
     "animeverse/anime-data.json"
   ];
 
   for (const publicId of databaseIds) {
-    try {
-      console.log("Trying database:", publicId);
 
-      const result = await cloudinary.api.resource(
-        publicId,
-        {
-          resource_type: "raw",
-          type: "upload"
-        }
+    try {
+
+      console.log(
+        "Trying database:",
+        publicId
       );
+
+      const result =
+        await cloudinary.api.resource(
+          publicId,
+          {
+            resource_type: "raw",
+            type: "upload"
+          }
+        );
 
       console.log(
         "Cloudinary database found:",
         result.secure_url
       );
 
-      const response = await fetch(
-        result.secure_url + "?t=" + Date.now()
-      );
+      const response =
+        await fetch(
+          result.secure_url +
+          "?t=" +
+          Date.now()
+        );
 
       if (!response.ok) {
+
         console.log(
           "Database fetch failed:",
           response.status
         );
+
         continue;
       }
 
-      const data = await response.json();
+      const data =
+        await response.json();
 
       if (Array.isArray(data)) {
+
         console.log(
           "Anime database loaded. Count:",
           data.length
@@ -115,9 +176,12 @@ async function loadAnime() {
         return data;
       }
 
-      console.log("Database JSON is not an array.");
+      console.log(
+        "Database JSON is not an array."
+      );
 
     } catch (error) {
+
       console.log(
         "Database attempt failed:",
         publicId,
@@ -126,44 +190,73 @@ async function loadAnime() {
     }
   }
 
-  console.log("No anime database found.");
+  console.log(
+    "No anime database found."
+  );
+
   return [];
 }
 
+
+// ===============================
+// SAVE CLOUDINARY DATABASE
+// ===============================
+
 async function saveAnime(anime) {
-  const tempFile = path.join(
-    tempDir,
-    "anime-data.json"
-  );
+
+  const tempFile =
+    path.join(
+      tempDir,
+      "anime-data.json"
+    );
 
   fs.writeFileSync(
     tempFile,
-    JSON.stringify(anime, null, 2)
+    JSON.stringify(
+      anime,
+      null,
+      2
+    )
   );
 
-  await new Promise((resolve, reject) => {
-    cloudinary.uploader.upload(
-      tempFile,
-      {
-        resource_type: "raw",
-        type: "upload",
-        public_id: DATA_PUBLIC_ID,
-        overwrite: true
-      },
-      (error, result) => {
-        if (error) {
-          return reject(error);
-        }
+  try {
 
-        resolve(result);
+    await new Promise(
+      (resolve, reject) => {
+
+        cloudinary.uploader.upload(
+          tempFile,
+          {
+            resource_type: "raw",
+
+            type: "upload",
+
+            public_id:
+              DATA_PUBLIC_ID,
+
+            overwrite: true
+          },
+
+          (error, result) => {
+
+            if (error) {
+              return reject(error);
+            }
+
+            resolve(result);
+          }
+        );
       }
     );
-  });
 
-  try {
-    fs.unlinkSync(tempFile);
-  } catch {}
+  } finally {
+
+    try {
+      fs.unlinkSync(tempFile);
+    } catch {}
+  }
 }
+
 
 // ===============================
 // CLOUDINARY SIGNATURE
@@ -173,14 +266,18 @@ app.post(
   "/api/admin/upload-signature",
   adminOnly,
   (req, res) => {
+
     try {
+
       const resourceType =
-        req.body.resource_type === "image"
+        req.body?.resource_type === "image"
           ? "image"
           : "video";
 
       const timestamp =
-        Math.floor(Date.now() / 1000);
+        Math.floor(
+          Date.now() / 1000
+        );
 
       const folder =
         resourceType === "video"
@@ -200,78 +297,144 @@ app.post(
 
       res.json({
         ok: true,
+
         signature,
+
         timestamp,
+
         folder,
+
         cloud_name:
           process.env.CLOUDINARY_CLOUD_NAME,
+
         api_key:
           process.env.CLOUDINARY_API_KEY
       });
 
     } catch (error) {
+
       console.error(
         "SIGNATURE ERROR:",
         error
       );
 
       res.status(500).json({
-        error: error.message
+        error:
+          error.message ||
+          "Cloudinary signature failed"
       });
     }
   }
 );
 
+
 // ===============================
-// HTML FILES
+// HTML / STATIC FILES
 // ===============================
 
-app.get("/logo.png", (_req, res) => {
-  res.sendFile(
-    path.join(__dirname, "logo.png"),
-    {
-      headers: {
-        "Content-Type": "image/png"
+app.get(
+  "/logo.png",
+  (_req, res) => {
+
+    res.sendFile(
+      path.join(
+        __dirname,
+        "logo.png"
+      ),
+      {
+        headers: {
+          "Content-Type":
+            "image/png"
+        }
       }
-    }
-  );
-});
+    );
+  }
+);
 
-app.get("/index.html", (_req, res) => {
-  res.sendFile(
-    path.join(__dirname, "index.html")
-  );
-});
 
-app.get("/watch.html", (_req, res) => {
-  res.sendFile(
-    path.join(__dirname, "watch.html")
-  );
-});
+app.get(
+  "/index.html",
+  (_req, res) => {
 
-app.get("/admin.html", (_req, res) => {
-  res.sendFile(
-    path.join(__dirname, "admin.html")
-  );
-});
+    res.sendFile(
+      path.join(
+        __dirname,
+        "index.html"
+      )
+    );
+  }
+);
 
-app.get("/style.css", (_req, res) => {
-  res.sendFile(
-    path.join(__dirname, "style.css")
-  );
-});
 
-app.get("/admin.js", (_req, res) => {
-  res.sendFile(
-    path.join(__dirname, "admin.js")
-  );
-});
+app.get(
+  "/watch.html",
+  (_req, res) => {
 
-app.get("/app.js", (_req, res) => {
-  res.sendFile(
-    path.join(__dirname, "app.js")
-  );
-});
+    res.sendFile(
+      path.join(
+        __dirname,
+        "watch.html"
+      )
+    );
+  }
+);
+
+
+app.get(
+  "/admin.html",
+  (_req, res) => {
+
+    res.sendFile(
+      path.join(
+        __dirname,
+        "admin.html"
+      )
+    );
+  }
+);
+
+
+app.get(
+  "/style.css",
+  (_req, res) => {
+
+    res.sendFile(
+      path.join(
+        __dirname,
+        "style.css"
+      )
+    );
+  }
+);
+
+
+app.get(
+  "/admin.js",
+  (_req, res) => {
+
+    res.sendFile(
+      path.join(
+        __dirname,
+        "admin.js"
+      )
+    );
+  }
+);
+
+
+app.get(
+  "/app.js",
+  (_req, res) => {
+
+    res.sendFile(
+      path.join(
+        __dirname,
+        "app.js"
+      )
+    );
+  }
+);
+
 
 // ===============================
 // GET ALL ANIME
@@ -280,8 +443,11 @@ app.get("/app.js", (_req, res) => {
 app.get(
   "/api/anime",
   async (_req, res) => {
+
     try {
-      const anime = await loadAnime();
+
+      const anime =
+        await loadAnime();
 
       res.set(
         "Cache-Control",
@@ -301,6 +467,7 @@ app.get(
       res.json(anime);
 
     } catch (error) {
+
       console.error(
         "ANIME API ERROR:",
         error
@@ -315,6 +482,7 @@ app.get(
   }
 );
 
+
 // ===============================
 // ADMIN LOGIN
 // ===============================
@@ -323,46 +491,94 @@ app.post(
   "/api/admin/login",
   (req, res) => {
 
-    const password =
-      String(req.body?.password || "");
+    try {
 
-    if (password !== String(ADMIN_PASSWORD)) {
-      return res.status(401).json({
-        error: "Wrong password"
-      });
-    }
-
-    req.session.isAdmin = true;
-
-    req.session.save((error) => {
-
-      if (error) {
-        console.error(
-          "SESSION SAVE ERROR:",
-          error
+      const password =
+        String(
+          req.body?.password || ""
         );
 
-        return res.status(500).json({
-          error: "Session save failed"
+      if (
+        password !==
+        String(ADMIN_PASSWORD)
+      ) {
+
+        console.log(
+          "ADMIN LOGIN FAILED"
+        );
+
+        return res.status(401).json({
+          error: "Wrong password"
         });
       }
 
-      console.log(
-        "ADMIN LOGIN SUCCESS"
+      req.session.isAdmin = true;
+
+      req.session.save(
+        (error) => {
+
+          if (error) {
+
+            console.error(
+              "SESSION SAVE ERROR:",
+              error
+            );
+
+            return res.status(500).json({
+              error:
+                "Session save failed"
+            });
+          }
+
+          console.log(
+            "ADMIN LOGIN SUCCESS"
+          );
+
+          return res.json({
+            ok: true,
+            isAdmin: true
+          });
+        }
       );
 
-      return res.json({
-        ok: true,
-        isAdmin: true
-      });
+    } catch (error) {
 
-    });
+      console.error(
+        "LOGIN ERROR:",
+        error
+      );
+
+      return res.status(500).json({
+        error:
+          error.message ||
+          "Login failed"
+      });
+    }
   }
 );
+
 
 // ===============================
 // ADMIN STATUS
 // ===============================
+
+app.get(
+  "/api/admin/status",
+  (req, res) => {
+
+    res.set(
+      "Cache-Control",
+      "no-store, no-cache, must-revalidate"
+    );
+
+    res.json({
+      isAdmin:
+        req.session?.isAdmin === true
+    });
+  }
+);
+
+
 // ===============================
 // ADMIN LOGOUT
 // ===============================
@@ -370,36 +586,40 @@ app.post(
 app.post(
   "/api/admin/logout",
   (req, res) => {
-    req.session.destroy((error) => {
 
-      if (error) {
-        console.error(
-          "LOGOUT ERROR:",
-          error
+    req.session.destroy(
+      (error) => {
+
+        if (error) {
+
+          console.error(
+            "LOGOUT ERROR:",
+            error
+          );
+
+          return res.status(500).json({
+            error:
+              "Logout failed"
+          });
+        }
+
+        res.clearCookie(
+          "connect.sid",
+          {
+            httpOnly: true,
+            sameSite: "lax",
+            secure: true
+          }
         );
 
-        return res.status(500).json({
-          error: "Logout failed"
+        return res.json({
+          ok: true
         });
       }
-
-      res.clearCookie("connect.sid");
-
-      res.json({
-        ok: true
-      });
-    });
+    );
   }
 );
-app.get(
-  "/api/admin/status",
-  (req, res) => {
-    res.json({
-      isAdmin:
-        !!req.session?.isAdmin
-    });
-  }
-);
+
 
 // ===============================
 // SAVE NEW ANIME / EPISODE
@@ -409,47 +629,60 @@ app.post(
   "/api/admin/anime",
   adminOnly,
   async (req, res) => {
+
     try {
+
       const title =
-        String(req.body.title || "").trim();
+        String(
+          req.body?.title || ""
+        ).trim();
 
       const video =
-        req.body.video;
+        req.body?.video;
 
       if (
         !video ||
         !video.secure_url ||
         !video.public_id
       ) {
+
         return res.status(400).json({
-          error: "Video upload is required"
+          error:
+            "Video upload is required"
         });
       }
 
       let episode =
-        Number(req.body.episode || 1);
+        Number(
+          req.body?.episode || 1
+        );
 
       if (
-        !Number.isInteger(episode) ||
+        !Number.isInteger(
+          episode
+        ) ||
         episode < 1
       ) {
+
         episode = 1;
       }
 
       const poster =
-        req.body.poster || null;
+        req.body?.poster || null;
 
       const anime =
         await loadAnime();
 
       const animeId =
-        req.body.animeId;
+        req.body?.animeId;
+
 
       // =================================
       // ADD EPISODE
       // =================================
 
       if (animeId) {
+
         const existingAnime =
           anime.find(
             item =>
@@ -458,35 +691,43 @@ app.post(
           );
 
         if (!existingAnime) {
+
           return res.status(404).json({
-            error: "Anime not found"
+            error:
+              "Anime not found"
           });
         }
+
 
         if (
           !Array.isArray(
             existingAnime.episodes
           )
         ) {
+
           existingAnime.episodes = [];
 
           if (
             existingAnime.video &&
             existingAnime.episode
           ) {
+
             existingAnime.episodes.push({
               episode:
                 Number(
                   existingAnime.episode
                 ),
+
               video:
                 existingAnime.video,
+
               video_public_id:
                 existingAnime.video_public_id ||
                 null
             });
           }
         }
+
 
         const alreadyExists =
           existingAnime.episodes.some(
@@ -496,13 +737,16 @@ app.post(
           );
 
         if (alreadyExists) {
+
           return res.status(400).json({
             error:
               `Episode ${episode} already exists`
           });
         }
 
+
         existingAnime.episodes.push({
+
           episode,
 
           video:
@@ -515,35 +759,64 @@ app.post(
             new Date().toISOString()
         });
 
+
         existingAnime.episodes.sort(
           (a, b) =>
             Number(a.episode) -
             Number(b.episode)
         );
 
-        await saveAnime(anime);
+
+        // Keep latest episode
+        existingAnime.episode =
+          episode;
+
+        existingAnime.video =
+          video.secure_url;
+
+        existingAnime.video_public_id =
+          video.public_id;
+
+
+        await saveAnime(
+          anime
+        );
+
 
         return res.json({
+
           ok: true,
+
           id:
             existingAnime.id,
+
           episode,
+
           message:
             `Episode ${episode} added successfully`
         });
       }
+
 
       // =================================
       // CREATE NEW ANIME
       // =================================
 
       if (!title) {
+
         return res.status(400).json({
-          error: "Title is required"
+          error:
+            "Title is required"
         });
       }
 
+
+      const now =
+        new Date().toISOString();
+
+
       const newAnime = {
+
         id:
           Date.now(),
 
@@ -551,12 +824,13 @@ app.post(
 
         description:
           String(
-            req.body.description || ""
+            req.body?.description ||
+            ""
           ),
 
         category:
           String(
-            req.body.category ||
+            req.body?.category ||
             "Anime"
           ),
 
@@ -580,12 +854,12 @@ app.post(
               video.public_id,
 
             created_at:
-              new Date().toISOString()
+              now
           }
         ],
 
         created_at:
-          new Date().toISOString(),
+          now,
 
         video_public_id:
           video.public_id,
@@ -595,26 +869,38 @@ app.post(
           null
       };
 
-      anime.unshift(newAnime);
 
-      await saveAnime(anime);
+      anime.unshift(
+        newAnime
+      );
 
-      res.json({
+
+      await saveAnime(
+        anime
+      );
+
+
+      return res.json({
+
         ok: true,
+
         id:
           newAnime.id,
+
         episode,
+
         message:
           "Anime added successfully"
       });
 
     } catch (error) {
+
       console.error(
         "SAVE ANIME ERROR:",
         error
       );
 
-      res.status(500).json({
+      return res.status(500).json({
         error:
           error.message ||
           "Upload failed"
@@ -622,6 +908,7 @@ app.post(
     }
   }
 );
+
 
 // ===============================
 // EDIT ANIME
@@ -631,7 +918,9 @@ app.put(
   "/api/admin/anime/:id",
   adminOnly,
   async (req, res) => {
+
     try {
+
       const anime =
         await loadAnime();
 
@@ -643,73 +932,96 @@ app.put(
         );
 
       if (index === -1) {
+
         return res.status(404).json({
-          error: "Anime not found"
+          error:
+            "Anime not found"
         });
       }
+
 
       const item =
         anime[index];
 
+
       const title =
         String(
-          req.body.title ||
-          item.title
+          req.body?.title ||
+          item.title ||
+          ""
         ).trim();
 
+
       if (!title) {
+
         return res.status(400).json({
-          error: "Title is required"
+          error:
+            "Title is required"
         });
       }
 
+
       let episode =
         Number(
-          req.body.episode ||
+          req.body?.episode ||
           item.episode ||
           1
         );
 
+
       if (
-        !Number.isInteger(episode) ||
+        !Number.isInteger(
+          episode
+        ) ||
         episode < 1
       ) {
+
         episode =
-          item.episode || 1;
+          Number(
+            item.episode || 1
+          );
       }
 
-      item.title = title;
+
+      item.title =
+        title;
 
       item.description =
         String(
-          req.body.description ??
+          req.body?.description ??
           item.description ??
           ""
         );
 
       item.category =
         String(
-          req.body.category ??
+          req.body?.category ??
           item.category ??
           "Anime"
         );
 
-      item.episode = episode;
+      item.episode =
+        episode;
 
-      await saveAnime(anime);
 
-      res.json({
+      await saveAnime(
+        anime
+      );
+
+
+      return res.json({
         ok: true,
         anime: item
       });
 
     } catch (error) {
+
       console.error(
         "EDIT ERROR:",
         error
       );
 
-      res.status(500).json({
+      return res.status(500).json({
         error:
           error.message ||
           "Edit failed"
@@ -717,6 +1029,7 @@ app.put(
     }
   }
 );
+
 
 // ===============================
 // DELETE CLOUDINARY FILE
@@ -726,26 +1039,34 @@ async function deleteCloudinaryFile(
   publicId,
   resourceType
 ) {
+
   if (!publicId) {
     return;
   }
 
+
   try {
+
     await cloudinary.uploader.destroy(
       publicId,
       {
         resource_type:
           resourceType,
-        type: "upload"
+
+        type:
+          "upload"
       }
     );
+
   } catch (error) {
+
     console.error(
       "CLOUDINARY DELETE ERROR:",
       error
     );
   }
 }
+
 
 // ===============================
 // DELETE ANIME
@@ -755,7 +1076,9 @@ app.delete(
   "/api/admin/anime/:id",
   adminOnly,
   async (req, res) => {
+
     try {
+
       const anime =
         await loadAnime();
 
@@ -766,63 +1089,127 @@ app.delete(
             String(req.params.id)
         );
 
+
       if (index === -1) {
+
         return res.status(404).json({
-          error: "Not found"
+          error:
+            "Not found"
         });
       }
+
 
       const item =
         anime[index];
 
-      if (item.video_public_id) {
+
+      // Delete main video
+      if (
+        item.video_public_id
+      ) {
+
         await deleteCloudinaryFile(
           item.video_public_id,
           "video"
         );
       }
 
-      if (item.poster_public_id) {
+
+      // Delete main poster
+      if (
+        item.poster_public_id
+      ) {
+
         await deleteCloudinaryFile(
           item.poster_public_id,
           "image"
         );
       }
 
-      anime.splice(index, 1);
 
-      await saveAnime(anime);
+      // Delete episode videos
+      if (
+        Array.isArray(
+          item.episodes
+        )
+      ) {
 
-      res.json({
+        for (
+          const ep
+          of item.episodes
+        ) {
+
+          if (
+            ep.video_public_id
+          ) {
+
+            // Avoid deleting the same
+            // video twice
+            if (
+              ep.video_public_id !==
+              item.video_public_id
+            ) {
+
+              await deleteCloudinaryFile(
+                ep.video_public_id,
+                "video"
+              );
+            }
+          }
+        }
+      }
+
+
+      anime.splice(
+        index,
+        1
+      );
+
+
+      await saveAnime(
+        anime
+      );
+
+
+      return res.json({
         ok: true
       });
 
     } catch (error) {
+
       console.error(
         "DELETE ERROR:",
         error
       );
 
-      res.status(500).json({
+      return res.status(500).json({
         error:
-          error.message
+          error.message ||
+          "Delete failed"
       });
     }
   }
 );
+
 
 // ===============================
 // ERROR HANDLER
 // ===============================
 
 app.use(
-  (err, _req, res, _next) => {
+  (
+    err,
+    _req,
+    res,
+    _next
+  ) => {
+
     console.error(
       "SERVER ERROR:",
       err
     );
 
-    res.status(400).json({
+    return res.status(400).json({
       error:
         err.message ||
         "Request failed"
@@ -830,13 +1217,15 @@ app.use(
   }
 );
 
+
 // ===============================
-// START
+// START SERVER
 // ===============================
 
 app.listen(
   PORT,
   () => {
+
     console.log(
       `Anime site running on port ${PORT}`
     );
