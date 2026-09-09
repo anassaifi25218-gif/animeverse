@@ -60,36 +60,22 @@ let selectedAnimeId = null;
 // ===============================
 
 function showDashboard() {
+  loginBox.hidden = true;
+  loginBox.style.display = "none";
 
-  // Login completely hide
-  if (loginBox) {
-    loginBox.hidden = true;
-    loginBox.style.display = "none";
-  }
-
-  // Dashboard show
-  if (dashboard) {
-    dashboard.hidden = false;
-    dashboard.style.display = "";
-  }
+  dashboard.hidden = false;
+  dashboard.style.display = "block";
 
   loadAnime();
 }
 
-
 function showLogin() {
+  dashboard.hidden = true;
+  dashboard.style.display = "none";
 
-  // Dashboard completely hide
-  if (dashboard) {
-    dashboard.hidden = true;
-    dashboard.style.display = "none";
-  }
-
-  // Login show
-  if (loginBox) {
-    loginBox.hidden = false;
-    loginBox.style.display = "";
-  }
+  loginBox.hidden = false;
+  loginBox.style.display = "grid";
+}
 
   // Clear sensitive upload state
   uploadedVideo = null;
