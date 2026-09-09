@@ -322,9 +322,9 @@ app.post(
   (req, res) => {
 
     const password =
-      String(req.body.password || "");
+      String(req.body?.password || "");
 
-    if (password !== ADMIN_PASSWORD) {
+    if (password !== String(ADMIN_PASSWORD)) {
       return res.status(401).json({
         error: "Wrong password"
       });
@@ -341,16 +341,20 @@ app.post(
         );
 
         return res.status(500).json({
-          error: "Login session save failed"
+          error: "Session save failed"
         });
       }
 
-      res.json({
-        ok: true
+      console.log(
+        "ADMIN LOGIN SUCCESS"
+      );
+
+      return res.json({
+        ok: true,
+        isAdmin: true
       });
 
     });
-
   }
 );
 
