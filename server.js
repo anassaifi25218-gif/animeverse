@@ -35,6 +35,15 @@ app.get("/", (_req, res) => {
   res.sendFile(path.join(__dirname, "index.html"));
 });
 
+
+
+// ===============================
+// ADMIN CHECK
+// ===============================
+
+function adminOnly(req, res, next) {
+  if (req.seapp.set("trust proxy", 1);
+
 app.use(
   session({
     secret: SESSION_SECRET,
@@ -43,18 +52,11 @@ app.use(
     cookie: {
       httpOnly: true,
       sameSite: "lax",
-      secure: false,
+      secure: true,
       maxAge: 1000 * 60 * 60 * 8
     }
   })
-);
-
-// ===============================
-// ADMIN CHECK
-// ===============================
-
-function adminOnly(req, res, next) {
-  if (req.session?.isAdmin) {
+);ssion?.isAdmin) {
     return next();
   }
 
