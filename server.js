@@ -28,7 +28,7 @@ const tempDir = path.join(__dirname, "temp-uploads");
 fs.mkdirSync(tempDir, { recursive: true });
 
 app.use(express.json({ limit: "10mb" }));
-
+app.set("trust proxy", 1);
 app.use(express.static(__dirname));
 
 app.get("/", (_req, res) => {
@@ -320,10 +320,11 @@ app.get(
 app.post(
   "/api/admin/login",
   (req, res) => {
-    if (
-      req.body.password !==
-      ADMIN_PASSWORD
-    ) {
+
+    const password =
+      String(req.body.password || "");
+
+    if (password !== ADMIN_PASSWORD) {
       return res.status(401).json({
         error: "Wrong password"
       });
@@ -331,9 +332,25 @@ app.post(
 
     req.session.isAdmin = true;
 
-    res.json({
-      ok: true
+    req.session.save((error) => {
+
+      if (error) {
+        console.error(
+          "SESSION SAVE ERROR:",
+          error
+        );
+
+        return res.status(500).json({
+          error: "Login session save failed"
+        });
+      }
+
+      res.json({
+        ok: true
+      });
+
     });
+
   }
 );
 
