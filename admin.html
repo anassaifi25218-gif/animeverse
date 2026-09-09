@@ -22,9 +22,14 @@
   box-sizing: border-box;
 }
 
+html {
+  scroll-behavior: smooth;
+}
+
 body {
   margin: 0;
   min-height: 100vh;
+
   font-family:
     system-ui,
     -apple-system,
@@ -32,21 +37,26 @@ body {
     "Segoe UI",
     sans-serif;
 
-  color: white;
+  color: #fff;
 
   background:
     radial-gradient(
-      circle at 15% 10%,
-      rgba(124,58,237,.25),
-      transparent 30%
+      circle at 10% 0%,
+      rgba(124,58,237,.22),
+      transparent 28%
     ),
     radial-gradient(
-      circle at 90% 80%,
-      rgba(37,99,235,.2),
+      circle at 95% 90%,
+      rgba(37,99,235,.18),
       transparent 30%
     ),
     #060810;
 }
+
+
+/* =========================
+   COMMON
+========================= */
 
 button,
 input,
@@ -58,35 +68,45 @@ button {
   cursor: pointer;
 }
 
+button:disabled {
+  cursor: not-allowed;
+}
+
 .page {
-  width: min(1150px, 94%);
+  width: min(1180px, 94%);
   margin: auto;
-  padding: 25px 0 50px;
+  padding: 28px 0 60px;
 }
 
 
-/* LOGIN */
+/* =========================
+   LOGIN
+========================= */
 
 #loginBox {
   min-height: 100vh;
+
   display: grid;
   place-items: center;
+
   padding: 20px;
 }
 
 .login-card {
-  width: min(420px, 100%);
-  padding: 32px;
+  width: min(430px, 100%);
+
+  padding: 34px;
+
   border-radius: 26px;
 
-  background: rgba(15,18,32,.86);
+  background:
+    rgba(15,18,32,.9);
 
-  border: 1px solid
-    rgba(255,255,255,.1);
+  border:
+    1px solid rgba(255,255,255,.1);
 
   box-shadow:
-    0 25px 80px
-    rgba(0,0,0,.5);
+    0 25px 90px rgba(0,0,0,.55);
 
   backdrop-filter: blur(18px);
 }
@@ -97,13 +117,15 @@ button {
 }
 
 .logo-icon {
-  width: 64px;
-  height: 64px;
+  width: 68px;
+  height: 68px;
+
   display: grid;
   place-items: center;
-  margin: auto auto 14px;
 
-  border-radius: 20px;
+  margin: 0 auto 14px;
+
+  border-radius: 21px;
 
   background:
     linear-gradient(
@@ -112,73 +134,101 @@ button {
       #2563eb
     );
 
-  font-size: 28px;
+  font-size: 30px;
+
+  box-shadow:
+    0 12px 35px rgba(124,58,237,.25);
 }
 
 .logo-box h1 {
   margin: 0;
-  font-size: 27px;
+
+  font-size: 28px;
+  font-weight: 800;
 }
 
 .logo-box p {
+  margin: 6px 0 0;
+
   color: #858da2;
+
   font-size: 13px;
 }
 
 
-/* INPUTS */
+/* =========================
+   INPUTS
+========================= */
 
 .field {
-  margin-bottom: 16px;
+  margin-bottom: 17px;
 }
 
 label {
   display: block;
+
   margin-bottom: 7px;
 
+  color: #d5d9e5;
+
   font-size: 13px;
-  font-weight: 600;
-  color: #cdd2df;
+  font-weight: 650;
 }
 
 input,
 textarea {
   width: 100%;
 
-  border: 1px solid #252a3d;
+  border:
+    1px solid #252a3d;
+
   border-radius: 13px;
 
   outline: none;
 
   background: #0b0f1d;
-  color: white;
+  color: #fff;
 
   padding: 13px 14px;
+
+  transition: .2s ease;
+}
+
+input::placeholder,
+textarea::placeholder {
+  color: #60687b;
 }
 
 input:focus,
 textarea:focus {
   border-color: #7c3aed;
+
+  box-shadow:
+    0 0 0 3px rgba(124,58,237,.12);
 }
 
 textarea {
-  min-height: 95px;
+  min-height: 100px;
   resize: vertical;
 }
 
 
-/* BUTTON */
+/* =========================
+   BUTTONS
+========================= */
 
 .primary {
   width: 100%;
 
   border: 0;
+
   border-radius: 13px;
 
   padding: 14px;
 
   color: white;
-  font-weight: 700;
+
+  font-weight: 750;
 
   background:
     linear-gradient(
@@ -186,50 +236,82 @@ textarea {
       #7c3aed,
       #2563eb
     );
+
+  box-shadow:
+    0 8px 25px rgba(37,99,235,.15);
+
+  transition: .2s ease;
+}
+
+.primary:hover {
+  transform: translateY(-1px);
+
+  box-shadow:
+    0 12px 30px rgba(37,99,235,.25);
 }
 
 #logout {
-  border: 1px solid #292e42;
+  border:
+    1px solid #292e42;
+
   border-radius: 12px;
 
-  padding: 10px 16px;
+  padding: 10px 17px;
 
-  color: white;
+  color: #fff;
+
   background: #101423;
+
+  transition: .2s ease;
+}
+
+#logout:hover {
+  background: #181d2d;
 }
 
 
-/* TOP */
+/* =========================
+   TOPBAR
+========================= */
 
 .topbar {
   display: flex;
+
   justify-content: space-between;
   align-items: center;
 
   gap: 15px;
 
-  margin-bottom: 24px;
+  margin-bottom: 25px;
 }
 
 .topbar h1 {
   margin: 0;
-  font-size: clamp(25px,5vw,36px);
+
+  font-size:
+    clamp(25px, 5vw, 38px);
+
+  line-height: 1.1;
 }
 
 .topbar p {
-  margin: 5px 0 0;
+  margin: 7px 0 0;
+
   color: #858da2;
+
   font-size: 13px;
 }
 
 
-/* STATS */
+/* =========================
+   STATS
+========================= */
 
 .stats {
   display: grid;
 
   grid-template-columns:
-    repeat(3,1fr);
+    repeat(3, 1fr);
 
   gap: 14px;
 
@@ -237,16 +319,38 @@ textarea {
 }
 
 .stat {
-  padding: 20px;
+  position: relative;
+
+  padding: 21px;
 
   border-radius: 20px;
 
   background:
-    rgba(14,18,31,.8);
+    rgba(14,18,31,.84);
 
   border:
-    1px solid
-    rgba(255,255,255,.08);
+    1px solid rgba(255,255,255,.08);
+
+  overflow: hidden;
+}
+
+.stat::after {
+  content: "";
+
+  position: absolute;
+
+  width: 100px;
+  height: 100px;
+
+  right: -40px;
+  bottom: -45px;
+
+  border-radius: 50%;
+
+  background:
+    rgba(124,58,237,.1);
+
+  filter: blur(15px);
 }
 
 .stat-icon {
@@ -258,64 +362,81 @@ textarea {
 
   margin-top: 8px;
 
-  font-size: 27px;
+  font-size: 28px;
 }
 
 .stat span {
   color: #858da2;
+
   font-size: 12px;
 }
 
 
-/* LAYOUT */
+/* =========================
+   MAIN LAYOUT
+========================= */
 
 .layout {
   display: grid;
 
   grid-template-columns:
-    minmax(0,1fr)
-    minmax(0,1fr);
+    minmax(0, 1fr)
+    minmax(0, 1fr);
 
   gap: 20px;
+
+  align-items: start;
 }
 
 .panel {
-  padding: 22px;
+  padding: 23px;
 
   border-radius: 23px;
 
   background:
-    rgba(14,18,31,.84);
+    rgba(14,18,31,.86);
 
   border:
-    1px solid
-    rgba(255,255,255,.08);
+    1px solid rgba(255,255,255,.08);
+
+  box-shadow:
+    0 15px 50px rgba(0,0,0,.18);
 }
 
 .panel-title {
   display: flex;
+
   justify-content: space-between;
   align-items: center;
+
+  gap: 10px;
 
   margin-bottom: 20px;
 }
 
 .panel-title h2 {
   margin: 0;
+
   font-size: 19px;
 }
 
 .panel-title span {
   color: #737b90;
-  font-size: 11px;
+
+  font-size: 10px;
+
+  letter-spacing: 1px;
 }
 
 
-/* UPLOAD */
+/* =========================
+   UPLOAD BOX
+========================= */
 
 .upload-box {
-  margin-top: 14px;
-  padding: 15px;
+  margin-top: 15px;
+
+  padding: 16px;
 
   border-radius: 17px;
 
@@ -327,9 +448,13 @@ textarea {
 
 .upload-head {
   display: flex;
-  justify-content: space-between;
 
-  margin-bottom: 10px;
+  justify-content: space-between;
+  align-items: center;
+
+  gap: 10px;
+
+  margin-bottom: 11px;
 }
 
 .upload-head strong {
@@ -338,6 +463,8 @@ textarea {
 
 .upload-head small {
   color: #737b90;
+
+  font-size: 10px;
 }
 
 .upload-button {
@@ -347,12 +474,20 @@ textarea {
 
   border-radius: 12px;
 
-  color: white;
+  color: #dfe5f5;
 
   background: #151a2c;
 
   border:
     1px solid #30364d;
+
+  transition: .2s ease;
+}
+
+.upload-button:hover:not(:disabled) {
+  background: #1c2339;
+
+  border-color: #4b5675;
 }
 
 .upload-button:disabled {
@@ -364,16 +499,20 @@ textarea {
 
   min-height: 18px;
 
-  margin-top: 8px;
+  margin-top: 9px;
 
   color: #8d95aa;
 
   font-size: 12px;
+
+  word-break: break-word;
 }
 
 #uploadMsg,
 #loginMsg {
   min-height: 20px;
+
+  margin: 12px 0 0;
 
   color: #9ca3af;
 
@@ -381,9 +520,13 @@ textarea {
 }
 
 
-/* SEARCH */
+/* =========================
+   SEARCH
+========================= */
 
 .search-box {
+  position: relative;
+
   margin-bottom: 14px;
 }
 
@@ -392,10 +535,13 @@ textarea {
 }
 
 
-/* ADMIN LIST */
+/* =========================
+   ADMIN LIST
+========================= */
 
 #adminList {
   display: flex;
+
   flex-direction: column;
 
   gap: 11px;
@@ -403,10 +549,21 @@ textarea {
   max-height: 620px;
 
   overflow-y: auto;
+
+  padding-right: 3px;
+}
+
+#adminList::-webkit-scrollbar {
+  width: 5px;
+}
+
+#adminList::-webkit-scrollbar-thumb {
+  background: #30364d;
+  border-radius: 10px;
 }
 
 .admin-anime {
-  padding: 14px;
+  padding: 15px;
 
   border-radius: 16px;
 
@@ -414,6 +571,12 @@ textarea {
 
   border:
     1px solid #252a3d;
+
+  transition: .2s ease;
+}
+
+.admin-anime:hover {
+  border-color: #353d58;
 }
 
 .anime-main strong {
@@ -446,6 +609,12 @@ textarea {
   padding: 8px 11px;
 
   font-size: 12px;
+
+  transition: .2s ease;
+}
+
+.anime-actions button:hover {
+  transform: translateY(-1px);
 }
 
 .edit-btn {
@@ -476,34 +645,68 @@ textarea {
 }
 
 
-/* MOBILE */
+/* =========================
+   DESKTOP FORM DETAILS
+========================= */
 
-@media (max-width: 800px) {
+#uploadForm {
+  position: relative;
+}
+
+#uploadForm > .field:nth-child(3) input {
+  letter-spacing: .1px;
+}
+
+#episode {
+  appearance: textfield;
+}
+
+
+/* =========================
+   MOBILE
+========================= */
+
+@media (max-width: 850px) {
 
   .layout {
     grid-template-columns: 1fr;
   }
 
   .stats {
-    grid-template-columns: 1fr;
+    grid-template-columns:
+      repeat(3, 1fr);
   }
 
   #adminList {
     max-height: none;
   }
+
 }
 
 
-@media (max-width: 500px) {
+@media (max-width: 600px) {
 
   .page {
     width: 92%;
+
     padding-top: 18px;
   }
 
-  .panel,
-  .login-card {
+  .stats {
+    grid-template-columns: 1fr;
+  }
+
+  .stat {
     padding: 17px;
+  }
+
+  .layout {
+    gap: 14px;
+  }
+
+  .panel {
+    padding: 17px;
+
     border-radius: 19px;
   }
 
@@ -515,8 +718,53 @@ textarea {
     font-size: 25px;
   }
 
+  .topbar p {
+    font-size: 12px;
+  }
+
   #logout {
     padding: 9px 12px;
+  }
+
+  .panel-title {
+    margin-bottom: 16px;
+  }
+
+  .panel-title h2 {
+    font-size: 17px;
+  }
+
+  .upload-box {
+    padding: 13px;
+  }
+
+}
+
+
+@media (max-width: 400px) {
+
+  .topbar {
+    flex-direction: column;
+  }
+
+  #logout {
+    width: 100%;
+  }
+
+}
+
+
+/* =========================
+   REDUCED MOTION
+========================= */
+
+@media (prefers-reduced-motion: reduce) {
+
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    transition: none !important;
   }
 
 }
@@ -530,7 +778,7 @@ textarea {
 
 <!-- =========================
      LOGIN
-========================== -->
+========================= -->
 
 <section id="loginBox">
 
@@ -589,10 +837,9 @@ textarea {
 </section>
 
 
-
 <!-- =========================
      DASHBOARD
-========================== -->
+========================= -->
 
 <section id="dashboard" hidden>
 
@@ -621,8 +868,9 @@ textarea {
 </header>
 
 
-
-<!-- STATS -->
+<!-- =========================
+     STATS
+========================= -->
 
 <div class="stats">
 
@@ -679,13 +927,12 @@ textarea {
 </div>
 
 
-
 <div class="layout">
 
 
 <!-- =========================
-     UPLOAD
-========================== -->
+     UPLOAD PANEL
+========================= -->
 
 <div class="panel">
 
@@ -807,7 +1054,6 @@ textarea {
     </div>
 
 
-
     <!-- POSTER -->
 
     <div class="upload-box">
@@ -844,7 +1090,6 @@ textarea {
     </div>
 
 
-
     <button
       type="submit"
       class="primary"
@@ -862,10 +1107,9 @@ textarea {
 </div>
 
 
-
 <!-- =========================
      LIBRARY
-========================== -->
+========================= -->
 
 <div class="panel">
 
@@ -888,6 +1132,7 @@ textarea {
       id="searchAdmin"
       type="search"
       placeholder="🔎 Search anime..."
+      autocomplete="off"
     >
 
   </div>
