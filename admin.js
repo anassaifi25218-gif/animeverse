@@ -182,26 +182,22 @@ if (loginForm) {
 
       try {
 
-        const res =
-          await fetch(
-            "/api/admin/login",
-            {
-              method: "POST",
+        const res = await fetch(
+  "/api/admin/login",
+  {
+    method: "POST",
 
-              headers: {
-                "Content-Type":
-                  "application/json"
-              },
+    headers: {
+      "Content-Type": "application/json"
+    },
 
-              credentials:
-                "same-origin",
+    credentials: "same-origin",
 
-              body:
-                JSON.stringify({
-                  password
-                })
-            }
-          );
+    body: JSON.stringify({
+      password
+    })
+  }
+);
 
         let data = {};
 
