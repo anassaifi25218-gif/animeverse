@@ -1198,30 +1198,255 @@ function displayAdminAnime(list) {
       const episodeBtn =
         item.querySelector(".episode-btn");
 
-      if (episodeBtn) {
-        episodeBtn.addEventListener(
-          "click",
-          () => {
-            prepareNewEpisode(anime);
-          }
-        );
-      }
-
-      const deleteBtn =
-        item.querySelector(".delete-btn");
-
-      if (deleteBtn) {
-        deleteBtn.addEventListener(
-          "click",
-          () => {
-            deleteAnime(anime.id);
-          }
-        );
-      }
-
-      adminList.appendChild(item);
+      if (editBtn) {
+  editBtn.addEventListener(
+    "click",
+    () => {
+      editAnime(anime);
     }
   );
+}
+
+const episodeBtn =
+  item.querySelector(".episode-btn");
+
+if (episodeBtn) {
+  episodeBtn.addEventListener(
+    "click",
+    () => {
+      prepareNewEpisode(anime);
+    }
+  );
+}
+
+const deleteBtn =
+  item.querySelector(".delete-btn");
+
+if (deleteBtn) {
+  deleteBtn.addEventListener(
+    "click",
+    () => {
+      deleteAnime(anime.id);
+    }
+  );
+}
+
+adminList.appendChild(item);
+
+    }
+  );
+}
+
+
+// ===============================
+// EDIT ANIME
+// ===============================
+
+async function editAnime(anime) {
+
+  const title =
+    prompt(
+      "Anime title:",
+      anime.title || ""
+    );
+
+  if (title === null) return;
+
+  const description =
+    prompt(
+      "Description:",
+      anime.description || ""
+    );
+
+  if (description === null) return;
+
+  const category =
+    prompt(
+      "Category:",
+      anime.category || "Anime"
+    );
+
+  if (category === null) return;
+
+  const episode =
+    prompt(
+      "Episode number:",
+      anime.episode || 1
+    );
+
+  if (episode === null) return;
+
+  if (uploadMsg) {
+    uploadMsg.textContent =
+      "Saving changes...";
+  }
+
+  try {
+
+    const res =
+      await fetch(
+        `/api/admin/anime/${anime.id}`,
+        {
+          method: "PUT",
+
+          headers: {
+            "Content-Type":
+              "application/json"
+          },
+
+          credentials:
+            "include",
+
+          body:
+            JSON.stringify({
+              title,
+              description,
+              category,
+              episode:
+                Number(episode)
+            })
+        }
+      );
+
+    let data = {};
+
+    try {
+      data = await res.json();
+    } catch {
+      data = {};
+    }
+
+    if (res.status === 401) {
+      showLogin();
+
+      if (loginMsg) {
+        loginMsg.textContent =
+          "Session expire ho gaya. Dobara login karo.";
+      }
+
+      return;
+    }
+
+    if (!res.ok || !data.ok) {
+      throw new Error(
+        data.error ||
+        "Anime update failed"
+      );
+    }
+
+    if (uploadMsg) {
+      uploadMsg.textContent =
+        "✅ Anime updated successfully!";
+    }
+
+    await loadAnime();
+
+  } catch (error) {
+
+    console.error(
+      "EDIT ERROR:",
+      error
+    );
+
+    if (uploadMsg) {
+      uploadMsg.textContent =
+        "Edit error: " +
+        error.message;
+    }
+  }
+}
+
+
+// ===============================
+// DELETE ANIME
+// ===============================
+
+async function deleteAnime(id) {
+
+  if (!id) {
+    return;
+  }
+
+  const confirmed =
+    confirm(
+      "Kya aap is anime ko delete karna chahte ho?"
+    );
+
+  if (!confirmed) {
+    return;
+  }
+
+  try {
+
+    const res =
+      await fetch(
+        `/api/admin/anime/${id}`,
+        {
+          method: "DELETE",
+
+          credentials:
+            "include",
+
+          cache:
+            "no-store"
+        }
+      );
+
+    let data = {};
+
+    try {
+      data = await res.json();
+    } catch {
+      data = {};
+    }
+
+    if (res.status === 401) {
+      showLogin();
+      return;
+    }
+
+    if (!res.ok || !data.ok) {
+      throw new Error(
+        data.error ||
+        "Delete failed"
+      );
+    }
+
+    if (uploadMsg) {
+      uploadMsg.textContent =
+        "✅ Anime deleted successfully!";
+    }
+
+    await loadAnime();
+
+  } catch (error) {
+
+    console.error(
+      "DELETE ERROR:",
+      error
+    );
+
+    if (uploadMsg) {
+      uploadMsg.textContent =
+        "Delete error: " +
+        error.message;
+    }
+  }
+}
+
+
+// ===============================
+// ESCAPE HTML
+// ===============================
+
+function escapeHtml(value) {
+
+  return String(value ?? "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
 }
 
 
