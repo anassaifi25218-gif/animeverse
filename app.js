@@ -375,17 +375,464 @@ function filterAnime() {
 }
 
 
-/* ===============================
-   SEARCH
-=============================== */
+// ===============================
+// IMPROVED SEARCH
+// ===============================
+
+const search =
+  document.getElementById("search");
+
+let searchAnimeCache = [];
+
+let searchSuggestionBox = null;
+
+
+// ===============================
+// CREATE SEARCH SUGGESTION BOX
+// ===============================
+
+function createSearchSuggestionBox() {
+
+  if (!search || searchSuggestionBox) {
+    return;
+  }
+
+  const searchBox =
+    search.closest(".search-box");
+
+  if (!searchBox) {
+    return;
+  }
+
+  searchBox.style.position = "relative";
+
+  searchSuggestionBox =
+    document.createElement("div");
+
+  searchSuggestionBox.id =
+    "searchSuggestions";
+
+  searchSuggestionBox.hidden = true;
+
+  searchSuggestionBox.style.position =
+    "absolute";
+
+  searchSuggestionBox.style.top =
+    "calc(100% + 8px)";
+
+  searchSuggestionBox.style.left =
+    "0";
+
+  searchSuggestionBox.style.right =
+    "0";
+
+  searchSuggestionBox.style.zIndex =
+    "9999";
+
+  searchSuggestionBox.style.background =
+    "#111827";
+
+  searchSuggestionBox.style.border =
+    "1px solid rgba(255,255,255,.12)";
+
+  searchSuggestionBox.style.borderRadius =
+    "14px";
+
+  searchSuggestionBox.style.overflow =
+    "hidden";
+
+  searchSuggestionBox.style.boxShadow =
+    "0 15px 40px rgba(0,0,0,.45)";
+
+  searchBox.appendChild(
+    searchSuggestionBox
+  );
+
+}
+
+
+// ===============================
+// ESCAPE HTML
+// ===============================
+
+function escapeSearch(value) {
+
+  return String(value ?? "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
+
+}
+
+
+// ===============================
+// LOAD ANIME FOR SEARCH
+// ===============================
+
+async function loadSearchAnime() {
+
+  try {
+
+    const response =
+      await fetch(
+        "/api/anime",
+        {
+          method: "GET",
+          cache: "no-store"
+        }
+      );
+
+    if (!response.ok) {
+      return;
+    }
+
+    const data =
+      await response.json();
+
+    searchAnimeCache =
+      Array.isArray(data)
+        ? data
+        : [];
+
+  } catch (error) {
+
+    console.error(
+      "SEARCH LOAD ERROR:",
+      error
+    );
+
+  }
+
+}
+
+
+// ===============================
+// SHOW SUGGESTIONS
+// ===============================
+
+function showSearchSuggestions(
+  query
+) {
+
+  createSearchSuggestionBox();
+
+  if (
+    !searchSuggestionBox ||
+    !search
+  ) {
+    return;
+  }
+
+  query =
+    query
+      .toLowerCase()
+      .trim();
+
+  if (!query) {
+
+    searchSuggestionBox.hidden =
+      true;
+
+    searchSuggestionBox.innerHTML =
+      "";
+
+    return;
+
+  }
+
+
+  const results =
+    searchAnimeCache
+      .filter(anime => {
+
+        const title =
+          String(
+            anime.title || ""
+          )
+            .toLowerCase();
+
+        const category =
+          String(
+            anime.category || ""
+          )
+            .toLowerCase();
+
+        return (
+          title.includes(query) ||
+          category.includes(query)
+        );
+
+      })
+      .slice(0, 6);
+
+
+  searchSuggestionBox.innerHTML =
+    "";
+
+
+  if (!results.length) {
+
+    searchSuggestionBox.innerHTML = `
+      <div
+        style="
+          padding:16px;
+          color:#9ca3af;
+          text-align:center;
+          font-size:14px;
+        "
+      >
+        🔎 Anime नहीं मिला
+      </div>
+    `;
+
+    searchSuggestionBox.hidden =
+      false;
+
+    return;
+
+  }
+
+
+  results.forEach(anime => {
+
+    const button =
+      document.createElement(
+        "button"
+      );
+
+    button.type =
+      "button";
+
+    button.style.width =
+      "100%";
+
+    button.style.display =
+      "flex";
+
+    button.style.alignItems =
+      "center";
+
+    button.style.gap =
+      "12px";
+
+    button.style.padding =
+      "10px 12px";
+
+    button.style.border =
+      "0";
+
+    button.style.borderBottom =
+      "1px solid rgba(255,255,255,.08)";
+
+    button.style.background =
+      "transparent";
+
+    button.style.color =
+      "#fff";
+
+    button.style.textAlign =
+      "left";
+
+    button.style.cursor =
+      "pointer";
+
+
+    const poster =
+      anime.poster?.secure_url ||
+      anime.poster?.url ||
+      anime.poster ||
+      "";
+
+
+    const episodeCount =
+      Array.isArray(
+        anime.episodes
+      )
+        ? anime.episodes.length
+        : (
+            anime.episode ||
+            1
+          );
+
+
+    button.innerHTML = `
+
+      ${
+        poster
+          ? `
+            <img
+              src="${escapeSearch(poster)}"
+              alt=""
+              loading="lazy"
+              style="
+                width:42px;
+                height:56px;
+                object-fit:cover;
+                border-radius:7px;
+                flex-shrink:0;
+              "
+            >
+          `
+          : `
+            <div
+              style="
+                width:42px;
+                height:56px;
+                border-radius:7px;
+                background:#202536;
+                display:grid;
+                place-items:center;
+                flex-shrink:0;
+                font-size:20px;
+              "
+            >
+              🎬
+            </div>
+          `
+      }
+
+      <div
+        style="
+          min-width:0;
+          flex:1;
+        "
+      >
+
+        <div
+          style="
+            font-size:15px;
+            font-weight:700;
+            white-space:nowrap;
+            overflow:hidden;
+            text-overflow:ellipsis;
+          "
+        >
+          ${escapeSearch(
+            anime.title ||
+            "Untitled Anime"
+          )}
+        </div>
+
+        <div
+          style="
+            margin-top:5px;
+            font-size:12px;
+            color:#9ca3af;
+          "
+        >
+          ${escapeSearch(
+            anime.category ||
+            "Anime"
+          )}
+          • ${episodeCount} EP
+        </div>
+
+      </div>
+
+    `;
+
+
+    button.addEventListener(
+      "mouseenter",
+      () => {
+
+        button.style.background =
+          "rgba(59,130,246,.12)";
+
+      }
+    );
+
+
+    button.addEventListener(
+      "mouseleave",
+      () => {
+
+        button.style.background =
+          "transparent";
+
+      }
+    );
+
+
+    button.addEventListener(
+      "click",
+      () => {
+
+        search.value =
+          anime.title || "";
+
+        searchSuggestionBox.hidden =
+          true;
+
+        searchSuggestionBox.innerHTML =
+          "";
+
+        /*
+         * Existing search/filter system ko
+         * activate karega.
+         */
+        search.dispatchEvent(
+          new Event(
+            "input",
+            {
+              bubbles: true
+            }
+          )
+        );
+
+      }
+    );
+
+
+    searchSuggestionBox.appendChild(
+      button
+    );
+
+  });
+
+
+  searchSuggestionBox.hidden =
+    false;
+
+}
+
+
+// ===============================
+// SEARCH INPUT
+// ===============================
 
 if (search) {
 
+  createSearchSuggestionBox();
+
+
   search.addEventListener(
     "input",
-    function () {
+    () => {
 
-      filterAnime();
+      showSearchSuggestions(
+        search.value
+      );
+
+    }
+  );
+
+
+  search.addEventListener(
+    "focus",
+    () => {
+
+      if (
+        search.value.trim()
+      ) {
+
+        showSearchSuggestions(
+          search.value
+        );
+
+      }
 
     }
   );
@@ -393,41 +840,44 @@ if (search) {
 }
 
 
-/* ===============================
-   CATEGORY
-=============================== */
+// ===============================
+// CLOSE WHEN CLICKING OUTSIDE
+// ===============================
 
-if (category) {
+document.addEventListener(
+  "click",
+  event => {
 
-  category.addEventListener(
-    "change",
-    function () {
+    if (
+      !search ||
+      !searchSuggestionBox
+    ) {
+      return;
+    }
 
-      filterAnime();
+    const searchBox =
+      search.closest(
+        ".search-box"
+      );
+
+    if (
+      searchBox &&
+      !searchBox.contains(
+        event.target
+      )
+    ) {
+
+      searchSuggestionBox.hidden =
+        true;
 
     }
-  );
 
-}
-
-
-/* ===============================
-   AUTO REFRESH
-   New uploads appear automatically
-=============================== */
-
-setInterval(
-  function () {
-
-    loadAnime();
-
-  },
-  30000
+  }
 );
 
 
-/* ===============================
-   START
-=============================== */
+// ===============================
+// LOAD SEARCH DATA
+// ===============================
 
-loadAnime();
+loadSearchAnime();
