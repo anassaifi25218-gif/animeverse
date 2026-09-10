@@ -168,8 +168,7 @@ if (loginForm) {
       e.preventDefault();
 
       if (loginMsg) {
-        loginMsg.textContent =
-          "Logging in...";
+        loginMsg.textContent = "Logging in...";
       }
 
       const passwordInput =
@@ -182,40 +181,59 @@ if (loginForm) {
 
       try {
 
-        const res = await fetch("/api/admin/login", {
-  method: "POST",
-  headers: {
-    "Content-Type": "application/json"
-  },
-  credentials: "include",
-  body: JSON.stringify({
-    password: password
-  })
-});
+        const res =
+          await fetch(
+            "/api/admin/login",
+            {
+              method: "POST",
 
-let data = {};
+              headers: {
+                "Content-Type":
+                  "application/json"
+              },
 
-try {
-  data = await res.json();
-} catch (error) {
-  data = {};
-}
+              credentials: "include",
 
-if (!res.ok) {
-  if (loginMsg) {
-    loginMsg.textContent =
-      data.error || "Login failed";
-  }
-  return;
-}
+              body:
+                JSON.stringify({
+                  password: password
+                })
+            }
+          );
 
-if (loginMsg) {
-  loginMsg.textContent = "";
-}
+        let data = {};
 
-loginForm.reset();
+        try {
+          data = await res.json();
+        } catch {
+          data = {};
+        }
 
-showDashboard();
+        if (!res.ok) {
+
+          if (loginMsg) {
+            loginMsg.textContent =
+              data.error ||
+              "Login failed";
+          }
+
+          return;
+        }
+
+        if (loginMsg) {
+          loginMsg.textContent = "";
+        }
+
+        loginForm.reset();
+
+        showDashboard();
+
+      } catch (error) {
+
+        console.error(
+          "LOGIN ERROR:",
+          error
+        );
 
         if (loginMsg) {
           loginMsg.textContent =
@@ -224,6 +242,7 @@ showDashboard();
       }
     }
   );
+
 }
 
 
