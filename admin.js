@@ -1186,9 +1186,52 @@ function displayAdminAnime(list) {
           ".edit-btn"
         );
 
-      if (editBtn) {
-
+            if (editBtn) {
         editBtn.addEventListener(
           "click",
           () => {
-            edi
+            editAnime(anime);
+          }
+        );
+      }
+
+      const episodeBtn =
+        item.querySelector(".episode-btn");
+
+      if (episodeBtn) {
+        episodeBtn.addEventListener(
+          "click",
+          () => {
+            prepareNewEpisode(anime);
+          }
+        );
+      }
+
+      const deleteBtn =
+        item.querySelector(".delete-btn");
+
+      if (deleteBtn) {
+        deleteBtn.addEventListener(
+          "click",
+          () => {
+            deleteAnime(anime.id);
+          }
+        );
+      }
+
+      adminList.appendChild(item);
+    }
+  );
+}
+
+
+// ===============================
+// START ADMIN PAGE
+// ===============================
+
+document.addEventListener(
+  "DOMContentLoaded",
+  () => {
+    checkStatus();
+  }
+);
