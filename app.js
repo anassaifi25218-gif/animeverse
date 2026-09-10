@@ -379,9 +379,6 @@ function filterAnime() {
 // IMPROVED SEARCH
 // ===============================
 
-const search = 
-document.getElementById("search");
-
 let searchAnimeCache = [];
 let searchSuggestionBox = null;
 
