@@ -1186,11 +1186,15 @@ function displayAdminAnime(list) {
           ".edit-btn"
         );
 
-            if (editBtn) {
+                  if (editBtn) {
         editBtn.addEventListener(
           "click",
           () => {
-            editAnime(anime);
+            if (typeof editAnime === "function") {
+              editAnime(anime);
+            } else {
+              console.log("Edit anime:", anime);
+            }
           }
         );
       }
@@ -1198,240 +1202,93 @@ function displayAdminAnime(list) {
       const episodeBtn =
         item.querySelector(".episode-btn");
 
-      if (editBtn) {
-  editBtn.addEventListener(
-    "click",
-    () => {
-      editAnime(anime);
-    }
-  );
-}
-
-const episodeBtn =
-  item.querySelector(".episode-btn");
-
-if (episodeBtn) {
-  episodeBtn.addEventListener(
-    "click",
-    () => {
-      prepareNewEpisode(anime);
-    }
-  );
-}
-
-const deleteBtn =
-  item.querySelector(".delete-btn");
-
-if (deleteBtn) {
-  deleteBtn.addEventListener(
-    "click",
-    () => {
-      deleteAnime(anime.id);
-    }
-  );
-}
-
-adminList.appendChild(item);
-
-    }
-  );
-}
-
-
-// ===============================
-// EDIT ANIME
-// ===============================
-
-async function editAnime(anime) {
-
-  const title =
-    prompt(
-      "Anime title:",
-      anime.title || ""
-    );
-
-  if (title === null) return;
-
-  const description =
-    prompt(
-      "Description:",
-      anime.description || ""
-    );
-
-  if (description === null) return;
-
-  const category =
-    prompt(
-      "Category:",
-      anime.category || "Anime"
-    );
-
-  if (category === null) return;
-
-  const episode =
-    prompt(
-      "Episode number:",
-      anime.episode || 1
-    );
-
-  if (episode === null) return;
-
-  if (uploadMsg) {
-    uploadMsg.textContent =
-      "Saving changes...";
-  }
-
-  try {
-
-    const res =
-      await fetch(
-        `/api/admin/anime/${anime.id}`,
-        {
-          method: "PUT",
-
-          headers: {
-            "Content-Type":
-              "application/json"
-          },
-
-          credentials:
-            "include",
-
-          body:
-            JSON.stringify({
-              title,
-              description,
-              category,
-              episode:
-                Number(episode)
-            })
-        }
-      );
-
-    let data = {};
-
-    try {
-      data = await res.json();
-    } catch {
-      data = {};
-    }
-
-    if (res.status === 401) {
-      showLogin();
-
-      if (loginMsg) {
-        loginMsg.textContent =
-          "Session expire ho gaya. Dobara login karo.";
+      if (episodeBtn) {
+        episodeBtn.addEventListener(
+          "click",
+          () => {
+            prepareNewEpisode(anime);
+          }
+        );
       }
 
-      return;
+      const deleteBtn =
+        item.querySelector(".delete-btn");
+
+      if (deleteBtn) {
+        deleteBtn.addEventListener(
+          "click",
+          async () => {
+
+            const confirmed =
+              confirm(
+                `Delete "${anime.title}"?`
+              );
+
+            if (!confirmed) {
+              return;
+            }
+
+            try {
+
+              deleteBtn.disabled = true;
+              deleteBtn.textContent = "Deleting...";
+
+              const res =
+                await fetch(
+                  `/api/admin/anime/${encodeURIComponent(anime.id)}`,
+                  {
+                    method: "DELETE",
+                    credentials: "include",
+                    cache: "no-store"
+                  }
+                );
+
+              let data = {};
+
+              try {
+                data = await res.json();
+              } catch {
+                data = {};
+              }
+
+              if (res.status === 401) {
+                showLogin();
+                throw new Error(
+                  "Session expire ho gaya. Dobara login karo."
+                );
+              }
+
+              if (!res.ok || data.ok === false) {
+                throw new Error(
+                  data.error ||
+                  "Anime delete failed."
+                );
+              }
+
+              await loadAnime();
+
+            } catch (error) {
+
+              console.error(
+                "DELETE ERROR:",
+                error
+              );
+
+              alert(
+                error.message ||
+                "Anime delete nahi hua."
+              );
+
+              deleteBtn.disabled = false;
+              deleteBtn.textContent = "🗑️ Delete";
+            }
+          }
+        );
+      }
+
+      adminList.appendChild(item);
     }
-
-    if (!res.ok || !data.ok) {
-      throw new Error(
-        data.error ||
-        "Anime update failed"
-      );
-    }
-
-    if (uploadMsg) {
-      uploadMsg.textContent =
-        "✅ Anime updated successfully!";
-    }
-
-    await loadAnime();
-
-  } catch (error) {
-
-    console.error(
-      "EDIT ERROR:",
-      error
-    );
-
-    if (uploadMsg) {
-      uploadMsg.textContent =
-        "Edit error: " +
-        error.message;
-    }
-  }
-}
-
-
-// ===============================
-// DELETE ANIME
-// ===============================
-
-async function deleteAnime(id) {
-
-  if (!id) {
-    return;
-  }
-
-  const confirmed =
-    confirm(
-      "Kya aap is anime ko delete karna chahte ho?"
-    );
-
-  if (!confirmed) {
-    return;
-  }
-
-  try {
-
-    const res =
-      await fetch(
-        `/api/admin/anime/${id}`,
-        {
-          method: "DELETE",
-
-          credentials:
-            "include",
-
-          cache:
-            "no-store"
-        }
-      );
-
-    let data = {};
-
-    try {
-      data = await res.json();
-    } catch {
-      data = {};
-    }
-
-    if (res.status === 401) {
-      showLogin();
-      return;
-    }
-
-    if (!res.ok || !data.ok) {
-      throw new Error(
-        data.error ||
-        "Delete failed"
-      );
-    }
-
-    if (uploadMsg) {
-      uploadMsg.textContent =
-        "✅ Anime deleted successfully!";
-    }
-
-    await loadAnime();
-
-  } catch (error) {
-
-    console.error(
-      "DELETE ERROR:",
-      error
-    );
-
-    if (uploadMsg) {
-      uploadMsg.textContent =
-        "Delete error: " +
-        error.message;
-    }
-  }
+  );
 }
 
 
@@ -1454,9 +1311,4 @@ function escapeHtml(value) {
 // START ADMIN PAGE
 // ===============================
 
-document.addEventListener(
-  "DOMContentLoaded",
-  () => {
-    checkStatus();
-  }
-);
+checkStatus();
