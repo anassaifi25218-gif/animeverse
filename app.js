@@ -383,7 +383,6 @@ const search =
   document.getElementById("search");
 
 let searchAnimeCache = [];
-
 let searchSuggestionBox = null;
 
 
@@ -414,35 +413,20 @@ function createSearchSuggestionBox() {
 
   searchSuggestionBox.hidden = true;
 
-  searchSuggestionBox.style.position =
-    "absolute";
-
-  searchSuggestionBox.style.top =
-    "calc(100% + 8px)";
-
-  searchSuggestionBox.style.left =
-    "0";
-
-  searchSuggestionBox.style.right =
-    "0";
-
-  searchSuggestionBox.style.zIndex =
-    "9999";
-
-  searchSuggestionBox.style.background =
-    "#111827";
-
-  searchSuggestionBox.style.border =
-    "1px solid rgba(255,255,255,.12)";
-
-  searchSuggestionBox.style.borderRadius =
-    "14px";
-
-  searchSuggestionBox.style.overflow =
-    "hidden";
-
-  searchSuggestionBox.style.boxShadow =
-    "0 15px 40px rgba(0,0,0,.45)";
+  searchSuggestionBox.style.cssText = `
+    position:absolute;
+    top:calc(100% + 8px);
+    left:0;
+    right:0;
+    z-index:9999;
+    background:#111827;
+    border:1px solid rgba(255,255,255,.12);
+    border-radius:14px;
+    overflow:hidden;
+    box-shadow:0 15px 40px rgba(0,0,0,.45);
+    max-height:360px;
+    overflow-y:auto;
+  `;
 
   searchBox.appendChild(
     searchSuggestionBox
@@ -468,7 +452,7 @@ function escapeSearch(value) {
 
 
 // ===============================
-// LOAD ANIME FOR SEARCH
+// LOAD SEARCH DATA
 // ===============================
 
 async function loadSearchAnime() {
@@ -477,7 +461,7 @@ async function loadSearchAnime() {
 
     const response =
       await fetch(
-        "/api/anime",
+        "/api/anime?_=" + Date.now(),
         {
           method: "GET",
           cache: "no-store"
@@ -509,12 +493,27 @@ async function loadSearchAnime() {
 
 
 // ===============================
-// SHOW SUGGESTIONS
+// CLOSE SUGGESTIONS
 // ===============================
 
-function showSearchSuggestions(
-  query
-) {
+function closeSearchSuggestions() {
+
+  if (!searchSuggestionBox) {
+    return;
+  }
+
+  searchSuggestionBox.hidden = true;
+
+  searchSuggestionBox.innerHTML = "";
+
+}
+
+
+// ===============================
+// SHOW SEARCH SUGGESTIONS
+// ===============================
+
+function showSearchSuggestions(query) {
 
   createSearchSuggestionBox();
 
@@ -530,13 +529,12 @@ function showSearchSuggestions(
       .toLowerCase()
       .trim();
 
+
   if (!query) {
 
-    searchSuggestionBox.hidden =
-      true;
+    closeSearchSuggestions();
 
-    searchSuggestionBox.innerHTML =
-      "";
+    filterAnime();
 
     return;
 
@@ -545,256 +543,225 @@ function showSearchSuggestions(
 
   const results =
     searchAnimeCache
-      .filter(anime => {
+      .filter(
+        function (anime) {
 
-        const title =
-          String(
-            anime.title || ""
-          )
-            .toLowerCase();
+          const title =
+            String(
+              anime.title || ""
+            ).toLowerCase();
 
-        const category =
-          String(
-            anime.category || ""
-          )
-            .toLowerCase();
+          const categories =
+            String(
+              anime.category || ""
+            ).toLowerCase();
 
-        return (
-          title.includes(query) ||
-          category.includes(query)
-        );
+          return (
+            title.includes(query) ||
+            categories.includes(query)
+          );
 
-      })
+        }
+      )
       .slice(0, 6);
 
 
-  searchSuggestionBox.innerHTML =
-    "";
+  searchSuggestionBox.innerHTML = "";
 
 
   if (!results.length) {
 
     searchSuggestionBox.innerHTML = `
-      <div
-        style="
-          padding:16px;
-          color:#9ca3af;
-          text-align:center;
-          font-size:14px;
-        "
-      >
+      <div style="
+        padding:18px;
+        text-align:center;
+        color:#9ca3af;
+        font-size:14px;
+      ">
         🔎 Anime नहीं मिला
       </div>
     `;
 
-    searchSuggestionBox.hidden =
-      false;
+    searchSuggestionBox.hidden = false;
+
+    filterAnime();
 
     return;
 
   }
 
 
-  results.forEach(anime => {
+  results.forEach(
+    function (anime) {
 
-    const button =
-      document.createElement(
-        "button"
-      );
+      const button =
+        document.createElement(
+          "button"
+        );
 
-    button.type =
-      "button";
+      button.type = "button";
 
-    button.style.width =
-      "100%";
-
-    button.style.display =
-      "flex";
-
-    button.style.alignItems =
-      "center";
-
-    button.style.gap =
-      "12px";
-
-    button.style.padding =
-      "10px 12px";
-
-    button.style.border =
-      "0";
-
-    button.style.borderBottom =
-      "1px solid rgba(255,255,255,.08)";
-
-    button.style.background =
-      "transparent";
-
-    button.style.color =
-      "#fff";
-
-    button.style.textAlign =
-      "left";
-
-    button.style.cursor =
-      "pointer";
+      button.className =
+        "search-suggestion";
 
 
-    const poster =
-      anime.poster?.secure_url ||
-      anime.poster?.url ||
-      anime.poster ||
-      "";
+      const poster =
+        anime.poster?.secure_url ||
+        anime.poster?.url ||
+        anime.poster ||
+        "";
 
 
-    const episodeCount =
-      Array.isArray(
-        anime.episodes
-      )
-        ? anime.episodes.length
-        : (
-            anime.episode ||
-            1
-          );
+      const episodeCount =
+        Array.isArray(
+          anime.episodes
+        )
+          ? anime.episodes.length
+          : (
+              anime.episode ||
+              1
+            );
 
 
-    button.innerHTML = `
+      button.innerHTML = `
 
-      ${
-        poster
-          ? `
-            <img
-              src="${escapeSearch(poster)}"
-              alt=""
-              loading="lazy"
-              style="
-                width:42px;
-                height:56px;
-                object-fit:cover;
-                border-radius:7px;
-                flex-shrink:0;
-              "
-            >
-          `
-          : `
-            <div
-              style="
-                width:42px;
-                height:56px;
-                border-radius:7px;
+        ${
+          poster
+            ? `
+              <img
+                src="${escapeSearch(poster)}"
+                alt=""
+                loading="lazy"
+                style="
+                  width:48px;
+                  height:62px;
+                  object-fit:cover;
+                  border-radius:8px;
+                  flex-shrink:0;
+                "
+              >
+            `
+            : `
+              <div style="
+                width:48px;
+                height:62px;
+                border-radius:8px;
                 background:#202536;
                 display:grid;
                 place-items:center;
                 flex-shrink:0;
-                font-size:20px;
-              "
-            >
-              🎬
-            </div>
-          `
-      }
+                font-size:21px;
+              ">
+                🎬
+              </div>
+            `
+        }
 
-      <div
-        style="
+        <div style="
           min-width:0;
           flex:1;
-        "
-      >
+          text-align:left;
+        ">
 
-        <div
-          style="
+          <div style="
             font-size:15px;
             font-weight:700;
+            color:#fff;
             white-space:nowrap;
             overflow:hidden;
             text-overflow:ellipsis;
-          "
-        >
-          ${escapeSearch(
-            anime.title ||
-            "Untitled Anime"
-          )}
-        </div>
+          ">
+            ${escapeSearch(
+              anime.title ||
+              "Untitled Anime"
+            )}
+          </div>
 
-        <div
-          style="
-            margin-top:5px;
+          <div style="
+            margin-top:6px;
             font-size:12px;
             color:#9ca3af;
-          "
-        >
-          ${escapeSearch(
-            anime.category ||
-            "Anime"
-          )}
-          • ${episodeCount} EP
+          ">
+            ${escapeSearch(
+              anime.category ||
+              "Anime"
+            )}
+            • ${episodeCount} EP
+          </div>
+
         </div>
 
-      </div>
+        <span style="
+          color:#00bfff;
+          font-size:20px;
+          flex-shrink:0;
+        ">
+          ›
+        </span>
 
-    `;
-
-
-    button.addEventListener(
-      "mouseenter",
-      () => {
-
-        button.style.background =
-          "rgba(59,130,246,.12)";
-
-      }
-    );
+      `;
 
 
-    button.addEventListener(
-      "mouseleave",
-      () => {
-
-        button.style.background =
-          "transparent";
-
-      }
-    );
-
-
-    button.addEventListener(
-      "click",
-      () => {
-
-        search.value =
-          anime.title || "";
-
-        searchSuggestionBox.hidden =
-          true;
-
-        searchSuggestionBox.innerHTML =
-          "";
-
-        /*
-         * Existing search/filter system ko
-         * activate karega.
-         */
-        search.dispatchEvent(
-          new Event(
-            "input",
-            {
-              bubbles: true
-            }
-          )
-        );
-
-      }
-    );
+      button.style.cssText = `
+        width:100%;
+        display:flex;
+        align-items:center;
+        gap:12px;
+        padding:11px 13px;
+        border:0;
+        border-bottom:1px solid rgba(255,255,255,.07);
+        background:transparent;
+        cursor:pointer;
+        text-align:left;
+      `;
 
 
-    searchSuggestionBox.appendChild(
-      button
-    );
+      button.addEventListener(
+        "mouseenter",
+        function () {
 
-  });
+          button.style.background =
+            "rgba(0,191,255,.10)";
+
+        }
+      );
 
 
-  searchSuggestionBox.hidden =
-    false;
+      button.addEventListener(
+        "mouseleave",
+        function () {
+
+          button.style.background =
+            "transparent";
+
+        }
+      );
+
+
+      button.addEventListener(
+        "click",
+        function () {
+
+          search.value =
+            anime.title || "";
+
+          closeSearchSuggestions();
+
+          filterAnime();
+
+        }
+      );
+
+
+      searchSuggestionBox.appendChild(
+        button
+      );
+
+    }
+  );
+
+
+  searchSuggestionBox.hidden = false;
 
 }
 
@@ -810,11 +777,17 @@ if (search) {
 
   search.addEventListener(
     "input",
-    () => {
+    function () {
 
       showSearchSuggestions(
         search.value
       );
+
+      /*
+       * Main anime grid ko bhi
+       * live filter karega.
+       */
+      filterAnime();
 
     }
   );
@@ -822,7 +795,7 @@ if (search) {
 
   search.addEventListener(
     "focus",
-    () => {
+    function () {
 
       if (
         search.value.trim()
@@ -837,16 +810,52 @@ if (search) {
     }
   );
 
+
+  search.addEventListener(
+    "keydown",
+    function (event) {
+
+      if (
+        event.key === "Escape"
+      ) {
+
+        closeSearchSuggestions();
+
+        search.blur();
+
+      }
+
+    }
+  );
+
 }
 
 
 // ===============================
-// CLOSE WHEN CLICKING OUTSIDE
+// CATEGORY FILTER
+// ===============================
+
+if (category) {
+
+  category.addEventListener(
+    "change",
+    function () {
+
+      filterAnime();
+
+    }
+  );
+
+}
+
+
+// ===============================
+// CLOSE SEARCH WHEN CLICKING OUTSIDE
 // ===============================
 
 document.addEventListener(
   "click",
-  event => {
+  function (event) {
 
     if (
       !search ||
@@ -867,8 +876,7 @@ document.addEventListener(
       )
     ) {
 
-      searchSuggestionBox.hidden =
-        true;
+      closeSearchSuggestions();
 
     }
 
