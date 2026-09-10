@@ -887,5 +887,5 @@ document.addEventListener(
 // ===============================
 // LOAD SEARCH DATA
 // ===============================
-
+loadAnime();
 loadSearchAnime();
