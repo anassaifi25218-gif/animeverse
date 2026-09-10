@@ -188,16 +188,14 @@ if (loginForm) {
               method: "POST",
 
               headers: {
-                "Content-Type":
-                  "application/json"
+                "Content-Type": "application/json"
               },
 
               credentials: "include",
 
-              body:
-                JSON.stringify({
-                  password: password
-                })
+              body: JSON.stringify({
+                password: password
+              })
             }
           );
 
@@ -213,20 +211,52 @@ if (loginForm) {
 
           if (loginMsg) {
             loginMsg.textContent =
-              data.error ||
-              "Login failed";
+              data.error || "Login failed";
           }
 
           return;
         }
 
+        loginForm.reset();
+
         if (loginMsg) {
           loginMsg.textContent = "";
         }
 
-        loginForm.reset();
+        // Check that session was actually saved
+        const statusRes =
+          await fetch(
+            "/api/admin/status",
+            {
+              method: "GET",
+              credentials: "include",
+              cache: "no-store"
+            }
+          );
 
-        showDashboard();
+        let statusData = {};
+
+        try {
+          statusData = await statusRes.json();
+        } catch {
+          statusData = {};
+        }
+
+        if (statusRes.ok && statusData.isAdmin === true) {
+
+          showDashboard();
+
+        } else {
+
+          if (loginMsg) {
+            loginMsg.textContent =
+              "Login hua, lekin session save nahi hua.";
+          }
+
+          console.error(
+            "LOGIN SESSION NOT ACTIVE"
+          );
+        }
 
       } catch (error) {
 
