@@ -182,90 +182,40 @@ if (loginForm) {
 
       try {
 
-        const res = await fetch(
-  "/api/admin/login",
-  {
-    method: "POST",
+        const res = await fetch("/api/admin/login", {
+  method: "POST",
+  headers: {
+    "Content-Type": "application/json"
+  },
+  credentials: "include",
+  body: JSON.stringify({
+    password: password
+  })
+});
 
-    headers: {
-      "Content-Type": "application/json"
-    },
+let data = {};
 
-    credentials: "same-origin",
+try {
+  data = await res.json();
+} catch (error) {
+  data = {};
+}
 
-    body: JSON.stringify({
-      password
-    })
+if (!res.ok) {
+  if (loginMsg) {
+    loginMsg.textContent =
+      data.error || "Login failed";
   }
-);
+  return;
+}
 
-        let data = {};
+if (loginMsg) {
+  loginMsg.textContent = "";
+}
 
-        try {
-          data = await res.json();
-        } catch {
-          data = {};
-        }
+loginForm.reset();
 
-        if (!res.ok) {
-
-          if (loginMsg) {
-            loginMsg.textContent =
-              data.error ||
-              "Login failed";
-          }
-
-          return;
-        }
-
-        loginForm.reset();
-
-        if (loginMsg) {
-          loginMsg.textContent = "";
-        }
-
-        // Give browser a moment to store session cookie
-        await new Promise(
-          resolve =>
-            setTimeout(resolve, 100)
-        );
-
-        // Verify session before opening dashboard
-        const statusRes =
-          await fetch(
-            "/api/admin/status",
-            {
-              method: "GET",
-              credentials: "same-origin",
-              cache: "no-store"
-            }
-          );
-
-        const statusData =
-          await statusRes.json();
-
-        if (statusData.isAdmin === true) {
-
-          showDashboard();
-
-        } else {
-
-          if (loginMsg) {
-            loginMsg.textContent =
-              "Login hua, lekin session save nahi hua.";
-          }
-
-          console.error(
-            "LOGIN SESSION NOT ACTIVE"
-          );
-        }
-
-      } catch (error) {
-
-        console.error(
-          "LOGIN ERROR:",
-          error
-        );
+showDashboard();
 
         if (loginMsg) {
           loginMsg.textContent =
