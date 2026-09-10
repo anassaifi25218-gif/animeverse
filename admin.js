@@ -85,7 +85,6 @@ function showLogin() {
     loginBox.style.display = "grid";
   }
 
-  // Clear upload state
   uploadedVideo = null;
   uploadedPoster = null;
   selectedAnimeId = null;
@@ -119,7 +118,7 @@ async function checkStatus() {
         "/api/admin/status",
         {
           method: "GET",
-          credentials: "same-origin",
+          credentials: "include",
           cache: "no-store"
         }
       );
@@ -168,7 +167,8 @@ if (loginForm) {
       e.preventDefault();
 
       if (loginMsg) {
-        loginMsg.textContent = "Logging in...";
+        loginMsg.textContent =
+          "Logging in...";
       }
 
       const passwordInput =
@@ -188,14 +188,16 @@ if (loginForm) {
               method: "POST",
 
               headers: {
-                "Content-Type": "application/json"
+                "Content-Type":
+                  "application/json"
               },
 
               credentials: "include",
 
-              body: JSON.stringify({
-                password: password
-              })
+              body:
+                JSON.stringify({
+                  password: password
+                })
             }
           );
 
@@ -211,7 +213,8 @@ if (loginForm) {
 
           if (loginMsg) {
             loginMsg.textContent =
-              data.error || "Login failed";
+              data.error ||
+              "Login failed";
           }
 
           return;
@@ -220,29 +223,42 @@ if (loginForm) {
         loginForm.reset();
 
         if (loginMsg) {
-          loginMsg.textContent = "";
+          loginMsg.textContent =
+            "Checking login...";
         }
 
-        // Check that session was actually saved
+        // Check session
         const statusRes =
           await fetch(
             "/api/admin/status",
             {
               method: "GET",
-              credentials: "include",
-              cache: "no-store"
+
+              credentials:
+                "include",
+
+              cache:
+                "no-store"
             }
           );
 
         let statusData = {};
 
         try {
-          statusData = await statusRes.json();
+          statusData =
+            await statusRes.json();
         } catch {
           statusData = {};
         }
 
-        if (statusRes.ok && statusData.isAdmin === true) {
+        if (
+          statusRes.ok &&
+          statusData.isAdmin === true
+        ) {
+
+          if (loginMsg) {
+            loginMsg.textContent = "";
+          }
 
           showDashboard();
 
@@ -272,7 +288,6 @@ if (loginForm) {
       }
     }
   );
-
 }
 
 
@@ -292,8 +307,12 @@ if (logoutBtn) {
           "/api/admin/logout",
           {
             method: "POST",
-            credentials: "same-origin",
-            cache: "no-store"
+
+            credentials:
+              "include",
+
+            cache:
+              "no-store"
           }
         );
 
@@ -338,7 +357,7 @@ async function getCloudinaryConfig(
         },
 
         credentials:
-          "same-origin",
+          "include",
 
         body:
           JSON.stringify({
@@ -418,7 +437,8 @@ async function openCloudinaryWidget(
             resourceType:
               resourceType,
 
-            multiple: false,
+            multiple:
+              false,
 
             sources: [
               "local"
@@ -510,11 +530,13 @@ async function openCloudinaryWidget(
                 finished = true;
 
                 resolve({
+
                   secure_url:
                     info.secure_url,
 
                   public_id:
                     info.public_id
+
                 });
               }
             }
@@ -702,8 +724,10 @@ if (uploadForm) {
           "Anime",
 
         episode:
-          formData.get("episode") ||
-          1,
+          Number(
+            formData.get("episode") ||
+            1
+          ),
 
         animeId:
           selectedAnimeId,
@@ -746,7 +770,7 @@ if (uploadForm) {
               },
 
               credentials:
-                "same-origin",
+                "include",
 
               body:
                 JSON.stringify(body)
@@ -826,6 +850,92 @@ if (uploadForm) {
 
 
 // ===============================
+// PREPARE NEW EPISODE
+// ===============================
+
+function prepareNewEpisode(anime) {
+
+  selectedAnimeId =
+    anime.id;
+
+  if (uploadForm) {
+
+    uploadForm.reset();
+
+    const title =
+      document.getElementById("title");
+
+    const description =
+      document.getElementById("description");
+
+    const category =
+      document.getElementById("category");
+
+    const episode =
+      document.getElementById("episode");
+
+    if (title) {
+      title.value =
+        anime.title || "";
+    }
+
+    if (description) {
+      description.value =
+        anime.description || "";
+    }
+
+    if (category) {
+      category.value =
+        anime.category || "Anime";
+    }
+
+    if (episode) {
+      const episodes =
+        Array.isArray(anime.episodes)
+          ? anime.episodes
+          : [];
+
+      const maxEpisode =
+        episodes.reduce(
+          (max, ep) =>
+            Math.max(
+              max,
+              Number(ep.episode) || 0
+            ),
+          Number(anime.episode) || 0
+        );
+
+      episode.value =
+        maxEpisode + 1;
+    }
+  }
+
+  uploadedVideo = null;
+  uploadedPoster = null;
+
+  if (videoStatus) {
+    videoStatus.textContent =
+      "No video selected";
+  }
+
+  if (posterStatus) {
+    posterStatus.textContent =
+      "No poster selected";
+  }
+
+  if (uploadMsg) {
+    uploadMsg.textContent =
+      `➕ Episode add kar rahe ho: ${anime.title}`;
+  }
+
+  window.scrollTo({
+    top: 0,
+    behavior: "smooth"
+  });
+}
+
+
+// ===============================
 // LOAD ANIME
 // ===============================
 
@@ -842,12 +952,21 @@ async function loadAnime() {
         "/api/anime",
         {
           method: "GET",
-          cache: "no-store",
-          credentials: "same-origin"
+
+          cache:
+            "no-store",
+
+          credentials:
+            "include"
         }
       );
 
     if (!res.ok) {
+
+      if (res.status === 401) {
+        showLogin();
+      }
+
       throw new Error(
         "Anime load failed"
       );
@@ -861,9 +980,13 @@ async function loadAnime() {
         ? list
         : [];
 
-    updateStats(allAnime);
+    updateStats(
+      allAnime
+    );
 
-    displayAdminAnime(allAnime);
+    displayAdminAnime(
+      allAnime
+    );
 
   } catch (error) {
 
@@ -893,8 +1016,8 @@ function updateStats(list) {
             String(
               anime.title || ""
             )
-            .trim()
-            .toLowerCase()
+              .trim()
+              .toLowerCase()
         )
       );
 
@@ -903,8 +1026,31 @@ function updateStats(list) {
   }
 
   if (totalEpisodes) {
+
+    let count = 0;
+
+    list.forEach(
+      anime => {
+
+        if (
+          Array.isArray(
+            anime.episodes
+          ) &&
+          anime.episodes.length
+        ) {
+
+          count +=
+            anime.episodes.length;
+
+        } else {
+
+          count += 1;
+        }
+      }
+    );
+
     totalEpisodes.textContent =
-      list.length;
+      count;
   }
 }
 
@@ -931,12 +1077,14 @@ if (searchAdmin) {
             const title =
               String(
                 anime.title || ""
-              ).toLowerCase();
+              )
+                .toLowerCase();
 
             const category =
               String(
                 anime.category || ""
-              ).toLowerCase();
+              )
+                .toLowerCase();
 
             return (
               title.includes(query) ||
@@ -1043,142 +1191,4 @@ function displayAdminAnime(list) {
         editBtn.addEventListener(
           "click",
           () => {
-            editAnime(anime);
-          }
-        );
-      }
-
-      const episodeBtn =
-        item.querySelector(
-          ".episode-btn"
-        );
-
-      if (episodeBtn) {
-
-        episodeBtn.addEventListener(
-          "click",
-          () => {
-            prepareNewEpisode(
-              anime
-            );
-          }
-        );
-      }
-
-      const deleteBtn =
-        item.querySelector(
-          ".delete-btn"
-        );
-
-      if (deleteBtn) {
-
-        deleteBtn.addEventListener(
-          "click",
-          () => {
-            deleteAnime(
-              anime.id
-            );
-          }
-        );
-      }
-
-      adminList.appendChild(
-        item
-      );
-    }
-  );
-}
-
-
-// ===============================
-// EDIT ANIME
-// ===============================
-
-async function editAnime(anime) {
-
-  const title =
-    prompt(
-      "Anime title:",
-      anime.title || ""
-    );
-
-  if (title === null) {
-    return;
-  }
-
-  const description =
-    prompt(
-      "Description:",
-      anime.description || ""
-    );
-
-  if (description === null) {
-    return;
-  }
-
-  const category =
-    prompt(
-      "Category:",
-      anime.category || "Anime"
-    );
-
-  if (category === null) {
-    return;
-  }
-
-  const episode =
-    prompt(
-      "Episode number:",
-      anime.episode || 1
-    );
-
-  if (episode === null) {
-    return;
-  }
-
-  if (uploadMsg) {
-    uploadMsg.textContent =
-      "Saving changes...";
-  }
-
-  try {
-
-    const res =
-      await fetch(
-        `/api/admin/anime/${anime.id}`,
-        {
-          method: "PUT",
-
-          headers: {
-            "Content-Type":
-              "application/json"
-          },
-
-          credentials:
-            "same-origin",
-
-          body:
-            JSON.stringify({
-              title,
-              description,
-              category,
-              episode
-            })
-        }
-      );
-
-    let data = {};
-
-    try {
-      data = await res.json();
-    } catch {
-      data = {};
-    }
-
-    if (res.status === 401) {
-
-      showLogin();
-
-      if (loginMsg) {
-        loginMsg.textContent =
-          "Session ex
+            edi
