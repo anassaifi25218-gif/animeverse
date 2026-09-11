@@ -411,11 +411,11 @@ function createSearchSuggestionBox() {
   searchSuggestionBox.hidden = true;
 
   searchSuggestionBox.style.cssText = `
-    position:absolute;
-    top:calc(100% + 8px);
-    left:0;
-    right:0;
-    z-index:9999;
+    position:fixed;
+    top:75px;
+    left:18px;
+    right:18px;
+    z-index:99999;
     background:#111827;
     border:1px solid rgba(255,255,255,.12);
     border-radius:14px;
