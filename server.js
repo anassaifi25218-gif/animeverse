@@ -556,6 +556,101 @@ app.get("/api/admin/status", (req, res) => {
 
 
 // ===============================
+// SHORTENER SETTINGS
+// ===============================
+
+const SHORTENER_BASE_URL =
+  process.env.SHORTENER_BASE_URL || "";
+
+// Encode destination safely
+function makeShortenerUrl(destination) {
+  if (!SHORTENER_BASE_URL) {
+    return destination;
+  }
+
+  return (
+    SHORTENER_BASE_URL +
+    encodeURIComponent(destination)
+  );
+}
+
+
+// ===============================
+// WATCH REDIRECT
+// ===============================
+
+app.get("/go/watch/:id", async (req, res) => {
+  try {
+    const anime = await loadAnime();
+
+    const item = anime.find(
+      a => String(a.id) === String(req.params.id)
+    );
+
+    if (!item) {
+      return res.status(404).send("Anime not found");
+    }
+
+    const watchUrl =
+      `${req.protocol}://${req.get("host")}/watch.html?id=${encodeURIComponent(item.id)}&direct=1`;
+
+    return res.redirect(
+      makeShortenerUrl(watchUrl)
+    );
+
+  } catch (error) {
+    console.error("WATCH REDIRECT ERROR:", error);
+
+    return res.status(500).send(
+      "Unable to open episode"
+    );
+  }
+});
+
+
+// ===============================
+// DOWNLOAD REDIRECT
+// ===============================
+
+app.get("/go/download/:id", async (req, res) => {
+  try {
+    const anime = await loadAnime();
+
+    const item = anime.find(
+      a => String(a.id) === String(req.params.id)
+    );
+
+    if (!item) {
+      return res.status(404).send("Anime not found");
+    }
+
+    const videoUrl =
+      item.video;
+
+    if (!videoUrl) {
+      return res.status(404).send(
+        "Download file not found"
+      );
+    }
+
+    return res.redirect(
+      makeShortenerUrl(videoUrl)
+    );
+
+  } catch (error) {
+    console.error(
+      "DOWNLOAD REDIRECT ERROR:",
+      error
+    );
+
+    return res.status(500).send(
+      "Unable to download episode"
+    );
+  }
+});
+
+
+// ===============================
 // ADMIN LOGOUT
 // ===============================
 
