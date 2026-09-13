@@ -562,8 +562,8 @@ app.get("/api/admin/status", (req, res) => {
 const SHORTENER_BASE_URL =
   process.env.SHORTENER_BASE_URL || "";
 
-// Encode destination safely
 function makeShortenerUrl(destination) {
+
   if (!SHORTENER_BASE_URL) {
     return destination;
   }
@@ -579,75 +579,131 @@ function makeShortenerUrl(destination) {
 // WATCH REDIRECT
 // ===============================
 
-app.get("/go/watch/:id", async (req, res) => {
-  try {
-    const anime = await loadAnime();
+app.get(
+  "/go/watch/:id/:episode",
+  async (req, res) => {
 
-    const item = anime.find(
-      a => String(a.id) === String(req.params.id)
-    );
+    try {
 
-    if (!item) {
-      return res.status(404).send("Anime not found");
+      const anime =
+        await loadAnime();
+
+      const item =
+        anime.find(
+          a =>
+            String(a.id) ===
+            String(req.params.id)
+        );
+
+      if (!item) {
+        return res.status(404).send(
+          "Anime not found"
+        );
+      }
+
+      const episodeNumber =
+        Number(req.params.episode);
+
+      const episode =
+        Array.isArray(item.episodes)
+          ? item.episodes.find(
+              ep =>
+                Number(ep.episode) ===
+                episodeNumber
+            )
+          : null;
+
+      if (!episode || !episode.video) {
+        return res.status(404).send(
+          "Episode not found"
+        );
+      }
+
+      const watchUrl =
+        `${req.protocol}://${req.get("host")}/watch.html?id=${encodeURIComponent(item.id)}&ep=${encodeURIComponent(episodeNumber)}&direct=1`;
+
+      return res.redirect(
+        makeShortenerUrl(watchUrl)
+      );
+
+    } catch (error) {
+
+      console.error(
+        "WATCH SHORTENER ERROR:",
+        error
+      );
+
+      return res.status(500).send(
+        "Unable to open episode"
+      );
     }
-
-    const watchUrl =
-      `${req.protocol}://${req.get("host")}/watch.html?id=${encodeURIComponent(item.id)}&direct=1`;
-
-    return res.redirect(
-      makeShortenerUrl(watchUrl)
-    );
-
-  } catch (error) {
-    console.error("WATCH REDIRECT ERROR:", error);
-
-    return res.status(500).send(
-      "Unable to open episode"
-    );
   }
-});
+);
 
 
 // ===============================
 // DOWNLOAD REDIRECT
 // ===============================
 
-app.get("/go/download/:id", async (req, res) => {
-  try {
-    const anime = await loadAnime();
+app.get(
+  "/go/download/:id/:episode",
+  async (req, res) => {
 
-    const item = anime.find(
-      a => String(a.id) === String(req.params.id)
-    );
+    try {
 
-    if (!item) {
-      return res.status(404).send("Anime not found");
-    }
+      const anime =
+        await loadAnime();
 
-    const videoUrl =
-      item.video;
+      const item =
+        anime.find(
+          a =>
+            String(a.id) ===
+            String(req.params.id)
+        );
 
-    if (!videoUrl) {
-      return res.status(404).send(
-        "Download file not found"
+      if (!item) {
+        return res.status(404).send(
+          "Anime not found"
+        );
+      }
+
+      const episodeNumber =
+        Number(req.params.episode);
+
+      const episode =
+        Array.isArray(item.episodes)
+          ? item.episodes.find(
+              ep =>
+                Number(ep.episode) ===
+                episodeNumber
+            )
+          : null;
+
+      if (!episode || !episode.video) {
+        return res.status(404).send(
+          "Download file not found"
+        );
+      }
+
+      return res.redirect(
+        makeShortenerUrl(
+          episode.video
+        )
+      );
+
+    } catch (error) {
+
+      console.error(
+        "DOWNLOAD SHORTENER ERROR:",
+        error
+      );
+
+      return res.status(500).send(
+        "Unable to download episode"
       );
     }
-
-    return res.redirect(
-      makeShortenerUrl(videoUrl)
-    );
-
-  } catch (error) {
-    console.error(
-      "DOWNLOAD REDIRECT ERROR:",
-      error
-    );
-
-    return res.status(500).send(
-      "Unable to download episode"
-    );
   }
-});
+);
 
 
 // ===============================
