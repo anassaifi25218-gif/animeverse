@@ -188,6 +188,27 @@
       ▶️ Watch Anime
     </h2>
 
+    <div id="watchActions" style="display:flex;gap:10px;flex-wrap:wrap;margin:15px 0 20px;">
+
+  <a
+    id="watchBtn"
+    class="nav-btn"
+    href="#"
+  >
+    ▶️ Watch Episode
+  </a>
+
+  <a
+    id="downloadBtn"
+    class="nav-btn"
+    href="#"
+  >
+    ⬇️ Download Episode
+  </a>
+
+    </div>
+
+
 
     <video
       id="animeVideo"
@@ -275,6 +296,12 @@ document.addEventListener(
 
     const video =
       document.getElementById("animeVideo");
+    
+    const watchBtn =
+  document.getElementById("watchBtn");
+
+const downloadBtn =
+  document.getElementById("downloadBtn");
 
 
     const episodeBox =
@@ -481,10 +508,12 @@ document.addEventListener(
        * Current episode
        */
 
-      let currentEpisode =
-        Number(
-          anime.episode || 1
-        );
+      const requestedEpisode =
+  Number(params.get("ep") || 0);
+
+let currentEpisode =
+  requestedEpisode ||
+  Number(anime.episode || 1);
 
 
       /*
@@ -519,6 +548,23 @@ document.addEventListener(
       /*
        * VIDEO
        */
+      function getWatchUrl(ep) {
+  return (
+    "/go/watch/" +
+    encodeURIComponent(anime.id) +
+    "/" +
+    encodeURIComponent(ep)
+  );
+}
+
+function getDownloadUrl(ep) {
+  return (
+    "/go/download/" +
+    encodeURIComponent(anime.id) +
+    "/" +
+    encodeURIComponent(ep)
+  );
+}
 
       let currentVideo =
         anime.video || "";
@@ -554,6 +600,17 @@ document.addEventListener(
       /*
        * EPISODE BUTTONS
        */
+      watchBtn.href =
+  getWatchUrl(
+    episodeData[currentIndex]?.episode ||
+    currentEpisode
+  );
+
+downloadBtn.href =
+  getDownloadUrl(
+    episodeData[currentIndex]?.episode ||
+    currentEpisode
+  );
 
       episodeBox.innerHTML = "";
 
