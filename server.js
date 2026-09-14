@@ -562,16 +562,32 @@ app.get("/api/admin/status", (req, res) => {
 const SHORTENER_BASE_URL =
   process.env.SHORTENER_BASE_URL || "";
 
-function makeShortenerUrl(destination) {
+async function makeShortenerUrl(destination) {
+  const apiToken = process.env.CUTY_API_TOKEN;
 
-  if (!SHORTENER_BASE_URL) {
+  if (!apiToken) {
     return destination;
   }
 
-  return (
-    SHORTENER_BASE_URL +
-    encodeURIComponent(destination)
-  );
+  const apiUrl =
+    "https://cuty.io/api?api=" +
+    encodeURIComponent(apiToken) +
+    "&url=" +
+    encodeURIComponent(destination);
+
+  const response = await fetch(apiUrl);
+
+  if (!response.ok) {
+    throw new Error("Cuty.io API request failed");
+  }
+
+  const result = await response.json();
+
+  if (result.status === "error") {
+    throw new Error(result.message || "Cuty.io error");
+  }
+
+  return result.shortenedUrl;
 }
 
 
@@ -623,8 +639,8 @@ app.get(
         `${req.protocol}://${req.get("host")}/watch.html?id=${encodeURIComponent(item.id)}&ep=${encodeURIComponent(episodeNumber)}&direct=1`;
 
       return res.redirect(
-        makeShortenerUrl(watchUrl)
-      );
+  await makeShortenerUrl(watchUrl)
+);
 
     } catch (error) {
 
@@ -686,10 +702,10 @@ app.get(
       }
 
       return res.redirect(
-        makeShortenerUrl(
-          episode.video
-        )
-      );
+  await makeShortenerUrl(
+    episode.video
+  )
+);
 
     } catch (error) {
 
