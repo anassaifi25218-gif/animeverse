@@ -100,24 +100,66 @@
     }
 
     #episodes {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 10px;
-    }
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
 
-    .episode-btn {
-      display: inline-block;
-      padding: 12px 18px;
-      border-radius: 10px;
-      background: #252733;
-      border: 1px solid #3b3d49;
-      color: #fff;
-      text-decoration: none;
-    }
+.episode-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 14px;
+  background: #252733;
+  border: 1px solid #3b3d49;
+  border-radius: 12px;
+}
 
-    .episode-btn.active {
-      background: #7c3aed;
-    }
+.episode-name {
+  color: #fff;
+  font-size: 17px;
+  font-weight: 600;
+}
+
+.episode-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.episode-action {
+  display: inline-block;
+  padding: 9px 13px;
+  border-radius: 9px;
+  color: #fff;
+  text-decoration: none;
+  background: #7c3aed;
+  border: 1px solid #8b5cf6;
+}
+
+.episode-action.download {
+  background: #252733;
+  border-color: #555866;
+}
+
+@media (max-width: 600px) {
+
+  .episode-row {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .episode-actions {
+    width: 100%;
+  }
+
+  .episode-action {
+    flex: 1;
+    text-align: center;
+  }
+
+}
 
     .muted {
       color: #aaa;
@@ -211,11 +253,12 @@
 
 
     <video
-      id="animeVideo"
-      controls
-      playsinline
-      preload="metadata"
-    >
+  id="animeVideo"
+  controls
+  playsinline
+  preload="metadata"
+  style="display:none;"
+>
     </video>
 
 
@@ -280,7 +323,10 @@ document.addEventListener(
 
     const id =
       params.get("id");
-
+    
+    const direct =
+  params.get("direct") === "1";
+    
 
     const title =
       document.getElementById("title");
@@ -583,10 +629,13 @@ function getDownloadUrl(ep) {
 
       if (currentVideo) {
 
-        video.src =
-          currentVideo;
+  video.src = currentVideo;
 
-        video.load();
+  if (direct) {
+    video.style.display = "block";
+  }
+
+  video.load();
 
       } else {
 
@@ -598,66 +647,80 @@ function getDownloadUrl(ep) {
 
 
       /*
-       * EPISODE BUTTONS
-       */
-      watchBtn.href =
-  getWatchUrl(
-    episodeData[currentIndex]?.episode ||
-    currentEpisode
-  );
+ * EPISODE ROWS
+ */
 
-downloadBtn.href =
-  getDownloadUrl(
-    episodeData[currentIndex]?.episode ||
-    currentEpisode
-  );
+episodeBox.innerHTML = "";
 
-      episodeBox.innerHTML = "";
+if (episodeData.length > 0) {
 
+  empty.hidden = true;
 
-      if (
-        episodeData.length > 0
-      ) {
+  episodeData.forEach(function (ep, index) {
 
-        empty.hidden = true;
+    const row =
+      document.createElement("div");
+
+    row.className = "episode-row";
 
 
-        episodeData.forEach(
-          function (ep, index) {
+    const name =
+      document.createElement("div");
 
-            const button =
-              document.createElement("a");
+    name.className = "episode-name";
 
-
-            button.className =
-              "episode-btn";
+    name.textContent =
+      "Episode " + ep.episode;
 
 
-            if (
-              index === currentIndex
-            ) {
+    const actions =
+      document.createElement("div");
 
-              button.classList.add(
-                "active"
-              );
-
-            }
+    actions.className =
+      "episode-actions";
 
 
-            button.href =
-              "#";
+    const watch =
+      document.createElement("a");
+
+    watch.className =
+      "episode-action";
+
+    watch.href =
+      getWatchUrl(ep.episode);
+
+    watch.textContent =
+      "▶️ Watch";
 
 
-            button.textContent =
-              "▶ Episode " +
-              ep.episode;
+    const download =
+      document.createElement("a");
+
+    download.className =
+      "episode-action download";
+
+    download.href =
+      getDownloadUrl(ep.episode);
+
+    download.textContent =
+      "⬇️ Download";
 
 
-            button.addEventListener(
-              "click",
-              function (event) {
+    actions.appendChild(watch);
+    actions.appendChild(download);
 
-                event.preventDefault();
+    row.appendChild(name);
+    row.appendChild(actions);
+
+    episodeBox.appendChild(row);
+
+  });
+
+} else {
+
+  empty.hidden = false;
+
+}
 
 
                 /*
@@ -743,7 +806,18 @@ downloadBtn.href =
        * PREVIOUS / NEXT
        */
 
-      function updateNavigation() {
+      function updateNavigation() { 
+        watchBtn.href =
+  getWatchUrl(
+    episodeData[currentIndex]?.episode ||
+    currentEpisode
+  );
+
+downloadBtn.href =
+  getDownloadUrl(
+    episodeData[currentIndex]?.episode ||
+    currentEpisode
+  );
 
         previous.classList.add(
           "disabled"
