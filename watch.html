@@ -656,18 +656,20 @@ if (episodeData.length > 0) {
 
   empty.hidden = true;
 
-  episodeData.forEach(function (ep, index) {
+  episodeData.forEach(function (ep) {
 
     const row =
       document.createElement("div");
 
-    row.className = "episode-row";
+    row.className =
+      "episode-row";
 
 
     const name =
       document.createElement("div");
 
-    name.className = "episode-name";
+    name.className =
+      "episode-name";
 
     name.textContent =
       "Episode " + ep.episode;
@@ -709,8 +711,10 @@ if (episodeData.length > 0) {
     actions.appendChild(watch);
     actions.appendChild(download);
 
+
     row.appendChild(name);
     row.appendChild(actions);
+
 
     episodeBox.appendChild(row);
 
@@ -723,90 +727,11 @@ if (episodeData.length > 0) {
 }
 
 
-                /*
-                 * Video बदलो
-                 */
+/*
+ * PREVIOUS / NEXT
+ */
 
-                if (ep.video) {
-
-                  video.src =
-                    ep.video;
-
-                  video.load();
-
-
-                  video.play()
-                    .catch(
-                      function () {}
-                    );
-
-                }
-
-
-                /*
-                 * Active button
-                 */
-
-                document
-                  .querySelectorAll(
-                    ".episode-btn"
-                  )
-                  .forEach(
-                    function (btn) {
-
-                      btn.classList.remove(
-                        "active"
-                      );
-
-                    }
-                  );
-
-
-                button.classList.add(
-                  "active"
-                );
-
-
-                /*
-                 * Previous / Next
-                 */
-
-                currentIndex =
-                  index;
-
-
-                updateNavigation();
-
-
-                window.scrollTo({
-                  top: 0,
-                  behavior: "smooth"
-                });
-
-              }
-            );
-
-
-            episodeBox.appendChild(
-              button
-            );
-
-          }
-        );
-
-
-      } else {
-
-        empty.hidden = false;
-
-      }
-
-
-      /*
-       * PREVIOUS / NEXT
-       */
-
-      function updateNavigation() { 
+function updateNavigation() {
         watchBtn.href =
   getWatchUrl(
     episodeData[currentIndex]?.episode ||
