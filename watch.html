@@ -793,29 +793,11 @@ downloadBtn.href =
               if (!ep) return;
 
 
-              currentIndex--;
-
-
-              video.src =
-                ep.video;
-
-
-              video.load();
-
-
-              video.play()
-                .catch(
-                  function () {}
-                );
-
-
-              updateActiveEpisode();
-
-              updateNavigation();
-
+              window.location.href =
+  getWatchUrl(ep.episode);
             };
-
-        }
+            }
+          
 
 
         /*
@@ -849,33 +831,15 @@ downloadBtn.href =
 
               if (!ep) return;
 
+currentIndex++;
 
-              currentIndex++;
+window.location.href =
+  getWatchUrl(ep.episode);
 
-
-              video.src =
-                ep.video;
-
-
-              video.load();
-
-
-              video.play()
-                .catch(
-                  function () {}
-                );
-
-
-              updateActiveEpisode();
-
-              updateNavigation();
-
-            };
-
+};
         }
 
-      }
-
+      
 
       /*
        * Active episode button update
