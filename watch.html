@@ -839,34 +839,9 @@ window.location.href =
   getWatchUrl(ep.episode);
 
 };
-        }
+        } 
 
-      
-
-      /*
-       * Active episode button update
-       */
-
-      function updateActiveEpisode() {
-
-        const buttons =
-          episodeBox.querySelectorAll(
-            ".episode-btn"
-          );
-
-
-        buttons.forEach(
-          function (btn, index) {
-
-            btn.classList.toggle(
-              "active",
-              index === currentIndex
-            );
-
-          }
-        );
-
-      }
+    
 
 
       updateNavigation();
