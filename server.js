@@ -562,6 +562,16 @@ app.get("/api/admin/status", (req, res) => {
 const SHORTENER_BASE_URL =
   process.env.SHORTENER_BASE_URL || "";
 
+// ===============================
+// VIEW / DOWNLOAD COUNT PROTECTION
+// ===============================
+
+const viewCooldown = new Map();
+const downloadCooldown = new Map();
+
+const COUNT_COOLDOWN =
+  10 * 60 * 1000; // 10 minutes
+
 async function makeShortenerUrl(destination) {
   const apiToken = process.env.CUTY_API_TOKEN;
 
@@ -589,6 +599,66 @@ async function makeShortenerUrl(destination) {
 
   return result.shortenedUrl;
 }
+
+// COUNT EPISODE VIEW
+app.post("/api/anime/:id/episode/:episode/view", async (req, res) => {
+  try {
+    const anime = await loadAnime();
+
+    const item = anime.find(
+      a => String(a.id) === String(req.params.id)
+    );
+
+    if (!item) {
+      return res.status(404).json({ error: "Anime not found" });
+    }
+
+    const episodeNumber = Number(req.params.episode);
+
+    const episode = Array.isArray(item.episodes)
+      ? item.episodes.find(
+          ep => Number(ep.episode) === episodeNumber
+        )
+      : null;
+
+    if (!episode) {
+      return res.status(404).json({ error: "Episode not found" });
+    }
+
+    const key =
+      `${req.sessionID}:${item.id}:${episodeNumber}`;
+
+    const now = Date.now();
+    const lastCount = viewCooldown.get(key) || 0;
+
+    if (now - lastCount < COUNT_COOLDOWN) {
+      return res.json({
+        ok: true,
+        counted: false,
+        views: Number(episode.views || 0)
+      });
+    }
+
+    episode.views = Number(episode.views || 0) + 1;
+
+    viewCooldown.set(key, now);
+
+    await saveAnime(anime);
+
+    return res.json({
+      ok: true,
+      counted: true,
+      views: episode.views
+    });
+
+  } catch (error) {
+    console.error("VIEW COUNT ERROR:", error);
+
+    return res.status(500).json({
+      error: "View count failed"
+    });
+  }
+});
 
 
 // ===============================
