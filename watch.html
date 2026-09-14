@@ -326,24 +326,6 @@ document.addEventListener("DOMContentLoaded", async function () {
   let viewSent = false;
 
 video.addEventListener("play", async () => {
-  if (viewSent) return;
-
-  viewSent = true;
-
-  try {
-    await fetch(
-      `/api/anime/${encodeURIComponent(anime.id)}/episode/${encodeURIComponent(currentEpisode.episode)}/view`,
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        }
-      }
-    );
-  } catch (error) {
-    console.error("View count failed:", error);
-  }
-});
 
   const watchBtn = document.getElementById("watchBtn");
   const downloadBtn = document.getElementById("downloadBtn");
@@ -407,11 +389,13 @@ video.addEventListener("play", async () => {
         .map(function (ep) {
 
           return {
-            episode: Number(ep.episode),
-            video: ep.video || "",
-            video_public_id:
-              ep.video_public_id || null
-          };
+  episode: Number(ep.episode),
+  video: ep.video || "",
+  video_public_id:
+    ep.video_public_id || null,
+  views: Number(ep.views || 0),
+  downloads: Number(ep.downloads || 0)
+};
 
         })
         .filter(function (ep) {
@@ -466,6 +450,28 @@ video.addEventListener("play", async () => {
       currentEpisode =
         episodeData[0]?.episode || 1;
     }
+
+    let viewSent = false;
+
+video.addEventListener("play", async function () {
+  if (viewSent) return;
+
+  viewSent = true;
+
+  try {
+    await fetch(
+      `/api/anime/${encodeURIComponent(anime.id)}/episode/${encodeURIComponent(currentEpisode)}/view`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        }
+      }
+    );
+  } catch (error) {
+    console.error("View count failed:", error);
+  }
+});
 
 
     /* URL FUNCTIONS */
@@ -539,6 +545,15 @@ video.addEventListener("play", async () => {
         name.textContent =
           "Episode " + ep.episode;
 
+        const stats =
+  document.createElement("div");
+
+stats.className =
+  "episode-stats";
+
+stats.textContent =
+  `👁️ ${ep.views} Views  |  ⬇️ ${ep.downloads} Downloads`;
+
 
         const actions =
           document.createElement("div");
@@ -577,7 +592,8 @@ video.addEventListener("play", async () => {
         actions.appendChild(download);
 
         row.appendChild(name);
-        row.appendChild(actions);
+row.appendChild(stats);
+row.appendChild(actions);
 
         episodeBox.appendChild(row);
 
