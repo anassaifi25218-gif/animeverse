@@ -451,27 +451,7 @@ video.addEventListener("play", async () => {
         episodeData[0]?.episode || 1;
     }
 
-    let viewSent = false;
-
-video.addEventListener("play", async function () {
-  if (viewSent) return;
-
-  viewSent = true;
-
-  try {
-    await fetch(
-      `/api/anime/${encodeURIComponent(anime.id)}/episode/${encodeURIComponent(currentEpisode)}/view`,
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        }
-      }
-    );
-  } catch (error) {
-    console.error("View count failed:", error);
-  }
-});
+    
 
 
     /* URL FUNCTIONS */
