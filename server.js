@@ -660,6 +660,69 @@ app.post("/api/anime/:id/episode/:episode/view", async (req, res) => {
   }
 });
 
+// ===============================
+// VIEW COUNT API
+// ===============================
+
+app.post("/api/anime/:id/episode/:episode/view", async (req, res) => {
+  try {
+    const anime = await loadAnime();
+
+    const item = anime.find(
+      a => String(a.id) === String(req.params.id)
+    );
+
+    if (!item) {
+      return res.status(404).json({ error: "Anime not found" });
+    }
+
+    const episodeNumber = Number(req.params.episode);
+
+    const episode = Array.isArray(item.episodes)
+      ? item.episodes.find(
+          ep => Number(ep.episode) === episodeNumber
+        )
+      : null;
+
+    if (!episode) {
+      return res.status(404).json({ error: "Episode not found" });
+    }
+
+    const key =
+      `${req.sessionID}:${item.id}:${episodeNumber}`;
+
+    const now = Date.now();
+    const lastCount = viewCooldown.get(key) || 0;
+
+    if (now - lastCount < COUNT_COOLDOWN) {
+      return res.json({
+        ok: true,
+        counted: false,
+        views: Number(episode.views || 0)
+      });
+    }
+
+    viewCooldown.set(key, now);
+
+    episode.views = Number(episode.views || 0) + 1;
+
+    await saveAnime(anime);
+
+    return res.json({
+      ok: true,
+      counted: true,
+      views: episode.views
+    });
+
+  } catch (error) {
+    console.error("VIEW COUNT ERROR:", error);
+
+    return res.status(500).json({
+      error: "View count failed"
+    });
+  }
+});
+
 
 // ===============================
 // WATCH REDIRECT
@@ -726,6 +789,70 @@ app.get(
   }
 );
 
+// ===============================
+// DOWNLOAD COUNT API
+// ===============================
+
+app.post("/api/anime/:id/episode/:episode/download", async (req, res) => {
+  try {
+    const anime = await loadAnime();
+
+    const item = anime.find(
+      a => String(a.id) === String(req.params.id)
+    );
+
+    if (!item) {
+      return res.status(404).json({ error: "Anime not found" });
+    }
+
+    const episodeNumber = Number(req.params.episode);
+
+    const episode = Array.isArray(item.episodes)
+      ? item.episodes.find(
+          ep => Number(ep.episode) === episodeNumber
+        )
+      : null;
+
+    if (!episode) {
+      return res.status(404).json({ error: "Episode not found" });
+    }
+
+    const key =
+      `${req.sessionID}:${item.id}:${episodeNumber}`;
+
+    const now = Date.now();
+    const lastCount = downloadCooldown.get(key) || 0;
+
+    if (now - lastCount < COUNT_COOLDOWN) {
+      return res.json({
+        ok: true,
+        counted: false,
+        downloads: Number(episode.downloads || 0)
+      });
+    }
+
+    downloadCooldown.set(key, now);
+
+    episode.downloads =
+      Number(episode.downloads || 0) + 1;
+
+    await saveAnime(anime);
+
+    return res.json({
+      ok: true,
+      counted: true,
+      downloads: episode.downloads
+    });
+
+  } catch (error) {
+    console.error("DOWNLOAD COUNT ERROR:", error);
+
+    return res.status(500).json({
+      error: "Download count failed"
+    });
+  }
+});
+
 
 // ===============================
 // DOWNLOAD REDIRECT
@@ -788,10 +915,23 @@ if (now - lastCount >= COUNT_COOLDOWN) {
   await saveAnime(anime);
 }
 
+const key =
+  `${req.sessionID}:${item.id}:${episodeNumber}`;
+
+const now = Date.now();
+const lastCount = downloadCooldown.get(key) || 0;
+
+if (now - lastCount >= COUNT_COOLDOWN) {
+  downloadCooldown.set(key, now);
+
+  episode.downloads =
+    Number(episode.downloads || 0) + 1;
+
+  await saveAnime(anime);
+}
+
 return res.redirect(
-  await makeShortenerUrl(
-    episode.video
-  )
+  await makeShortenerUrl(episode.video)
 );
 
     } catch (error) {
