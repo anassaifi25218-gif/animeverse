@@ -310,563 +310,339 @@
 
 
 <script>
+document.addEventListener("DOMContentLoaded", async function () {
 
-document.addEventListener(
-  "DOMContentLoaded",
-  async function () {
+  const params = new URLSearchParams(window.location.search);
 
-    const params =
-      new URLSearchParams(
-        window.location.search
-      );
+  const id = params.get("id");
+  const direct = params.get("direct") === "1";
 
+  const title = document.getElementById("title");
+  const category = document.getElementById("category");
+  const description = document.getElementById("description");
+  const video = document.getElementById("animeVideo");
 
-    const id =
-      params.get("id");
-    
-    const direct =
-  params.get("direct") === "1";
-    
+  const watchBtn = document.getElementById("watchBtn");
+  const downloadBtn = document.getElementById("downloadBtn");
 
-    const title =
-      document.getElementById("title");
+  const episodeBox = document.getElementById("episodes");
+  const empty = document.getElementById("empty");
 
+  const previous = document.getElementById("previousBtn");
+  const next = document.getElementById("nextBtn");
 
-    const category =
-      document.getElementById("category");
+  if (!id) {
+    title.textContent = "Anime not found";
+    return;
+  }
 
+  try {
 
-    const description =
-      document.getElementById("description");
+    const response = await fetch(
+      "/api/anime?_" + Date.now(),
+      {
+        cache: "no-store"
+      }
+    );
 
+    if (!response.ok) {
+      throw new Error("API error: " + response.status);
+    }
 
-    const video =
-      document.getElementById("animeVideo");
-    
-    const watchBtn =
-  document.getElementById("watchBtn");
+    const animeList = await response.json();
 
-const downloadBtn =
-  document.getElementById("downloadBtn");
+    const anime = animeList.find(function (item) {
+      return String(item.id) === String(id);
+    });
 
-
-    const episodeBox =
-      document.getElementById("episodes");
-
-    console.log("EPISODE BOX:", episodeBox);
-
-
-    const empty =
-      document.getElementById("empty");
-
-
-    const previous =
-      document.getElementById("previousBtn");
-
-
-    const next =
-      document.getElementById("nextBtn");
-
-
-    if (!id) {
-
-      title.textContent =
-        "Anime not found";
-
+    if (!anime) {
+      title.textContent = "Anime not found";
       return;
-
     }
 
+    /* BASIC INFO */
 
-    try {
+    title.textContent = anime.title || "Anime";
 
-      const response =
-        await fetch(
-          "/api/anime?_" +
-          Date.now(),
-          {
-            cache: "no-store"
-          }
-        );
+    document.title =
+      (anime.title || "Anime") + " — AnimeVerse";
 
+    category.textContent =
+      anime.category || "Anime";
 
-      if (!response.ok) {
-
-        throw new Error(
-          "API error: " +
-          response.status
-        );
-
-      }
+    description.textContent =
+      anime.description || "No description available.";
 
 
-      const animeList =
-        await response.json();
+    /* EPISODES */
 
+    let episodeData = [];
 
-      if (!Array.isArray(animeList)) {
+    if (Array.isArray(anime.episodes)) {
 
-        throw new Error(
-          "Invalid anime data"
-        );
+      episodeData = anime.episodes
+        .map(function (ep) {
 
-      }
-
-
-      /*
-       * Current anime record
-       */
-
-      const anime =
-        animeList.find(
-          function (item) {
-
-            return String(item.id) ===
-              String(id);
-
-          }
-        );
-
-
-      if (!anime) {
-
-        title.textContent =
-          "Anime not found";
-
-        return;
-
-      }
-
-
-      /*
-       * BASIC INFORMATION
-       */
-
-      title.textContent =
-        anime.title ||
-        "Anime";
-
-
-      document.title =
-        (anime.title || "Anime") +
-        " — AnimeVerse";
-
-
-      category.textContent =
-        anime.category ||
-        "Anime";
-
-
-      description.textContent =
-        anime.description ||
-        "No description available.";
-
-
-      /*
-       * EPISODES
-       *
-       * Server अब episodes array में
-       * सभी episodes रख रहा है.
-       */
-
-      let episodeData = [];
-
-
-      if (
-        Array.isArray(
-          anime.episodes
-        )
-      ) {
-
-        episodeData =
-          anime.episodes.map(
-            function (ep) {
-
-              return {
-
-                episode:
-                  Number(
-                    ep.episode || 1
-                  ),
-
-                video:
-                  ep.video || "",
-
-                video_public_id:
-                  ep.video_public_id ||
-                  null
-
-              };
-
-            }
-          );
-
-      }
-
-
-      /*
-       * पुराने data के लिए fallback
-       */
-
-      if (
-        episodeData.length === 0 &&
-        anime.video
-      ) {
-
-        episodeData = [
-
-          {
-
-            episode:
-              Number(
-                anime.episode || 1
-              ),
-
-            video:
-              anime.video,
-
+          return {
+            episode: Number(ep.episode),
+            video: ep.video || "",
             video_public_id:
-              anime.video_public_id ||
-              null
-
-          }
-
-        ];
-
-      }
-
-
-      /*
-       * Episode number के हिसाब से sort
-       */
-
-      episodeData.sort(
-        function (a, b) {
-
-          return (
-            Number(a.episode || 0) -
-            Number(b.episode || 0)
-          );
-
-        }
-      );
-
-
-      /*
-       * Current episode
-       */
-
-      const requestedEpisode =
-  Number(params.get("ep") || 0);
-
-let currentEpisode =
-  requestedEpisode ||
-  Number(anime.episode || 1);
-
-
-      /*
-       * अगर current episode
-       * episodes array में है तो
-       * उसका index निकालो.
-       */
-
-      let currentIndex =
-        episodeData.findIndex(
-          function (ep) {
-
-            return Number(
-              ep.episode
-            ) === currentEpisode;
-
-          }
-        );
-
-
-      /*
-       * अगर नहीं मिला तो पहला episode
-       */
-
-      if (currentIndex === -1) {
-
-        currentIndex = 0;
-
-      }
-
-
-      /*
-       * VIDEO
-       */
-      function getWatchUrl(ep) {
-  return (
-    "/go/watch/" +
-    encodeURIComponent(anime.id) +
-    "/" +
-    encodeURIComponent(ep)
-  );
-}
-
-function getDownloadUrl(ep) {
-  return (
-    "/go/download/" +
-    encodeURIComponent(anime.id) +
-    "/" +
-    encodeURIComponent(ep)
-  );
-}
-
-      let currentVideo =
-        anime.video || "";
-
-
-      if (
-        episodeData[currentIndex] &&
-        episodeData[currentIndex].video
-      ) {
-
-        currentVideo =
-          episodeData[currentIndex].video;
-
-      }
-
-
-      if (currentVideo) {
-
-  video.src = currentVideo;
-
-  if (direct) {
-    video.style.display = "block";
-  }
-
-  video.load();
-
-      } else {
-
-        video.removeAttribute("src");
-
-        video.load();
-
-      }
-
-
-      /*
- * EPISODE ROWS
- */
-
-episodeBox.innerHTML = "";
-
-if (episodeData.length > 0) {
-
-  empty.hidden = true;
-
-  episodeData.forEach(function (ep) {
-
-    const row =
-      document.createElement("div");
-
-    row.className =
-      "episode-row";
-
-
-    const name =
-      document.createElement("div");
-
-    name.className =
-      "episode-name";
-
-    name.textContent =
-      "Episode " + ep.episode;
-
-
-    const actions =
-      document.createElement("div");
-
-    actions.className =
-      "episode-actions";
-
-
-    const watch =
-      document.createElement("a");
-
-    watch.className =
-      "episode-action";
-
-    watch.href =
-      getWatchUrl(ep.episode);
-
-    watch.textContent =
-      "▶️ Watch";
-
-
-    const download =
-      document.createElement("a");
-
-    download.className =
-      "episode-action download";
-
-    download.href =
-      getDownloadUrl(ep.episode);
-
-    download.textContent =
-      "⬇️ Download";
-
-
-    actions.appendChild(watch);
-    actions.appendChild(download);
-
-
-    row.appendChild(name);
-    row.appendChild(actions);
-
-
-    episodeBox.appendChild(row);
-
-  });
-
-} else {
-
-  empty.hidden = false;
-
-}
-
-
-/*
- * PREVIOUS / NEXT
- */
-
-function updateNavigation() {
-        watchBtn.href =
-  getWatchUrl(
-    episodeData[currentIndex]?.episode ||
-    currentEpisode
-  );
-
-downloadBtn.href =
-  getDownloadUrl(
-    episodeData[currentIndex]?.episode ||
-    currentEpisode
-  );
-
-        previous.classList.add(
-          "disabled"
-        );
-
-        next.classList.add(
-          "disabled"
-        );
-
-
-        previous.removeAttribute(
-          "href"
-        );
-
-        next.removeAttribute(
-          "href"
-        );
-
-
-        /*
-         * Previous
-         */
-
-        if (
-          currentIndex > 0
-        ) {
-
-          previous.classList.remove(
-            "disabled"
-          );
-
-          previous.href =
-            "#";
-
-
-          previous.onclick =
-            function (event) {
-
-              event.preventDefault();
-
-
-              const ep =
-                episodeData[
-                  currentIndex - 1
-                ];
-
-
-              if (!ep) return;
-
-
-              window.location.href =
-  getWatchUrl(ep.episode);
-            };
-            }
-          
-
-
-        /*
-         * Next
-         */
-
-        if (
-          currentIndex <
-          episodeData.length - 1
-        ) {
-
-          next.classList.remove(
-            "disabled"
-          );
-
-          next.href =
-            "#";
-
-
-          next.onclick =
-            function (event) {
-
-              event.preventDefault();
-
-
-              const ep =
-                episodeData[
-                  currentIndex + 1
-                ];
-
-
-              if (!ep) return;
-
-currentIndex++;
-
-window.location.href =
-  getWatchUrl(ep.episode);
-
-};
-        } 
-
-    
-
-
-      updateNavigation();
-
-
-    } catch (error) {
-
-      console.error(
-        "WATCH ERROR:",
-        error
-      );
-
-
-      title.textContent =
-        "Anime load nahi ho paya.";
-
-
-      description.textContent =
-        "Data load karne me problem aa rahi hai.";
+              ep.video_public_id || null
+          };
+
+        })
+        .filter(function (ep) {
+          return ep.episode > 0;
+        });
 
     }
 
-  }
-);
 
+    /* OLD DATA FALLBACK */
+
+    if (
+      episodeData.length === 0 &&
+      anime.video
+    ) {
+
+      episodeData = [
+        {
+          episode: Number(anime.episode || 1),
+          video: anime.video,
+          video_public_id:
+            anime.video_public_id || null
+        }
+      ];
+
+    }
+
+
+    /* SORT */
+
+    episodeData.sort(function (a, b) {
+      return a.episode - b.episode;
+    });
+
+
+    /* CURRENT EPISODE */
+
+    const requestedEpisode =
+      Number(params.get("ep") || 0);
+
+    let currentEpisode =
+      requestedEpisode ||
+      Number(anime.episode || 1);
+
+    let currentIndex =
+      episodeData.findIndex(function (ep) {
+        return ep.episode === currentEpisode;
+      });
+
+    if (currentIndex === -1) {
+      currentIndex = 0;
+      currentEpisode =
+        episodeData[0]?.episode || 1;
+    }
+
+
+    /* URL FUNCTIONS */
+
+    function getWatchUrl(ep) {
+
+      return (
+        "/go/watch/" +
+        encodeURIComponent(anime.id) +
+        "/" +
+        encodeURIComponent(ep)
+      );
+
+    }
+
+    function getDownloadUrl(ep) {
+
+      return (
+        "/go/download/" +
+        encodeURIComponent(anime.id) +
+        "/" +
+        encodeURIComponent(ep)
+      );
+
+    }
+
+
+    /* VIDEO */
+
+    const currentVideo =
+      episodeData[currentIndex]?.video ||
+      anime.video ||
+      "";
+
+    if (direct && currentVideo) {
+
+      video.src = currentVideo;
+      video.style.display = "block";
+      video.load();
+
+    } else {
+
+      video.removeAttribute("src");
+      video.style.display = "none";
+      video.load();
+
+    }
+
+
+    /* EPISODES */
+
+    episodeBox.innerHTML = "";
+
+    if (episodeData.length > 0) {
+
+      empty.hidden = true;
+
+      episodeData.forEach(function (ep) {
+
+        const row =
+          document.createElement("div");
+
+        row.className = "episode-row";
+
+
+        const name =
+          document.createElement("div");
+
+        name.className = "episode-name";
+
+        name.textContent =
+          "Episode " + ep.episode;
+
+
+        const actions =
+          document.createElement("div");
+
+        actions.className =
+          "episode-actions";
+
+
+        const watch =
+          document.createElement("a");
+
+        watch.className =
+          "episode-action";
+
+        watch.href =
+          getWatchUrl(ep.episode);
+
+        watch.textContent =
+          "▶️ Watch";
+
+
+        const download =
+          document.createElement("a");
+
+        download.className =
+          "episode-action download";
+
+        download.href =
+          getDownloadUrl(ep.episode);
+
+        download.textContent =
+          "⬇️ Download";
+
+
+        actions.appendChild(watch);
+        actions.appendChild(download);
+
+        row.appendChild(name);
+        row.appendChild(actions);
+
+        episodeBox.appendChild(row);
+
+      });
+
+    } else {
+
+      empty.hidden = false;
+
+    }
+
+
+    /* TOP BUTTONS */
+
+    const activeEpisode =
+      episodeData[currentIndex]?.episode ||
+      currentEpisode;
+
+    watchBtn.href =
+      getWatchUrl(activeEpisode);
+
+    downloadBtn.href =
+      getDownloadUrl(activeEpisode);
+
+
+    /* PREVIOUS */
+
+    previous.classList.add("disabled");
+    next.classList.add("disabled");
+
+    previous.removeAttribute("href");
+    next.removeAttribute("href");
+
+    if (currentIndex > 0) {
+
+      previous.classList.remove("disabled");
+
+      previous.href =
+        getWatchUrl(
+          episodeData[currentIndex - 1].episode
+        );
+
+    }
+
+
+    /* NEXT */
+
+    if (
+      currentIndex <
+      episodeData.length - 1
+    ) {
+
+      next.classList.remove("disabled");
+
+      next.href =
+        getWatchUrl(
+          episodeData[currentIndex + 1].episode
+        );
+
+    }
+
+
+    console.log(
+      "Anime loaded:",
+      anime.title
+    );
+
+    console.log(
+      "Episodes:",
+      episodeData
+    );
+
+  } catch (error) {
+
+    console.error(
+      "WATCH ERROR:",
+      error
+    );
+
+    title.textContent =
+      "Anime load nahi ho paya.";
+
+    description.textContent =
+      "Data load karne me problem aa rahi hai.";
+
+  }
+
+});
 </script>
 
 </body>
