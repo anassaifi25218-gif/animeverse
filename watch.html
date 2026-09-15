@@ -602,53 +602,87 @@ document.addEventListener("DOMContentLoaded", async function () {
 
 
     /* ===============================
-       VIEW COUNTER
-    =============================== */
+   VIEW COUNTER
+=============================== */
 
-    let viewSent = false;
+video.addEventListener(
+  "play",
+  async function () {
+
+    const viewKey =
+      "animeverse_view_" +
+      anime.id +
+      "_episode_" +
+      currentEpisode;
+
+    const lastView =
+      localStorage.getItem(viewKey);
+
+    const now = Date.now();
+
+    const TEN_MINUTES =
+      10 * 60 * 1000;
 
 
-    video.addEventListener(
-      "play",
-      async function () {
+    /* 10 minutes ke andar
+       dobara view count nahi hoga */
 
-        if (viewSent) {
-          return;
-        }
+    if (
+      lastView &&
+      now - Number(lastView) < TEN_MINUTES
+    ) {
+
+      console.log(
+        "View already counted recently."
+      );
+
+      return;
+    }
 
 
-        viewSent = true;
+    try {
 
-
-        try {
-
-          await fetch(
-            "/api/anime/" +
-            encodeURIComponent(anime.id) +
-            "/episode/" +
-            encodeURIComponent(currentEpisode) +
-            "/view",
-            {
-              method: "POST",
-
-              headers: {
-                "Content-Type":
-                  "application/json"
-              }
+      const response =
+        await fetch(
+          "/api/anime/" +
+          encodeURIComponent(anime.id) +
+          "/episode/" +
+          encodeURIComponent(currentEpisode) +
+          "/view",
+          {
+            method: "POST",
+            headers: {
+              "Content-Type":
+                "application/json"
             }
-          );
+          }
+        );
 
-        } catch (error) {
 
-          console.error(
-            "View count failed:",
-            error
-          );
+      if (response.ok) {
 
-        }
+        localStorage.setItem(
+          viewKey,
+          String(now)
+        );
+
+        console.log(
+          "View counted."
+        );
 
       }
-    );
+
+    } catch (error) {
+
+      console.error(
+        "View count failed:",
+        error
+      );
+
+    }
+
+  }
+);
 
 
     /* ===============================
