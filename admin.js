@@ -43,6 +43,9 @@ const totalAnime =
 const totalEpisodes =
   document.getElementById("totalEpisodes");
 
+const totalViews =
+  document.getElementById("totalViews");
+
 const CLOUDINARY_UPLOAD_PRESET =
   "animeverse_upload";
 
@@ -1051,6 +1054,39 @@ function updateStats(list) {
 
     totalEpisodes.textContent =
       count;
+  }
+
+  if (totalViews) {
+
+    let views = 0;
+
+    list.forEach(
+      anime => {
+
+        if (
+          Array.isArray(
+            anime.episodes
+          )
+        ) {
+
+          anime.episodes.forEach(
+            episode => {
+
+              views +=
+                Number(
+                  episode.views || 0
+                );
+
+            }
+          );
+
+        }
+
+      }
+    );
+
+    totalViews.textContent =
+      views;
   }
 }
 
