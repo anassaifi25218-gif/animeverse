@@ -75,7 +75,7 @@ app.use(
 // STATIC FILES
 // ===============================
 
-app.use(express.static(__dirname));
+app.use(express.static(__dirname, { index: false }));
 
 app.get("/sitemap.xml", async (_req, res) => {
   try {
