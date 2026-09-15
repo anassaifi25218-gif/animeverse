@@ -898,22 +898,7 @@ app.get(
         );
       }
 
-      const key =
-  `${req.sessionID}:${item.id}:${episodeNumber}`;
-
-const now = Date.now();
-const lastCount =
-  downloadCooldown.get(key) || 0;
-
-if (now - lastCount >= COUNT_COOLDOWN) {
-
-  episode.downloads =
-    Number(episode.downloads || 0) + 1;
-
-  downloadCooldown.set(key, now);
-
-  await saveAnime(anime);
-}
+    
 
 const key =
   `${req.sessionID}:${item.id}:${episodeNumber}`;
