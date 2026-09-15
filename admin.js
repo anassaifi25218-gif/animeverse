@@ -732,6 +732,12 @@ if (uploadForm) {
             1
           ),
 
+        totalEpisodes:
+  Number(
+    formData.get("totalEpisodes") ||
+    1
+  ),
+
         animeId:
           selectedAnimeId,
 
