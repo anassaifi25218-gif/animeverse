@@ -228,6 +228,8 @@
     Loading description...
   </p>
 
+  <div id="totalEpisodesInfo" class="muted"></div>
+
 
   <section>
 
@@ -332,6 +334,9 @@ document.addEventListener("DOMContentLoaded", async function () {
   const description =
     document.getElementById("description");
 
+  const totalEpisodesInfo =
+  document.getElementById("totalEpisodesInfo");
+
   const video =
     document.getElementById("animeVideo");
 
@@ -434,6 +439,17 @@ if (metaDescription) {
     description.textContent =
       anime.description ||
       "No description available.";
+
+    if (totalEpisodesInfo) {
+
+  totalEpisodesInfo.textContent =
+    "📺 Total Episodes: " +
+    Number(
+      anime.totalEpisodes ||
+      0
+    );
+
+    }
 
 
     /* ===============================
