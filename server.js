@@ -77,6 +77,36 @@ app.use(
 
 app.use(express.static(__dirname));
 
+app.get("/sitemap.xml", async (_req, res) => {
+  try {
+    const anime = await loadAnime();
+
+    const urls = [
+      "https://animeverse-j4vz.onrender.com/"
+    ];
+
+    anime.forEach(item => {
+      if (item.id) {
+        urls.push(
+          `https://animeverse-j4vz.onrender.com/watch.html?id=${encodeURIComponent(item.id)}`
+        );
+      }
+    });
+
+    const xml = `<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+${urls.map(url => `  <url><loc>${url}</loc></url>`).join("\n")}
+</urlset>`;
+
+    res.type("application/xml");
+    res.send(xml);
+
+  } catch (error) {
+    console.error("SITEMAP ERROR:", error);
+    res.status(500).send("Sitemap generation failed");
+  }
+});
+
 
 // ===============================
 // HOME
