@@ -1219,6 +1219,12 @@ app.post(
             "Anime"
           ),
 
+        totalEpisodes:
+  Number(
+    req.body?.totalEpisodes ||
+    1
+  ),
+
         poster:
           poster?.secure_url ||
           null,
