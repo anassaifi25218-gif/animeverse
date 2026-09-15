@@ -11,6 +11,11 @@
 
   <title>Watch Anime</title>
 
+  <meta
+  name="description"
+  content="AnimeVerse par anime episodes aur anime details dekhein."
+>
+
   <link
     rel="stylesheet"
     href="/style.css"
@@ -408,6 +413,18 @@ document.addEventListener("DOMContentLoaded", async function () {
     document.title =
       (anime.title || "Anime") +
       " — AnimeVerse";
+
+    const metaDescription =
+  document.querySelector(
+    'meta[name="description"]'
+  );
+
+if (metaDescription) {
+  metaDescription.setAttribute(
+    "content",
+    `${anime.title || "Anime"} — AnimeVerse par episodes aur anime details dekhein.`
+  );
+}
 
 
     category.textContent =
