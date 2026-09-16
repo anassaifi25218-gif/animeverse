@@ -738,6 +738,10 @@ if (uploadForm) {
     1
   ),
 
+        releaseDay:
+  formData.get("releaseDay") || "",
+      
+
         animeId:
           selectedAnimeId,
 
