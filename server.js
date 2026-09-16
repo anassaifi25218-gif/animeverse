@@ -1225,6 +1225,11 @@ app.post(
     1
   ),
 
+        releaseDay:
+  String(
+    req.body?.releaseDay || ""
+  ),
+
         poster:
           poster?.secure_url ||
           null,
