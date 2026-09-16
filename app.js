@@ -2,6 +2,8 @@ const grid = document.getElementById("grid");
 const empty = document.getElementById("empty");
 const search = document.getElementById("search");
 const category = document.getElementById("category");
+const languageFilter =
+  document.getElementById("languageFilter");
 
 let animeList = [];
 
@@ -322,6 +324,11 @@ function filterAnime() {
       ? category.value
       : "";
 
+   const selectedLanguage =
+  languageFilter
+    ? languageFilter.value
+    : "";
+
 
   const filtered =
     animeList.filter(
@@ -358,11 +365,18 @@ function filterAnime() {
             selectedCategory
           );
 
+         const matchesLanguage =
+  !selectedLanguage ||
+  String(
+    anime.language || ""
+  ).trim() === selectedLanguage;
+
 
         return (
-          matchesSearch &&
-          matchesCategory
-        );
+  matchesSearch &&
+  matchesCategory &&
+  matchesLanguage
+);
 
       }
     );
@@ -807,6 +821,19 @@ if (search) {
 if (category) {
 
   category.addEventListener(
+    "change",
+    function () {
+
+      filterAnime();
+
+    }
+  );
+
+}
+
+if (languageFilter) {
+
+  languageFilter.addEventListener(
     "change",
     function () {
 
