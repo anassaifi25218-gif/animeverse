@@ -740,6 +740,9 @@ if (uploadForm) {
 
         releaseDay:
   formData.get("releaseDay") || "",
+
+        language:
+  formData.get("language") || "",
       
 
         animeId:
