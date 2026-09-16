@@ -1230,6 +1230,11 @@ app.post(
     req.body?.releaseDay || ""
   ),
 
+        language:
+  String(
+    req.body?.language || ""
+  ),
+
         poster:
           poster?.secure_url ||
           null,
