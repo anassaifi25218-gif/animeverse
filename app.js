@@ -1,5 +1,7 @@
 const grid = document.getElementById("grid");
 const empty = document.getElementById("empty");
+const loading =
+  document.getElementById("loading");
 const search = document.getElementById("search");
 const category = document.getElementById("category");
 const languageFilter =
@@ -40,6 +42,10 @@ async function loadAnime() {
     }
 
     animeList = data;
+
+    if (loading) {
+  loading.style.display = "none";
+    }
 
     console.log(
       "Anime loaded:",
