@@ -230,6 +230,8 @@
 
   <div id="totalEpisodesInfo" class="muted"></div>
 
+  <div id="releaseDayInfo" class="muted"></div>
+
 
   <section>
 
@@ -450,6 +452,29 @@ if (metaDescription) {
     );
 
     }
+
+    const releaseDayInfo =
+  document.getElementById("releaseDayInfo");
+
+if (releaseDayInfo) {
+
+  if (anime.releaseDay === "Daily") {
+
+    releaseDayInfo.textContent =
+      "📅 New episode will be uploaded Every Day";
+
+  } else if (anime.releaseDay) {
+
+    releaseDayInfo.textContent =
+      "📅 New episode will be uploaded Every " +
+      anime.releaseDay;
+
+  } else {
+
+    releaseDayInfo.textContent = "";
+
+  }
+}
 
 
     /* ===============================
