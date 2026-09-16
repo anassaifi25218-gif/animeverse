@@ -44,7 +44,9 @@ async function loadAnime() {
     animeList = data;
 
     if (loading) {
-  loading.style.display = "none";
+  setTimeout(() => {
+    loading.style.display = "none";
+  }, 1200);
     }
 
     console.log(
