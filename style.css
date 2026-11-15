@@ -1406,3 +1406,95 @@ body.light-mode .menu-title {
   }
 }
 
+
+
+/* ANIMEVERSE PREMIUM BADGES */
+
+.anime-card {
+  position: relative;
+  display: block;
+  overflow: hidden;
+  border-radius: 16px;
+  text-decoration: none;
+  background: #091827;
+  border: 1px solid #233849;
+  transition: .3s ease;
+}
+
+.anime-card:hover {
+  transform: translateY(-5px);
+  border-color: #e50914;
+  box-shadow: 0 12px 30px rgba(229,9,20,.2);
+}
+
+.anime-poster {
+  position: relative;
+  overflow: hidden;
+  aspect-ratio: 16 / 9;
+}
+
+.anime-poster img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  transition: transform .4s ease;
+}
+
+.anime-card:hover .anime-poster img {
+  transform: scale(1.06);
+}
+
+.poster-badges {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  display: flex;
+  gap: 6px;
+}
+
+.new-badge,
+.hd-badge,
+.episode-badge {
+  padding: 5px 9px;
+  border-radius: 6px;
+  font-size: 11px;
+  font-weight: 900;
+}
+
+.new-badge {
+  background: #e50914;
+  color: white;
+}
+
+.hd-badge {
+  background: #0878e8;
+  color: white;
+}
+
+.episode-badge {
+  position: absolute;
+  bottom: 10px;
+  left: 10px;
+  background: rgba(0,0,0,.8);
+  color: white;
+}
+
+.anime-info {
+  padding: 12px;
+}
+
+.anime-info h3 {
+  color: white;
+  font-size: 16px;
+  font-weight: 800;
+  margin: 0 0 7px;
+}
+
+.anime-info p {
+  color: #8999a9;
+  font-size: 12px;
+  margin: 0;
+}
+
+
