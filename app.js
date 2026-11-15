@@ -151,6 +151,7 @@ function setupCategories() {
    PREMIUM DISPLAY ANIME
 =============================== */
 
+
 function displayAnime(list) {
 
   if (!grid) return;
@@ -183,46 +184,15 @@ function displayAnime(list) {
 
     const title = anime.title || "Untitled Anime";
 
-    const animeCategory = anime.category || "Anime";
+    const animeCategory =
+      anime.category || "Anime";
 
     const episodeCount =
       Array.isArray(anime.episodes)
         ? anime.episodes.length
         : anime.episode || 0;
 
-    const episodeText =
-      episodeCount + " EP";
-
-    // NEW badge: only when a valid recent date exists
-    const uploadDate =
-      anime.createdAt ||
-      anime.uploadedAt ||
-      anime.date;
-
-    const parsedDate = uploadDate
-      ? new Date(uploadDate)
-      : null;
-
-    const isNew =
-      parsedDate &&
-      !isNaN(parsedDate.getTime()) &&
-      parsedDate.getTime() <= Date.now() &&
-      Date.now() - parsedDate.getTime() <=
-        7 * 24 * 60 * 60 * 1000;
-
-    // HD badge: only when quality is specified
-    const quality =
-      String(
-        anime.quality ||
-        anime.resolution ||
-        ""
-      ).toUpperCase();
-
-    const isHD =
-      /HD|720P|1080P|1440P|2160P|4K/.test(quality);
-
     card.innerHTML = `
-
       <div class="anime-poster">
 
         <img
@@ -231,43 +201,23 @@ function displayAnime(list) {
           loading="lazy"
         >
 
-        <div class="poster-badges">
-
-          ${
-            isNew
-              ? '<span class="new-badge">NEW</span>'
-              : ''
-          }
-
-          ${
-            isHD
-              ? '<span class="hd-badge">HD</span>'
-              : ''
-          }
-
-        </div>
-
         <span class="episode-badge">
-          ${escapeHTML(episodeText)}
+          ${episodeCount} EP
         </span>
 
       </div>
 
       <div class="anime-info">
-
         <h3>${escapeHTML(title)}</h3>
-
         <p>${escapeHTML(animeCategory)}</p>
-
       </div>
-
     `;
 
     grid.appendChild(card);
 
   });
-
 }
+
 
 
 /* ===============================
