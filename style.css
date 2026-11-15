@@ -1306,3 +1306,103 @@ body.light-mode .menu-title {
   }
 
 }
+
+
+/* ==================================
+   ANIMEVERSE PREMIUM ANIME CARDS
+================================== */
+
+.grid .card {
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+
+  background: linear-gradient(
+    145deg,
+    #171717,
+    #0c0c0c
+  ) !important;
+
+  border: 1px solid rgba(255,255,255,.09) !important;
+  border-radius: 17px !important;
+
+  box-shadow: 0 8px 25px rgba(0,0,0,.3);
+
+  transition:
+    transform .3s ease,
+    border-color .3s ease,
+    box-shadow .3s ease;
+}
+
+.grid .card:hover {
+  transform: translateY(-7px);
+
+  border-color: rgba(229,9,20,.8) !important;
+
+  box-shadow:
+    0 15px 35px rgba(0,0,0,.5),
+    0 0 22px rgba(229,9,20,.17);
+}
+
+/* Anime Poster */
+
+.grid .card img {
+  width: 100%;
+  display: block;
+
+  object-fit: cover;
+
+  transition:
+    transform .45s ease,
+    filter .45s ease;
+}
+
+.grid .card:hover img {
+  transform: scale(1.06);
+  filter: brightness(1.1);
+}
+
+/* Card Content */
+
+.grid .card h3 {
+  color: #fff !important;
+  font-weight: 800;
+  line-height: 1.4;
+}
+
+.grid .card p {
+  color: #aaa;
+  line-height: 1.5;
+}
+
+/* Card Links */
+
+.grid .card a {
+  transition: color .2s ease;
+}
+
+.grid .card a:hover {
+  color: #ff3948 !important;
+}
+
+/* Mobile */
+
+@media (max-width: 600px) {
+  .grid .card {
+    border-radius: 13px !important;
+  }
+
+  .grid .card:hover {
+    transform: translateY(-3px);
+  }
+}
+
+/* Reduced Motion */
+
+@media (prefers-reduced-motion: reduce) {
+  .grid .card,
+  .grid .card img {
+    transition: none !important;
+  }
+}
+
