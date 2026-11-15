@@ -146,71 +146,129 @@ function setupCategories() {
 }
 
 
+
 /* ===============================
-   DISPLAY ANIME
+   PREMIUM DISPLAY ANIME
 =============================== */
 
 function displayAnime(list) {
 
-  if (!grid) {
-
-    console.error(
-      "ERROR: #grid element नहीं मिला"
-    );
-
-    return;
-  }
-
+  if (!grid) return;
 
   grid.innerHTML = "";
 
-
   if (!list.length) {
-
-    if (empty) {
-      empty.hidden = false;
-    }
-
+    if (empty) empty.hidden = false;
     return;
   }
 
+  if (empty) empty.hidden = true;
 
-  if (empty) {
-    empty.hidden = true;
-  }
+  list.forEach(function (anime) {
 
+    const card = document.createElement("a");
 
-  list.forEach(
-    function (anime) {
+    card.className = "anime-card";
 
-      const card =
-        document.createElement("a");
+    card.href =
+      "/watch.html?id=" +
+      encodeURIComponent(anime.id);
 
+    const poster =
+      typeof anime.poster === "string"
+        ? anime.poster
+        : anime.poster?.secure_url ||
+          anime.poster?.url ||
+          "";
 
-      card.className =
-        "anime-card";
+    const title = anime.title || "Untitled Anime";
 
+    const animeCategory = anime.category || "Anime";
 
-      card.href =
-        "/watch.html?id=" +
-        encodeURIComponent(
-          anime.id
-        );
+    const episodeCount =
+      Array.isArray(anime.episodes)
+        ? anime.episodes.length
+        : anime.episode || 0;
 
+    const episodeText =
+      episodeCount + " EP";
 
-      const poster =
-        anime.poster ||
-        "https://via.placeholder.com/300x169?text=No+Poster";
+    // NEW badge: only when a valid recent date exists
+    const uploadDate =
+      anime.createdAt ||
+      anime.uploadedAt ||
+      anime.date;
 
+    const parsedDate = uploadDate
+      ? new Date(uploadDate)
+      : null;
 
-      const title =
-        anime.title ||
-        "Untitled Anime";
+    const isNew =
+      parsedDate &&
+      !isNaN(parsedDate.getTime()) &&
+      parsedDate.getTime() <= Date.now() &&
+      Date.now() - parsedDate.getTime() <=
+        7 * 24 * 60 * 60 * 1000;
 
+    // HD badge: only when quality is specified
+    const quality =
+      String(
+        anime.quality ||
+        anime.resolution ||
+        ""
+      ).toUpperCase();
 
-      const animeCategory =
-        anime.category ||
-        "Anime";
+    const isHD =
+      /HD|720P|1080P|1440P|2160P|4K/.test(quality);
+
+    card.innerHTML = `
+
+      <div class="anime-poster">
+
+        <img
+          src="${escapeHTML(poster)}"
+          alt="${escapeHTML(title)}"
+          loading="lazy"
+        >
+
+        <div class="poster-badges">
+
+          ${
+            isNew
+              ? '<span class="new-badge">NEW</span>'
+              : ''
+          }
+
+          ${
+            isHD
+              ? '<span class="hd-badge">HD</span>'
+              : ''
+          }
+
+        </div>
+
+        <span class="episode-badge">
+          ${escapeHTML(episodeText)}
+        </span>
+
+      </div>
+
+      <div class="anime-info">
+
+        <h3>${escapeHTML(title)}</h3>
+
+        <p>${escapeHTML(animeCategory)}</p>
+
+      </div>
+
+    `;
+
+    grid.appendChild(card);
+
+  });
+
+}
+
 
 
       /*
